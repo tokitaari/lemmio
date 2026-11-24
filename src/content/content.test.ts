@@ -5,14 +5,25 @@ import {
   ALL_SUBTOPIC_IDS,
   areEquivalent,
   checkAnswer,
+  checkDrawnLine,
+  checkFunction,
+  checkFunctionValue,
+  checkIntersection,
   checkSolutionSet,
   checkStep,
+  checkZero,
+  functionToText,
+  isFunctionSubtopic,
   equalSolutionSets,
   equationToLatex,
   equationToText,
   isTermSubtopic,
   operationToLatex,
+  numberToText,
   parse,
+  point,
+  pointToText,
+  Rational,
   readEquation,
   readSolutionSet,
   solutionSetToLatex,
@@ -21,10 +32,14 @@ import {
   toLatex,
   toPolynomial,
   toText,
-  type Rational,
+  valueAt as functionValueAt,
+  type EquationTask,
+  type FunctionTask,
 } from '../math'
+import { DEFAULT_WINDOW } from '../plane'
 import { allSubtopics, catalog } from '../catalog'
 import { deckLatex, deckMarkup, deckTerms, validateDeck } from '../cards'
+import type { CardWidget } from '../cards/types'
 import {
   allEntries,
   allFormulas,
@@ -33,10 +48,28 @@ import {
   findFormula,
   formulaGroupsOf,
   formulaSheets,
+  functionExampleFigure,
   subtopicContent,
 } from './index'
-import { chainToLatex, equationPieces, equationToLatexMarkup, splitChain, splitMarkup, termToLatex } from './markup'
-import { isEquationTask, type EquivalenceRule, type SolutionSetRule, type SubtopicContent } from './types'
+import {
+  chainToLatex,
+  equationPieces,
+  equationToLatexMarkup,
+  readFunctionSegment,
+  splitChain,
+  splitMarkup,
+  termToLatex,
+} from './markup'
+import { isEquationTask, isFunctionTask, type EquivalenceRule, type SolutionSetRule, type SubtopicContent } from './types'
+
+/** The card widgets that show a coordinate plane. */
+const PLANE_WIDGETS: readonly CardWidget['kind'][] = [
+  'line-sliders',
+  'slope-triangle',
+  'line-points',
+  'value-table',
+  'two-lines',
+]
 
 /** Every markup text of a topic: all texts of its cards and the example comments. */
 function markupTexts(content: SubtopicContent): string[] {
@@ -52,6 +85,60 @@ function mathSources(text: string): string[] {
 
 function equationSources(text: string): string[] {
   return splitMarkup(text).flatMap((s) => (s.kind === 'equation' ? [s.source] : []))
+}
+
+function functionSources(text: string): string[] {
+  return splitMarkup(text).flatMap((s) => (s.kind === 'function' ? [s.source] : []))
+}
+
+/** Checks the worked solution of an equation line by line, including the solution set. */
+function expectSolvedLineByLine(task: EquationTask) {
+  let previous = task.equation
+  for (const step of task.steps) {
+    const text = equationToText(step.equation)
+    expect(checkStep(previous, step.operation, text).kind, text).toBe('correct')
+    previous = step.equation
+  }
+  expect(checkSolutionSet(task, solutionSetToText(task.solutionSet))).toEqual({ kind: 'correct' })
+}
+
+/** The result of a function task, given as the learner would, is accepted. */
+function expectFunctionResultAccepted(task: FunctionTask) {
+  switch (task.kind) {
+    case 'read-equation':
+    case 'from-point-slope':
+    case 'from-two-points':
+      expect(checkFunction(task.fn, functionToText(task.fn))).toEqual({ kind: 'correct' })
+      break
+    case 'draw-graph':
+      expect(checkDrawnLine(task.fn, point(0, task.fn.n), point(1, functionValueAt(task.fn, Rational.ONE)))).toEqual({
+        kind: 'correct',
+      })
+      break
+    case 'point-test': {
+      const x = task.point.x
+      const input = `f(${numberToText(x)}) = ${numberToText(task.value)}`
+      expect(checkFunctionValue(task.fn, input, x)).toEqual({ kind: 'correct' })
+      expect(task.onGraph).toBe(task.value.equals(task.point.y))
+      break
+    }
+    case 'zero': {
+      const zero = task.zero
+      expect(zero.kind).not.toBe('all')
+      const answer =
+        zero.kind === 'single'
+          ? { kind: 'input' as const, input: pointToText(point(zero.x, 0), 'N') }
+          : { kind: 'none' as const }
+      expect(checkZero(task, answer)).toEqual({ kind: 'correct' })
+      break
+    }
+    case 'intersection': {
+      const i = task.intersection
+      const answer = i.kind === 'point' ? { kind: 'point' as const, input: pointToText(i.point, 'S') } : { kind: i.kind }
+      expect(checkIntersection(task, answer)).toEqual({ kind: 'correct' })
+      break
+    }
+  }
 }
 
 /** Value of a term with numbers for its letters, e.g. `a:c` with a = 3, c = 2 gives 3/2. */
@@ -135,6 +222,36 @@ describe('markup', () => {
     expect(() => equationPieces('')).toThrow(/Empty/)
   })
 
+  it('splits off segments about functions marked with "fn:"', () => {
+    expect(splitMarkup('Für $fn: f(x) = 2x - 1$ liegt $fn: P(2|3)$ auf dem Graphen.')).toEqual([
+      { kind: 'text', text: 'Für ' },
+      { kind: 'function', source: 'f(x) = 2x - 1' },
+      { kind: 'text', text: ' liegt ' },
+      { kind: 'function', source: 'P(2|3)' },
+      { kind: 'text', text: ' auf dem Graphen.' },
+    ])
+  })
+
+  it('reads function equations, function values, points and values of m and n', () => {
+    expect(readFunctionSegment('f(x) = 2x - 3')).toEqual({ kind: 'function', pieces: ['f(x)', '= 2x - 3'] })
+    expect(readFunctionSegment('g(x) = 2(x + 1) - 1').pieces).toEqual(['g(x)', '= 2(x + 1) - 1'])
+    expect(readFunctionSegment('y = -x + 4').pieces).toEqual(['y', '= -x + 4'])
+    expect(readFunctionSegment('f(2) = 2·2 - 1 = 3').pieces).toEqual(['f(2)', '= 2 \\cdot 2 - 1', '= 3'])
+    expect(readFunctionSegment('f(-3)').pieces).toEqual(['f(-3)'])
+    expect(readFunctionSegment('P(2|-3)')).toEqual({ kind: 'point', pieces: ['P(2 \\mid -3)'] })
+    expect(readFunctionSegment('(0|4)').pieces).toEqual(['(0 \\mid 4)'])
+    expect(readFunctionSegment('m = (9 - 3)/(4 - 1) = 2').pieces).toEqual(['m', '= \\frac{9 - 3}{4 - 1}', '= 2'])
+    const value = readFunctionSegment('f(2) = 2·2 - 1 = 3')
+    expect(value.kind === 'value' && value.values.map((v) => v.toString())).toEqual(['3', '3'])
+  })
+
+  it('rejects function segments that cannot be read', () => {
+    expect(() => readFunctionSegment('f(x) = 2x + n')).toThrow(/Not a function equation/)
+    expect(() => readFunctionSegment('f(2) = x')).toThrow(/Not a function value/)
+    expect(() => readFunctionSegment('m = 2x')).toThrow(/Not a number/)
+    expect(() => readFunctionSegment('P(2,5)')).toThrow(/Not a function equation, function value or point/)
+  })
+
   it('keeps multiplication dots written in the source', () => {
     expect(chainToLatex('3·(-5) = -15')).toBe('3 \\cdot (-5) = -15')
     expect(chainToLatex('2·x·5 = 10x')).toBe('2 \\cdot x \\cdot 5 = 10x')
@@ -195,6 +312,16 @@ describe('formula sheet', () => {
     expect(formulaGroupsOf('toString', 'constructor')).toEqual([])
   })
 
+  it('has the groups of linear functions', () => {
+    expect(formulaGroupsOf('funktionen', 'lineare-funktionen').map((g) => g.title)).toEqual([
+      'Funktionsgleichung',
+      'Steigung aus zwei Punkten',
+      'Nullstelle',
+      'Schnittpunkt',
+    ])
+    expect(entryLatex(findFormula('slope-two-points'))).toBe('m = \\frac{y_2 - y_1}{x_2 - x_1} \\quad (x_1 \\neq x_2)')
+  })
+
   it('shows the three binomial formulas in school notation', () => {
     const latex = formulaGroupsOf('algebra', 'terme').find((g) => g.title === 'Binomische Formeln')?.formulas.map(entryLatex)
     expect(latex).toEqual([
@@ -230,6 +357,7 @@ describe('topic content', () => {
       expect(cards.some((c) => c.question?.kind === 'choice')).toBe(true)
       expect(cards.some((c) => c.question?.kind === 'term')).toBe(true)
       if (isTermSubtopic(topic)) expect(kinds.has('area-model')).toBe(true)
+      else if (isFunctionSubtopic(topic)) expect(PLANE_WIDGETS.some((kind) => kinds.has(kind))).toBe(true)
       else expect([kinds.has('balance'), kinds.has('equation-steps')]).toEqual([true, true])
     })
 
@@ -277,6 +405,20 @@ describe('topic content', () => {
       }
     })
 
+    it('reads every function segment in the text, its numbers agree, and typesets it with KaTeX', () => {
+      for (const text of markupTexts(content)) {
+        for (const source of functionSources(text)) {
+          const segment = readFunctionSegment(source)
+          if (segment.kind === 'value' || segment.kind === 'assignment') {
+            for (const value of segment.values) {
+              expect(value.equals(segment.values[0]!), `${source} (in: ${text})`).toBe(true)
+            }
+          }
+          expect(() => renderStrict(segment.pieces.join(' ')), `${source} (in: ${text})`).not.toThrow()
+        }
+      }
+    })
+
     describe.each(content.examples.map((e) => [e.title, e] as const))('example "%s"', (_title, example) => {
       const { task } = example
 
@@ -284,16 +426,30 @@ describe('topic content', () => {
         expect(task.topic).toBe(topic)
       })
 
+      it.runIf(isFunctionTask(task))('draws its figure with whole numbers inside the window', () => {
+        if (!isFunctionTask(task)) return
+        const { lines, points } = functionExampleFigure(task)
+        expect(lines.length).toBeGreaterThan(0)
+        for (const line of lines) {
+          expect([Number.isInteger(line.m), Number.isInteger(line.n)], line.name).toEqual([true, true])
+        }
+        for (const p of points) {
+          expect(Number.isInteger(p.x) && Number.isInteger(p.y), p.label).toBe(true)
+          expect(p.x >= DEFAULT_WINDOW.x[0] && p.x <= DEFAULT_WINDOW.x[1], p.label).toBe(true)
+          expect(p.y >= DEFAULT_WINDOW.y[0] && p.y <= DEFAULT_WINDOW.y[1], p.label).toBe(true)
+        }
+      })
+
       it('has a worked solution whose result is accepted as correct', () => {
+        if (isFunctionTask(task)) {
+          expect(task.steps.length).toBeGreaterThan(1)
+          expectFunctionResultAccepted(task)
+          if ('equation' in task) expectSolvedLineByLine(task.equation)
+          return
+        }
         if (isEquationTask(task)) {
           expect(task.steps.length).toBeGreaterThan(0)
-          let previous = task.equation
-          for (const step of task.steps) {
-            const text = equationToText(step.equation)
-            expect(checkStep(previous, step.operation, text).kind, text).toBe('correct')
-            previous = step.equation
-          }
-          expect(checkSolutionSet(task, solutionSetToText(task.solutionSet))).toEqual({ kind: 'correct' })
+          expectSolvedLineByLine(task)
           return
         }
         expect(task.steps.length).toBeGreaterThan(1)
@@ -302,6 +458,10 @@ describe('topic content', () => {
       })
 
       it('typesets prompt and steps with KaTeX', () => {
+        if (isFunctionTask(task)) {
+          for (const step of task.steps) expect(() => renderStrict(step.latex), step.latex).not.toThrow()
+          return
+        }
         if (isEquationTask(task)) {
           const latex = [
             equationToLatex(task.equation),
@@ -323,9 +483,11 @@ describe('topic content', () => {
       ALL_SUBTOPIC_IDS.map((topic) => [
         topic,
         subtopicContent[topic].examples.map(({ task }) =>
-          isEquationTask(task)
-            ? `${equationToText(task.equation)} → ${solutionSetToText(task.solutionSet)}`
-            : `${toText(task.prompt)} = ${toText(task.solution)}`,
+          isFunctionTask(task)
+            ? `${task.kind} → ${task.steps[task.steps.length - 1]!.text}`
+            : isEquationTask(task)
+              ? `${equationToText(task.equation)} → ${solutionSetToText(task.solutionSet)}`
+              : `${toText(task.prompt)} = ${toText(task.solution)}`,
         ),
       ]),
     )
@@ -344,6 +506,27 @@ describe('topic content', () => {
         '2(x + 3) = 2x + 1 → L = { }',
         '4x - (x - 5) = 3x + 5 → L = ℚ',
         '5x + 3 = 2x + 3 → L = {0}',
+      ],
+      'funktionen/lineare-funktionen/steigung-und-graph': [
+        'read-equation → f(x) = -x + 2',
+        'draw-graph → f(x) = 2x - 3',
+        'read-equation → f(x) = 3',
+      ],
+      'funktionen/lineare-funktionen/gleichung-aufstellen': [
+        'from-point-slope → f(x) = -3x + 7',
+        'from-two-points → f(x) = 2x + 1',
+        'from-two-points → f(x) = -2x + 3',
+      ],
+      'funktionen/lineare-funktionen/punktprobe-nullstelle': [
+        'point-test → 5 = 5',
+        'point-test → -7 ≠ -4',
+        'zero → N(-2|0)',
+        'zero → L = { }',
+      ],
+      'funktionen/lineare-funktionen/schnittpunkt': [
+        'intersection → S(2|5)',
+        'intersection → L = { }',
+        'intersection → L = ℚ',
       ],
     })
   })

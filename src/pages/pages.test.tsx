@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { catalog } from '../catalog'
-import { allEntries, formulaGroupsOf, isEquationTask, subtopicContent } from '../content'
-import { ALL_SUBTOPIC_IDS, EQUATION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
+import { allEntries, formulaGroupsOf, isEquationTask, isFunctionTask, subtopicContent } from '../content'
+import { ALL_SUBTOPIC_IDS, EQUATION_SUBTOPIC_IDS, FUNCTION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
 import { routes } from '../routes'
 
 function renderAt(path: string) {
@@ -30,8 +30,9 @@ describe('topic page', () => {
     content.examples.forEach((example, i) => {
       const card = within(examples.getByRole('article', { name: `Beispiel ${i + 1}: ${example.title}` }))
       const steps = within(card.getByRole('list', { name: 'Lösungsweg' })).getAllByRole('listitem')
-      // Equations: the first line, one line per step and the solution set.
-      expect(steps).toHaveLength(example.task.steps.length + (isEquationTask(example.task) ? 2 : 1))
+      // Terms: the prompt plus one line per step. Equations: also the solution set. Functions: one line per step.
+      const extra = isFunctionTask(example.task) ? 0 : isEquationTask(example.task) ? 2 : 1
+      expect(steps).toHaveLength(example.task.steps.length + extra)
       for (const step of example.task.steps) if (step.note) expect(card.getByText(step.note)).toBeInTheDocument()
     })
 
@@ -63,6 +64,24 @@ describe('topic page', () => {
     expect(practice.getByRole('button', { name: 'Zeile prüfen' })).toBeInTheDocument()
     expect(practice.getByRole('button', { name: 'Lösungsmenge prüfen' })).toBeInTheDocument()
     expect(practice.queryByText(/folgen bald/)).not.toBeInTheDocument()
+  })
+
+  it.each(FUNCTION_SUBTOPIC_IDS)('%s says that its practice follows later', (topic) => {
+    renderAt(`/${topic}`)
+    const practice = within(screen.getByRole('region', { name: 'Übung' }))
+    expect(practice.getByText('Übungsaufgaben zu diesem Teilthema folgen bald.')).toBeInTheDocument()
+    expect(document.getElementById('uebung')).not.toBeNull()
+  })
+
+  it('shows the graph of a worked example about functions', () => {
+    renderAt('/funktionen/lineare-funktionen/schnittpunkt')
+    const card = within(screen.getByRole('article', { name: 'Beispiel 1: Genau ein Schnittpunkt' }))
+    expect(card.getByRole('group', { name: /^Graph zum Beispiel/ })).toBeInTheDocument()
+    expect(card.getByRole('img', { name: /^Gerade f\(x\) = 2x \+ 1/ })).toBeInTheDocument()
+    expect(card.getByRole('img', { name: /^Punkt S/ })).toBeInTheDocument()
+    const lines = within(card.getByRole('list', { name: 'Lösungsweg' })).getAllByRole('listitem')
+    expect(lines.at(-1)).toHaveClass('solution-result')
+    expect(lines.at(-1)).toHaveTextContent('Der Schnittpunkt der beiden Geraden.')
   })
 
   it('shows a worked equation in school notation with the solution set at the end', () => {

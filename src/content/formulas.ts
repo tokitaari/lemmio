@@ -102,6 +102,95 @@ export const formulaSheets: Readonly<Record<string, readonly FormulaGroup[]>> = 
       ],
     },
   ],
+  'funktionen/lineare-funktionen': [
+    {
+      title: 'Funktionsgleichung',
+      formulas: [
+        {
+          kind: 'statement',
+          id: 'function-equation',
+          name: 'Lineare Funktion mit Steigung m und y-Achsenabschnitt n',
+          latex: String.raw`f(x) = mx + n`,
+        },
+        {
+          kind: 'statement',
+          id: 'function-value',
+          name: 'Funktionswert an der Stelle a',
+          latex: String.raw`f(a) = m \cdot a + n`,
+        },
+        {
+          kind: 'statement',
+          id: 'point-test',
+          name: 'Punktprobe',
+          latex: String.raw`P(a \mid b) \text{ liegt auf dem Graphen von } f \iff f(a) = b`,
+        },
+      ],
+    },
+    {
+      title: 'Steigung aus zwei Punkten',
+      formulas: [
+        {
+          kind: 'statement',
+          id: 'slope-two-points',
+          name: 'Steigung der Geraden durch P(x₁|y₁) und Q(x₂|y₂)',
+          latex: String.raw`m = \frac{y_2 - y_1}{x_2 - x_1}`,
+          condition: String.raw`x_1 \neq x_2`,
+        },
+        {
+          kind: 'statement',
+          id: 'intercept-from-point',
+          name: 'y-Achsenabschnitt aus der Steigung und einem Punkt P(x₁|y₁)',
+          latex: String.raw`y_1 = m \cdot x_1 + n \iff n = y_1 - m \cdot x_1`,
+        },
+      ],
+    },
+    {
+      title: 'Nullstelle',
+      formulas: [
+        {
+          kind: 'statement',
+          id: 'zero-equation',
+          name: 'Nullstelle: f(x) = 0 lösen',
+          latex: String.raw`f(x_0) = 0 \;\Rightarrow\; N(x_0 \mid 0)`,
+        },
+        {
+          kind: 'statement',
+          id: 'zero-none',
+          name: 'Keine Nullstelle: Der Graph verläuft parallel zur x-Achse',
+          latex: String.raw`m = 0,\ n \neq 0`,
+        },
+      ],
+    },
+    {
+      title: 'Schnittpunkt',
+      formulas: [
+        {
+          kind: 'statement',
+          id: 'intersection-equate',
+          name: 'Schnittpunkt: gleichsetzen, dann y berechnen',
+          latex: String.raw`f(x_S) = g(x_S) \;\Rightarrow\; S(x_S \mid f(x_S))`,
+        },
+        {
+          kind: 'statement',
+          id: 'intersection-one',
+          name: 'Genau ein Schnittpunkt: verschiedene Steigungen',
+          latex: String.raw`m_f \neq m_g`,
+        },
+        {
+          kind: 'statement',
+          id: 'intersection-parallel',
+          name: 'Kein Schnittpunkt: parallele Geraden',
+          latex: String.raw`m_f = m_g,\ n_f \neq n_g`,
+        },
+        {
+          kind: 'statement',
+          id: 'intersection-identical',
+          name: 'Unendlich viele Schnittpunkte: identische Geraden',
+          latex: String.raw`m_f = m_g,\ n_f = n_g`,
+        },
+      ],
+    },
+  ],
 }
 
 /** Every entry of the formula sheet, in sheet order. */
@@ -164,5 +253,7 @@ export function entryLatex(entry: SheetEntry): string {
     }
     case 'solution-set':
       return `${equationLatex(entry.line)} \\;\\Rightarrow\\; ${solutionSetSourceLatex(entry.set)}`
+    case 'statement':
+      return entry.condition ? `${entry.latex} \\quad (${entry.condition})` : entry.latex
   }
 }
