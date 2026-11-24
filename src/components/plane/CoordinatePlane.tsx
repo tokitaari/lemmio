@@ -42,6 +42,11 @@ export interface PlaneLineItem {
   label?: string
   tone?: PlaneTone
   dashed?: boolean
+  /**
+   * Accessible name instead of "Gerade f(x) = …", for lines whose equation
+   * the learner has to find (e.g. "Gerade f durch (0|2) und (1|1)").
+   */
+  description?: string
 }
 
 export interface PlanePointItem {
@@ -298,7 +303,7 @@ export default function CoordinatePlane({
               key={item.id}
               className={`plane-line plane-tone-${item.tone ?? 'accent'}${item.dashed ? ' is-dashed' : ''}`}
               role="img"
-              aria-label={`Gerade ${lineText(item.line, item.label)}`}
+              aria-label={item.description ?? `Gerade ${lineText(item.line, item.label)}`}
             >
               <line x1={from.x} y1={from.y} x2={to.x} y2={to.y} />
               {anchor && (

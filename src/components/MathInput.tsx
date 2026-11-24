@@ -5,20 +5,28 @@ interface MathInputProps {
   value: string
   onChange: (value: string) => void
   /** Variable letters of the current task; each gets its own key. */
-  variables: readonly string[]
+  variables?: readonly string[]
+  /** Replaces the default keys (variables, ², brackets, + − ·), e.g. for function equations or points. */
+  keys?: readonly MathKey[]
   readOnly?: boolean
   inputRef: RefObject<HTMLInputElement | null>
   describedBy?: string
 }
 
-interface Key {
+export interface MathKey {
   /** Text inserted at the caret. */
   text: string
+  /** What the key shows if that differs from `text`. */
+  display?: string
   /** Accessible name for symbols that screen readers would read badly. */
   label?: string
+  /** Puts the caret this many characters before the end of the inserted text, e.g. to land inside `N(|0)`. */
+  caretBack?: number
+  /** Takes two columns of the key grid (class `math-key-wide`). */
+  wide?: boolean
 }
 
-const SYMBOL_KEYS: readonly Key[] = [
+const SYMBOL_KEYS: readonly MathKey[] = [
   { text: '²', label: 'Hoch zwei' },
   { text: '(', label: 'Klammer auf' },
   { text: ')', label: 'Klammer zu' },
@@ -32,7 +40,16 @@ const SYMBOL_KEYS: readonly Key[] = [
  * phone keyboard (², brackets, ·). Keys insert at the caret and keep the focus
  * in the field, so the on-screen keyboard stays open.
  */
-export default function MathInput({ id, value, onChange, variables, readOnly = false, inputRef, describedBy }: MathInputProps) {
+export default function MathInput({
+  id,
+  value,
+  onChange,
+  variables = [],
+  keys: customKeys,
+  readOnly = false,
+  inputRef,
+  describedBy,
+}: MathInputProps) {
   // Caret position to restore after React has written the new value.
   const caret = useRef<number | null>(null)
 
@@ -50,10 +67,10 @@ export default function MathInput({ id, value, onChange, variables, readOnly = f
     return { start, end: input?.selectionEnd ?? start }
   }
 
-  const insert = (text: string) => {
+  const insert = (key: MathKey) => {
     const { start, end } = selection()
-    caret.current = start + text.length
-    onChange(value.slice(0, start) + text + value.slice(end))
+    caret.current = start + key.text.length - (key.caretBack ?? 0)
+    onChange(value.slice(0, start) + key.text + value.slice(end))
   }
 
   const backspace = () => {
@@ -63,7 +80,7 @@ export default function MathInput({ id, value, onChange, variables, readOnly = f
     onChange(value.slice(0, from) + value.slice(end))
   }
 
-  const keys: readonly Key[] = [...variables.map((v) => ({ text: v })), ...SYMBOL_KEYS]
+  const keys: readonly MathKey[] = customKeys ?? [...variables.map((v) => ({ text: v })), ...SYMBOL_KEYS]
 
   return (
     <>
@@ -87,14 +104,14 @@ export default function MathInput({ id, value, onChange, variables, readOnly = f
           <button
             key={key.text}
             type="button"
-            className="math-key"
+            className={key.wide ? 'math-key math-key-wide' : 'math-key'}
             aria-label={key.label}
             disabled={readOnly}
             // Keeps the focus (and on phones the keyboard) in the input.
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => insert(key.text)}
+            onClick={() => insert(key)}
           >
-            {key.text}
+            {key.display ?? key.text}
           </button>
         ))}
         <button
