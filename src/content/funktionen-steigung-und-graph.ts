@@ -48,7 +48,7 @@ export const funktionenSteigungUndGraph: SubtopicContent = {
       title: 'Der y-Achsenabschnitt n',
       body: [
         'Eine lineare Funktion hat die Form f(x) = mx + n. Ihr Graph ist eine Gerade.',
-        'Setzt man $0$ ein, bleibt $fn: f(0) = n$. Die Gerade schneidet die y-Achse also im Punkt (0|n). Deshalb heißt $n$ y-Achsenabschnitt.',
+        'Setzt man $0$ ein, bleibt f(0) = n. Die Gerade schneidet die y-Achse also im Punkt (0|n). Deshalb heißt $n$ y-Achsenabschnitt.',
         'Verschiebe die Gerade mit $n$. Ihre Richtung bleibt gleich.',
       ],
       widget: { kind: 'line-sliders', m: { value: 1 }, n: { value: 2 }, vary: 'n' },

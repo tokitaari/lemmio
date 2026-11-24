@@ -19,7 +19,7 @@ export const funktionenGleichungAufstellen: SubtopicContent = {
         kind: 'line-points',
         points: [
           [1, 3],
-          [4, 9],
+          [3, 7],
         ],
         table: false,
       },
@@ -64,11 +64,11 @@ export const funktionenGleichungAufstellen: SubtopicContent = {
       id: 'steigung-zwei-punkte',
       title: 'Steigung aus zwei Punkten',
       body: [
-        'Von $fn: P(1|3)$ nach $fn: Q(4|9)$ geht es $4 - 1 = 3$ nach rechts und $9 - 3 = 6$ nach oben. Das ist ein Steigungsdreieck.',
-        'Also ist $m$ die Differenz der y-Werte geteilt durch die Differenz der x-Werte: $fn: m = (9 - 3)/(4 - 1) = 6/3 = 2$.',
+        'Von $fn: P(1|3)$ nach $fn: Q(3|7)$ geht es $3 - 1 = 2$ nach rechts und $7 - 3 = 4$ nach oben. Das ist ein Steigungsdreieck.',
+        'Also ist $m$ die Differenz der y-Werte geteilt durch die Differenz der x-Werte: $fn: m = (7 - 3)/(3 - 1) = 4/2 = 2$.',
         'Ziehe P an der Geraden entlang oder Q zur Seite: Der Quotient bleibt $2$.',
       ],
-      widget: { kind: 'slope-triangle', m: 2, n: 1, at: 1, run: 3, resizable: true },
+      widget: { kind: 'slope-triangle', m: 2, n: 1, at: 1, run: 2, resizable: true },
       question: {
         kind: 'term',
         prompt: 'Eine Gerade geht durch $fn: P(1|2)$ und $fn: Q(3|8)$. Wie groß ist ihre Steigung $m$?',
@@ -82,7 +82,7 @@ export const funktionenGleichungAufstellen: SubtopicContent = {
       title: 'Dann n bestimmen',
       body: [
         'Mit der Steigung $2$ ist f(x) = 2x + n. Jetzt geht es weiter wie bei Steigung und Punkt.',
-        'Setze einen der beiden Punkte ein, zum Beispiel P: $eq: 3 = 2·1 + n$, also $fn: n = 1$. Mit Q ergibt sich dasselbe: $eq: 9 = 2·4 + n$.',
+        'Setze einen der beiden Punkte ein, zum Beispiel P: $eq: 3 = 2·1 + n$, also $fn: n = 1$. Mit Q ergibt sich dasselbe: $eq: 7 = 2·3 + n$.',
         'Schiebe die Gerade mit der Steigung $2$ mit $n$ so, dass sie durch beide Punkte geht.',
       ],
       widget: { kind: 'line-sliders', m: { value: 2 }, n: { value: -3 }, vary: 'n', target: { m: 2, n: 1 } },
@@ -130,13 +130,13 @@ export const funktionenGleichungAufstellen: SubtopicContent = {
       ],
       question: {
         kind: 'choice',
-        prompt: 'Für die Gerade durch $fn: P(1|3)$ und $fn: Q(4|9)$ hat jemand $fn: f(x) = 2x - 1$ berechnet. Stimmt das?',
+        prompt: 'Für die Gerade durch $fn: P(1|3)$ und $fn: Q(3|7)$ hat jemand $fn: f(x) = 2x - 1$ berechnet. Stimmt das?',
         options: [
           { text: 'Nein, denn $fn: f(1) = 2·1 - 1 = 1$, nicht $3$.', correct: true },
           { text: 'Ja, die Steigung $2$ stimmt.', feedback: 'Die Steigung stimmt, aber auch $n$ muss passen. Mache die Probe mit P.' },
-          { text: 'Ja, denn $fn: f(4) = 9$.', feedback: 'Rechne nach: $fn: f(4) = 2·4 - 1 = 7$.' },
+          { text: 'Ja, denn $fn: f(3) = 7$.', feedback: 'Rechne nach: $fn: f(3) = 2·3 - 1 = 5$.' },
         ],
-        explanation: 'Richtig ist $fn: f(x) = 2x + 1$: $fn: f(1) = 3$ und $fn: f(4) = 9$.',
+        explanation: 'Richtig ist $fn: f(x) = 2x + 1$: $fn: f(1) = 3$ und $fn: f(3) = 7$.',
       },
     },
     {
@@ -167,8 +167,8 @@ export const funktionenGleichungAufstellen: SubtopicContent = {
     },
     {
       title: 'Aus zwei Punkten',
-      task: buildTwoPointsTask([1, 3], [4, 9]),
-      comment: 'Probe mit Q: $fn: f(4) = 2·4 + 1 = 9$.',
+      task: buildTwoPointsTask([1, 3], [3, 7]),
+      comment: 'Probe mit Q: $fn: f(3) = 2·3 + 1 = 7$.',
     },
     {
       title: 'Fallende Gerade aus zwei Punkten',
