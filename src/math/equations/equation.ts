@@ -144,8 +144,11 @@ export function equationForm(equation: Equation): EquationForm {
   return 'open'
 }
 
-/** A number, optionally with a sign or in brackets; fractions must be reduced and not whole. */
-function isPlainNumber(e: Expr): boolean {
+/**
+ * A number, optionally with a sign or in brackets; fractions must be reduced
+ * and not whole. Also used for coordinates and function values.
+ */
+export function isPlainNumber(e: Expr): boolean {
   switch (e.type) {
     case 'group':
       return isPlainNumber(e.body)

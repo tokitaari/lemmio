@@ -1,4 +1,7 @@
-/** Machine-readable reason why an input could not be read as a term, equation, operation or solution set. */
+/**
+ * Machine-readable reason why an input could not be read as a term, equation,
+ * operation, solution set, function equation, point or function value.
+ */
 export type TermErrorCode =
   | 'empty'
   | 'too-long'
@@ -26,6 +29,13 @@ export type TermErrorCode =
   | 'multiply-by-term'
   | 'multiply-by-zero'
   | 'invalid-solution-set'
+  // Linear functions (src/math/functions)
+  | 'invalid-function'
+  | 'wrong-variable'
+  | 'invalid-point'
+  | 'missing-separator'
+  | 'comma-separator'
+  | 'invalid-function-value'
 
 /**
  * Error for invalid input. `message` is German and meant for the learner;
