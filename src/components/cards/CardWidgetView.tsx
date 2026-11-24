@@ -2,6 +2,9 @@ import type { CardWidget } from '../../cards'
 import AreaModelView from './AreaModelView'
 import BalanceView from './BalanceView'
 import EquationStepsView from './EquationStepsView'
+import LinePointsView from './LinePointsView'
+import LineSlidersView from './LineSlidersView'
+import SlopeTriangleView from './SlopeTriangleView'
 import TermStepsView from './TermStepsView'
 
 /**
@@ -21,5 +24,11 @@ export default function CardWidgetView({ widget }: { widget: CardWidget }) {
       return <BalanceView widget={widget} />
     case 'equation-steps':
       return <EquationStepsView widget={widget} />
+    case 'line-sliders':
+      return <LineSlidersView widget={widget} />
+    case 'slope-triangle':
+      return <SlopeTriangleView widget={widget} />
+    case 'line-points':
+      return <LinePointsView widget={widget} />
   }
 }

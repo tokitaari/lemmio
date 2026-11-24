@@ -48,13 +48,15 @@ export type PlaneLine =
  * - `free`: to every grid point of the window
  * - `vertical`: up and down, x stays (e.g. n on the y-axis)
  * - `horizontal`: left and right, y stays (e.g. a zero on the x-axis)
- * - `on-line`: only to grid points on the line
+ * - `on-line`: only to grid points on the line; `range` limits them to
+ *   x values in [min, max] (y values for a vertical line), e.g. so that a
+ *   slope triangle attached to the point stays inside the window
  */
 export type PointDrag =
   | { kind: 'free' }
   | { kind: 'vertical' }
   | { kind: 'horizontal' }
-  | { kind: 'on-line'; line: PlaneLine }
+  | { kind: 'on-line'; line: PlaneLine; range?: Range }
 
 /** Keys a movable point reacts to (see `planeKey`). */
 export type PlaneKey = 'left' | 'right' | 'up' | 'down' | 'home' | 'end' | 'page-up' | 'page-down'
@@ -274,6 +276,15 @@ export function gridPointsOnLine(line: PlaneLine, window: PlaneWindow): GridPoin
   return points
 }
 
+/** Grid points an `on-line` point can reach: those of its line in the window, limited to its range. */
+export function lineTrack(drag: { line: PlaneLine; range?: Range }, window: PlaneWindow): GridPoint[] {
+  const points = gridPointsOnLine(drag.line, window)
+  const range = drag.range
+  if (!range) return points
+  const coordinate = drag.line.kind === 'vertical' ? 'y' : 'x'
+  return points.filter((p) => p[coordinate] >= range[0] && p[coordinate] <= range[1])
+}
+
 /** True if the grid point lies on the line. */
 export function isOnLine(line: PlaneLine, p: GridPoint): boolean {
   if (line.kind === 'vertical') return toRational(line.x).equals(Rational.of(p.x))
@@ -296,7 +307,7 @@ function isOccupied(p: GridPoint, occupied: readonly GridPoint[]): GridPoint | u
  * points have no single track; they move along their row or column.
  */
 function track(current: GridPoint, drag: PointDrag, window: PlaneWindow, along: 'row' | 'column'): GridPoint[] {
-  if (drag.kind === 'on-line') return gridPointsOnLine(drag.line, window)
+  if (drag.kind === 'on-line') return lineTrack(drag, window)
   const direction = drag.kind === 'vertical' ? 'column' : drag.kind === 'horizontal' ? 'row' : along
   return direction === 'row'
     ? integers(window.x).map((x) => ({ x, y: current.y }))
@@ -307,7 +318,10 @@ function track(current: GridPoint, drag: PointDrag, window: PlaneWindow, along: 
 export function pointProblems(p: GridPoint, window: PlaneWindow, drag?: PointDrag): string[] {
   if (!Number.isInteger(p.x) || !Number.isInteger(p.y)) return ['Punkt: Koordinaten müssen ganze Zahlen sein.']
   if (!inWindow(window, p)) return ['Punkt: liegt außerhalb des Fensters.']
-  if (drag?.kind === 'on-line' && !isOnLine(drag.line, p)) return ['Punkt: liegt nicht auf seiner Geraden.']
+  if (drag?.kind === 'on-line') {
+    if (!isOnLine(drag.line, p)) return ['Punkt: liegt nicht auf seiner Geraden.']
+    if (!lineTrack(drag, window).some((q) => sameGridPoint(q, p))) return ['Punkt: liegt außerhalb seines Bereichs auf der Geraden.']
+  }
   return []
 }
 
@@ -332,7 +346,7 @@ export function snapPoint(
 ): GridPoint {
   let target: GridPoint
   if (drag.kind === 'on-line') {
-    const candidates = gridPointsOnLine(drag.line, window)
+    const candidates = lineTrack(drag, window)
     let best: GridPoint | undefined
     let bestDistance = Infinity
     for (const c of candidates) {
@@ -434,7 +448,7 @@ export function movePoint(
 export function pointValueRange(p: GridPoint, drag: PointDrag, window: PlaneWindow): { now: number; min: number; max: number } {
   if (drag.kind === 'vertical') return { now: p.y, min: window.y[0], max: window.y[1] }
   if (drag.kind === 'on-line') {
-    const points = gridPointsOnLine(drag.line, window)
+    const points = lineTrack(drag, window)
     if (drag.line.kind === 'vertical') {
       return { now: p.y, min: points[0]?.y ?? p.y, max: points.at(-1)?.y ?? p.y }
     }

@@ -4,6 +4,9 @@ import { areaModelProblems, areaModelTerms, buildAreaModel } from './areaModel'
 import { balanceProblems, balanceTerms, buildBalance } from './balance'
 import { termQuestionKey } from './deck'
 import { buildEquationSteps, equationStepsLatex, equationStepsProblems, equationStepsTerms } from './equationSteps'
+import { buildLinePoints, linePointsLatex, linePointsProblems } from './linePoints'
+import { buildLineSliders, lineSlidersLatex, lineSlidersProblems } from './lineSliders'
+import { buildSlopeTriangle, slopeTriangleLatex, slopeTriangleProblems } from './slopeTriangle'
 import { CARD_ID, DECK_ID } from './storage'
 import type { Card, CardQuestion, CardWidget, Deck } from './types'
 
@@ -58,6 +61,12 @@ function widgetProblems(widget: CardWidget): string[] {
       return balanceProblems(widget)
     case 'equation-steps':
       return equationStepsProblems(widget)
+    case 'line-sliders':
+      return lineSlidersProblems(widget)
+    case 'slope-triangle':
+      return slopeTriangleProblems(widget)
+    case 'line-points':
+      return linePointsProblems(widget)
   }
 }
 
@@ -110,16 +119,27 @@ function cardTerms(card: Card): string[] {
 
 /**
  * LaTeX that a deck shows besides terms and markup, e.g. operations,
- * intermediate lines and solution sets of equation steps. Content tests
- * render it with KaTeX in strict mode. Widgets with problems are skipped.
+ * intermediate lines and solution sets of equation steps, or the start
+ * equations of the line widgets (their other states are covered by the
+ * unit tests of the widgets). Content tests render it with KaTeX in strict
+ * mode. Widgets with problems are skipped.
  */
 export function deckLatex(deck: Deck): string[] {
   return deck.cards.flatMap((card) => {
     const widget = card.widget
-    if (widget?.kind === 'equation-steps' && equationStepsProblems(widget).length === 0) {
-      return equationStepsLatex(buildEquationSteps(widget))
+    if (!widget || widgetProblems(widget).length > 0) return []
+    switch (widget.kind) {
+      case 'equation-steps':
+        return equationStepsLatex(buildEquationSteps(widget))
+      case 'line-sliders':
+        return lineSlidersLatex(buildLineSliders(widget))
+      case 'slope-triangle':
+        return slopeTriangleLatex(buildSlopeTriangle(widget))
+      case 'line-points':
+        return linePointsLatex(buildLinePoints(widget))
+      default:
+        return []
     }
-    return []
   })
 }
 

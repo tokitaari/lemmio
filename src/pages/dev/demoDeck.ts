@@ -3,8 +3,8 @@ import type { Deck } from '../../cards'
 /**
  * Demo deck for the card framework, shown at /dev/karten in the dev server
  * only. It uses every card feature at least once, including the three modes
- * of the area model and both modes of the balance; real decks arrive with
- * the subtopics.
+ * of the area model, both modes of the balance and the line widgets of the
+ * coordinate plane; real decks arrive with the subtopics.
  */
 export const demoDeck: Deck = {
   id: 'dev/karten/demo',
@@ -173,6 +173,76 @@ export const demoDeck: Deck = {
         'Mit der Tastatur: Mit Tab zur Auswahl, dort die Pfeiltasten, dann mit Tab zu den Umformungen.',
       ],
       widget: { kind: 'balance', equation: '2x + 1 = 7', mode: 'explore' },
+    },
+    // Function equations are written without $ here: inside $…$ every "=" is checked as an identity of terms.
+    {
+      id: 'gerade-regler',
+      title: 'Steigung und y-Achsenabschnitt',
+      body: [
+        'Die Gerade gehört zu f(x) = mx + n. Verändere $m$ und $n$ mit den Schiebereglern.',
+        'Mit der Tastatur: Regler mit Tab wählen, dann die Pfeiltasten, Pos1 oder Ende.',
+      ],
+      widget: { kind: 'line-sliders', m: { value: 1 }, n: { value: 2 } },
+      question: {
+        kind: 'choice',
+        prompt: 'Was passiert mit der Geraden, wenn nur $n$ größer wird?',
+        options: [
+          { text: 'Sie wird steiler.', feedback: 'Die Steilheit hängt nur von $m$ ab.' },
+          { text: 'Sie verschiebt sich nach oben.', correct: true },
+          { text: 'Sie dreht sich um den Ursprung.', feedback: 'Um einen festen Punkt dreht sie sich, wenn sich $m$ ändert.' },
+        ],
+        explanation: '$n$ ist der y-Wert an der Stelle 0. Wird $n$ größer, rutscht die ganze Gerade nach oben.',
+      },
+    },
+    {
+      id: 'gerade-ziel',
+      title: 'Auf das Ziel schieben',
+      body: ['Die Steigung bleibt fest. Schiebe die Gerade mit $n$ auf die gestrichelte Zielgerade.'],
+      widget: { kind: 'line-sliders', m: { value: -2 }, n: { value: 4 }, vary: 'n', target: { m: -2, n: -1 }, name: 'g' },
+    },
+    {
+      id: 'steigungsdreieck',
+      title: 'Steigungsdreieck',
+      body: [
+        'Gehe von P aus ein Kästchen nach rechts. Um wie viel musst du hoch, um wieder auf die Gerade zu kommen?',
+        'Ziehe P an der Geraden entlang: Das Dreieck sieht überall gleich aus.',
+      ],
+      widget: { kind: 'slope-triangle', m: 2, n: -1, at: 1 },
+      question: {
+        kind: 'choice',
+        prompt: 'Wie groß ist die Steigung dieser Geraden?',
+        options: [
+          { text: '$1$', feedback: 'Das ist der Schritt nach rechts. Gefragt ist hoch durch rechts.' },
+          { text: '$2$', correct: true },
+          { text: '$-1$', feedback: 'Das ist der y-Achsenabschnitt.' },
+        ],
+        explanation: 'Ein Kästchen nach rechts, zwei hoch: Die Steigung ist $2 : 1$, also $2$.',
+      },
+    },
+    {
+      id: 'steigungsdreieck-groesse',
+      title: 'Größer oder kleiner',
+      body: [
+        'Hier lassen sich P und Q ziehen. Die Gerade fällt, deshalb ist „hoch“ negativ.',
+        'Wie groß du das Dreieck auch machst: hoch durch rechts ergibt immer dieselbe Zahl.',
+      ],
+      widget: { kind: 'slope-triangle', m: -1, n: 3, at: 0, run: 2, resizable: true },
+    },
+    {
+      id: 'zwei-punkte',
+      title: 'Gerade durch zwei Punkte',
+      body: [
+        'Ziehe P und Q. Die Gleichung und die Wertetabelle passen sich an.',
+        'Stehen P und Q übereinander, ist die Gerade senkrecht. Sie gehört zu keiner Funktion.',
+      ],
+      widget: {
+        kind: 'line-points',
+        points: [
+          [0, -3],
+          [2, 1],
+        ],
+        target: { m: -1, n: 2 },
+      },
     },
   ],
 }
