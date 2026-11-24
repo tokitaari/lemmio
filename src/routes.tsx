@@ -6,9 +6,9 @@ import NotFound from './pages/NotFound'
 import SubtopicPage from './pages/SubtopicPage'
 
 /**
- * Pages for development only (e.g. the card demo). `import.meta.env.DEV` is
- * false in the production build, so Vite drops these routes and their lazily
- * loaded modules entirely.
+ * Pages for development only (card demo, coordinate plane demo).
+ * `import.meta.env.DEV` is false in the production build, so Vite drops these
+ * routes and their lazily loaded modules entirely.
  */
 const devRoutes: RouteObject[] = import.meta.env.DEV
   ? [
@@ -16,6 +16,11 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
         path: 'dev/karten',
         HydrateFallback: () => null,
         lazy: async () => ({ Component: (await import('./pages/dev/CardsDemo')).default }),
+      },
+      {
+        path: 'dev/koordinaten',
+        HydrateFallback: () => null,
+        lazy: async () => ({ Component: (await import('./pages/dev/PlaneDemo')).default }),
       },
     ]
   : []
