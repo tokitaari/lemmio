@@ -100,6 +100,13 @@ describe('Routing and layout', () => {
     expect(screen.getByText(`Karte 1 von ${demoDeck.cards.length}`)).toBeInTheDocument()
   })
 
+  it('serves the coordinate plane demo in the dev server', async () => {
+    renderAt('/dev/koordinaten')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Koordinatensystem-Demo' })).toBeInTheDocument()
+    expect(screen.getAllByRole('group', { name: /Koordinatensystem, x von/ })).toHaveLength(4)
+    expect(screen.getAllByRole('slider', { name: /^Punkt / })).toHaveLength(6)
+  })
+
   it('shows "not found" for nested unknown paths', () => {
     renderAt('/a/b/c/d')
     expect(screen.getByRole('heading', { name: 'Seite nicht gefunden' })).toBeInTheDocument()
