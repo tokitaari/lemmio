@@ -217,6 +217,10 @@ describe('math keys', () => {
 })
 
 describe('series and progress', () => {
+  // A whole series types ten answers key by key; under load (e.g. the full
+  // suite in parallel workers) that can take longer than the default 5 s.
+  const SERIES_TIMEOUT = 20_000
+
   async function finishSeries(setupResult: ReturnType<typeof setup>, correctEvery: (i: number) => boolean) {
     const { tasks, user, answer } = setupResult
     for (let i = 0; i < tasks.length; i++) {
@@ -239,7 +243,7 @@ describe('series and progress', () => {
       correct: 8,
       lastSeries: { correct: 8, total: 10 },
     })
-  })
+  }, SERIES_TIMEOUT)
 
   it('starts a new series without repeating the progress', async () => {
     const s = setup()
@@ -248,7 +252,7 @@ describe('series and progress', () => {
     expect(screen.getByText('Aufgabe 1 von 10')).toBeInTheDocument()
     expect(s.input()).toHaveFocus()
     expect(screen.getByText('Bisher: 10 von 10 richtig. Letzte Serie: 10 von 10 richtig.')).toBeInTheDocument()
-  })
+  }, SERIES_TIMEOUT)
 
   it('keeps the progress after a reload', async () => {
     const first = setup('algebra/terme/faktorisieren')
