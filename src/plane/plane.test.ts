@@ -15,6 +15,7 @@ import {
   labelStep,
   lineLabelAnchor,
   lineText,
+  lineTrack,
   movePoint,
   placeAt,
   planeFrame,
@@ -38,6 +39,7 @@ const free: PointDrag = { kind: 'free' }
 const vertical: PointDrag = { kind: 'vertical' }
 const horizontal: PointDrag = { kind: 'horizontal' }
 const onF: PointDrag = { kind: 'on-line', line: f }
+const onFLimited: PointDrag = { kind: 'on-line', line: f, range: [0, 3] }
 
 describe('window', () => {
   it('is −8…8 by default and accepts windows that show both axes', () => {
@@ -170,6 +172,24 @@ describe('snapping', () => {
     expect(snapPoint({ x: 20, y: 20 }, { x: 3, y: 3 }, onF, W)).toEqual({ x: 5, y: 7 })
   })
 
+  it('keeps points on a line inside their range', () => {
+    expect(lineTrack({ line: f, range: [0, 3] }, W)).toEqual([
+      { x: 0, y: -3 },
+      { x: 1, y: -1 },
+      { x: 2, y: 1 },
+      { x: 3, y: 3 },
+    ])
+    expect(lineTrack({ line: { kind: 'vertical', x: 2 }, range: [6, 9] }, W)).toEqual([
+      { x: 2, y: 6 },
+      { x: 2, y: 7 },
+      { x: 2, y: 8 },
+    ])
+    expect(snapPoint({ x: 20, y: 20 }, { x: 1, y: -1 }, onFLimited, W)).toEqual({ x: 3, y: 3 })
+    expect(snapPoint({ x: -5, y: -13 }, { x: 1, y: -1 }, onFLimited, W)).toEqual({ x: 0, y: -3 })
+    expect(pointProblems({ x: 4, y: 5 }, W, onFLimited)).toEqual(['Punkt: liegt außerhalb seines Bereichs auf der Geraden.'])
+    expect(pointProblems({ x: 3, y: 3 }, W, onFLimited)).toEqual([])
+  })
+
   it('stays where it is while the nearest grid point is taken', () => {
     expect(snapPoint({ x: 2.4, y: -3.6 }, { x: 0, y: 0 }, free, W, [{ x: 2, y: -4 }])).toEqual({ x: 0, y: 0 })
     expect(snapPoint({ x: 3.4, y: -3.6 }, { x: 0, y: 0 }, free, W, [{ x: 2, y: -4 }])).toEqual({ x: 3, y: -4 })
@@ -243,12 +263,16 @@ describe('keyboard', () => {
     expect(movePoint(p, 'end', onF, W)).toEqual({ kind: 'moved', point: { x: 5, y: 7 } })
     expect(movePoint(p, 'home', onF, W)).toEqual({ kind: 'moved', point: { x: -2, y: -7 } })
     expect(movePoint({ x: 5, y: 7 }, 'right', onF, W)).toEqual({ kind: 'edge' })
+    expect(movePoint({ x: 3, y: 3 }, 'right', onFLimited, W)).toEqual({ kind: 'edge' })
+    expect(movePoint(p, 'end', onFLimited, W)).toEqual({ kind: 'moved', point: { x: 3, y: 3 } })
+    expect(movePoint(p, 'home', onFLimited, W)).toEqual({ kind: 'moved', point: { x: 0, y: -3 } })
   })
 
   it('gives the value range of the coordinate a point changes', () => {
     expect(pointValueRange({ x: 3, y: 2 }, free, W)).toEqual({ now: 3, min: -8, max: 8 })
     expect(pointValueRange({ x: 0, y: 2 }, vertical, W)).toEqual({ now: 2, min: -8, max: 8 })
     expect(pointValueRange({ x: 1, y: -1 }, onF, W)).toEqual({ now: 1, min: -2, max: 5 })
+    expect(pointValueRange({ x: 1, y: -1 }, onFLimited, W)).toEqual({ now: 1, min: 0, max: 3 })
   })
 })
 

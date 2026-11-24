@@ -22,6 +22,7 @@ export {
   labelStep,
   lineLabelAnchor,
   lineText,
+  lineTrack,
   MARGIN,
   movePoint,
   occupiedAnnouncement,

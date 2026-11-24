@@ -114,6 +114,56 @@ describe('equation steps widget', () => {
   })
 })
 
+describe('line widgets', () => {
+  it('reports the problems of the line widgets with the card', () => {
+    const sliders = card({ widget: { kind: 'line-sliders', m: { value: 5 }, n: { value: 0 } } })
+    expect(validateDeck(deckOf(sliders))).toEqual(['card "karte": line-sliders: m = 5 lies outside its range -4…4'])
+    const triangle = card({ widget: { kind: 'slope-triangle', m: 0, n: 1 } })
+    expect(validateDeck(deckOf(triangle))).toEqual([
+      'card "karte": slope-triangle: m must not be 0 (a horizontal line has no triangle)',
+    ])
+    const points = card({
+      widget: {
+        kind: 'line-points',
+        points: [
+          [1, 1],
+          [1, 1],
+        ],
+      },
+    })
+    expect(validateDeck(deckOf(points))).toEqual(['card "karte": line-points: P and Q must be different points'])
+  })
+
+  it('collects the start equations as LaTeX and skips broken widgets', () => {
+    const deck = deckOf(
+      card({ id: 'a', widget: { kind: 'line-sliders', m: { value: 2 }, n: { value: -3 } } }),
+      card({ id: 'b', widget: { kind: 'slope-triangle', m: 2, n: 1 } }),
+      card({
+        id: 'c',
+        widget: {
+          kind: 'line-points',
+          name: 'g',
+          points: [
+            [0, 1],
+            [1, 2],
+          ],
+          table: [0],
+        },
+      }),
+      card({ id: 'd', widget: { kind: 'slope-triangle', m: 0, n: 1 } }),
+    )
+    expect(deckLatex(deck)).toEqual([
+      'f(x) = 2x - 3',
+      'f(x) = 2x + 1',
+      'm = \\frac{\\text{hoch}}{\\text{rechts}} = \\frac{2}{1} = 2',
+      'g(x) = x + 1',
+      '1',
+    ])
+    for (const latex of deckLatex(deck)) expect(() => renderStrict(latex)).not.toThrow()
+    expect(deckTerms(deck)).toEqual([])
+  })
+})
+
 describe('deckTerms', () => {
   it('collects widget lines and the terms of term questions', () => {
     const terms = deckTerms(
@@ -180,6 +230,9 @@ describe('demo deck', () => {
     }
     for (const term of deckTerms(demoDeck)) {
       expect(() => renderStrict(termToLatex(term)), term).not.toThrow()
+    }
+    for (const latex of deckLatex(demoDeck)) {
+      expect(() => renderStrict(latex), latex).not.toThrow()
     }
   })
 })

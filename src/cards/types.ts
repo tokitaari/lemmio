@@ -1,5 +1,6 @@
 import type { Markup } from '../content/types'
-import type { FormRequirement } from '../math'
+import type { Coordinates, FormRequirement } from '../math'
+import type { PlaneWindow } from '../plane'
 
 /**
  * Explanations are decks of cards (similar to brilliant.org): one card at a
@@ -26,7 +27,14 @@ export interface Card {
  * Interactive elements. Each kind has its own component (see
  * src/components/cards/CardWidgetView.tsx); new kinds are added to this union.
  */
-export type CardWidget = TermStepsWidget | AreaModelWidget | BalanceWidget | EquationStepsWidget
+export type CardWidget =
+  | TermStepsWidget
+  | AreaModelWidget
+  | BalanceWidget
+  | EquationStepsWidget
+  | LineSlidersWidget
+  | SlopeTriangleWidget
+  | LinePointsWidget
 
 /**
  * A transformation shown line by line: the start term, then `= term` per step
@@ -149,6 +157,84 @@ export interface EquationStepsLine {
   equation: string
   /** Explanation shown next to the operation. */
   note?: Markup
+}
+
+/**
+ * The graph of f(x) = mx + n with a slider for m and one for n; the
+ * equation below follows. The point (0|n) on the y-axis is marked. With a
+ * `target` a dashed target line is shown and reaching it is announced (it
+ * does not lock "Weiter"; that is what questions are for). Logic and checks:
+ * src/cards/lineSliders.ts.
+ */
+export interface LineSlidersWidget {
+  kind: 'line-sliders'
+  /** Slope; range −4…4 by default, at most −10…10. */
+  m: LineSlider
+  /** y-intercept; range: the y-range of the window by default, and never beyond it. */
+  n: LineSlider
+  /** Which sliders are shown; the other value stays fixed. Default: `both`. */
+  vary?: 'both' | 'm' | 'n'
+  target?: LineTarget
+  /** Name of the function, one lower-case letter. Default: `f`. */
+  name?: string
+  /** Visible window; −8…8 on both axes by default. */
+  window?: PlaneWindow
+  /** Accessible name of the coordinate plane. */
+  label?: string
+}
+
+/** Start value and range of a slider; whole numbers, step 1. */
+export interface LineSlider {
+  value: number
+  min?: number
+  max?: number
+}
+
+/** A line y = mx + n to reach, drawn dashed; whole numbers, n inside the window. */
+export interface LineTarget {
+  m: number
+  n: number
+}
+
+/**
+ * Slope triangle at the graph of f(x) = mx + n: from P go `run` units to
+ * the right ("rechts") and m · run up ("hoch", negative if the line falls)
+ * to reach Q; below, m = hoch : rechts. P can be dragged along the line;
+ * with `resizable` Q can be dragged too, so the triangle changes its size
+ * but not the slope. Logic and checks: src/cards/slopeTriangle.ts.
+ */
+export interface SlopeTriangleWidget {
+  kind: 'slope-triangle'
+  /** Slope, a whole number ≠ 0. */
+  m: number
+  /** y-intercept, a whole number. */
+  n: number
+  /** x of P at the start. Default: 0. */
+  at?: number
+  /** Width of the triangle at the start, 1…6. Default: 1. */
+  run?: number
+  /** Q is movable as well, which changes the width. */
+  resizable?: boolean
+  name?: string
+  window?: PlaneWindow
+  label?: string
+}
+
+/**
+ * Two movable points P and Q with the line through them; the equation and a
+ * table of values follow. Slopes may be fractions here; a vertical line is
+ * named as no function. Logic and checks: src/cards/linePoints.ts.
+ */
+export interface LinePointsWidget {
+  kind: 'line-points'
+  /** Start positions of P and Q: different grid points in the window. */
+  points: readonly [Coordinates, Coordinates]
+  /** x values of the table of values (1–7 different whole numbers), or `false` for none. Default: −2…2. */
+  table?: readonly number[] | false
+  target?: LineTarget
+  name?: string
+  window?: PlaneWindow
+  label?: string
 }
 
 export type CardQuestion = ChoiceQuestion | TermQuestion
