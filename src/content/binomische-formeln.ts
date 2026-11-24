@@ -1,9 +1,9 @@
 import { buildBinomialTask } from '../math'
 import { poly } from './poly'
-import type { TopicContent } from './types'
+import type { SubtopicContent } from './types'
 
 /** Subtopic 2: the three binomial formulas. */
-export const binomischeFormeln: TopicContent = {
+export const binomischeFormeln: SubtopicContent = {
   cards: [
     {
       id: 'quadrat-einer-summe',

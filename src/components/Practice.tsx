@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
-import { generateSeries, toLatex, toText, type Rng, type TopicId } from '../math'
+import { generateSeries, toLatex, toText, type Rng, type SubtopicId } from '../math'
 import {
   createSession,
   currentTask,
@@ -13,7 +13,7 @@ import {
   type Feedback,
   type Session,
 } from '../practice/session'
-import { useTopicProgress } from '../practice/useTopicProgress'
+import { useSubtopicProgress } from '../practice/useSubtopicProgress'
 import Chip from './Chip'
 import InputEcho from './InputEcho'
 import MathInput from './MathInput'
@@ -24,7 +24,7 @@ import SolutionSteps from './SolutionSteps'
 import Tex from './Tex'
 
 interface PracticeProps {
-  topic: TopicId
+  topic: SubtopicId
   /** Source of randomness for the series; tests pass a seeded one. */
   rng?: Rng
 }
@@ -36,7 +36,7 @@ interface PracticeProps {
 export default function Practice({ topic, rng = Math.random }: PracticeProps) {
   const [session, setSession] = useState(() => createSession(generateSeries(topic, rng)))
   const [input, setInput] = useState('')
-  const { progress, saveFailed, record, reset } = useTopicProgress(topic)
+  const { progress, saveFailed, record, reset } = useSubtopicProgress(topic)
 
   const inputId = useId()
   const hintId = useId()

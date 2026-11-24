@@ -1,9 +1,9 @@
 import { buildExpandTask } from '../math'
 import { poly } from './poly'
-import type { TopicContent } from './types'
+import type { SubtopicContent } from './types'
 
 /** Subtopic 1: multiplying out a product of two sums. */
-export const ausmultiplizieren: TopicContent = {
+export const ausmultiplizieren: SubtopicContent = {
   cards: [
     {
       id: 'worum-geht-es',

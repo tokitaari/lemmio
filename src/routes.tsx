@@ -3,7 +3,7 @@ import Layout from './components/Layout'
 import FormulaSheet from './pages/FormulaSheet'
 import Home from './pages/Home'
 import NotFound from './pages/NotFound'
-import TopicPage from './pages/TopicPage'
+import SubtopicPage from './pages/SubtopicPage'
 
 /**
  * Pages for development only (e.g. the card demo). `import.meta.env.DEV` is
@@ -27,7 +27,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <Home /> },
       { path: 'formelsatz', element: <FormulaSheet /> },
-      { path: ':area/:topic/:subtopic', element: <TopicPage /> },
+      { path: ':area/:topic/:subtopic', element: <SubtopicPage /> },
       ...devRoutes,
       { path: '*', element: <NotFound /> },
     ],

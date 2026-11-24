@@ -1,11 +1,11 @@
-import type { TopicId } from '../math'
+import type { SubtopicId } from '../math'
 import { ausmultiplizieren } from './ausmultiplizieren'
 import { binomischeFormeln } from './binomische-formeln'
 import { faktorisieren } from './faktorisieren'
 import { gleichungenKlammern } from './gleichungen-klammern'
 import { gleichungenSonderfaelle } from './gleichungen-sonderfaelle'
 import { gleichungenUmformen } from './gleichungen-umformen'
-import type { TopicContent } from './types'
+import type { SubtopicContent } from './types'
 
 export {
   allEntries,
@@ -38,20 +38,20 @@ export {
   type Markup,
   type SheetEntry,
   type SolutionSetRule,
-  type TopicContent,
+  type SubtopicContent,
   type WorkedExample,
 } from './types'
 
 /** Explanations, worked examples and formulas per subtopic. */
-export const topicContent = {
+export const subtopicContent = {
   'algebra/terme/ausmultiplizieren': ausmultiplizieren,
   'algebra/terme/binomische-formeln': binomischeFormeln,
   'algebra/terme/faktorisieren': faktorisieren,
   'algebra/lineare-gleichungen/umformen': gleichungenUmformen,
   'algebra/lineare-gleichungen/klammern': gleichungenKlammern,
   'algebra/lineare-gleichungen/sonderfaelle': gleichungenSonderfaelle,
-} as const satisfies Record<TopicId, TopicContent>
+} as const satisfies Record<SubtopicId, SubtopicContent>
 
-export function findContent(id: string): TopicContent | undefined {
-  return Object.hasOwn(topicContent, id) ? topicContent[id as keyof typeof topicContent] : undefined
+export function findContent(id: string): SubtopicContent | undefined {
+  return Object.hasOwn(subtopicContent, id) ? subtopicContent[id as keyof typeof subtopicContent] : undefined
 }

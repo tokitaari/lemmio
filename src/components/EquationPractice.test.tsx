@@ -8,19 +8,19 @@ import {
   operationToText,
   solutionSetToText,
   type EquationTask,
-  type EquationTopicId,
+  type EquationSubtopicId,
 } from '../math'
 import { STORAGE_KEY } from '../practice/progress'
 import EquationPractice from './EquationPractice'
 
 const SEED = 3
-const TOPIC: EquationTopicId = 'algebra/lineare-gleichungen/umformen'
+const TOPIC: EquationSubtopicId = 'algebra/lineare-gleichungen/umformen'
 
 beforeEach(() => {
   localStorage.clear()
 })
 
-function setup(topic: EquationTopicId = TOPIC) {
+function setup(topic: EquationSubtopicId = TOPIC) {
   const tasks = generateEquationSeries(topic, createRng(SEED))
   const user = userEvent.setup()
   const view = render(<EquationPractice topic={topic} rng={createRng(SEED)} />)

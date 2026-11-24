@@ -5,7 +5,7 @@ import {
   operationToLatex,
   solutionSetToLatex,
   type EquationTask,
-  type EquationTopicId,
+  type EquationSubtopicId,
   type Rng,
 } from '../math'
 import {
@@ -20,7 +20,7 @@ import {
   type EquationSession,
 } from '../practice/equationSession'
 import { finishedBetween, isSeriesOver, isTaskFinished } from '../practice/session'
-import { useTopicProgress } from '../practice/useTopicProgress'
+import { useSubtopicProgress } from '../practice/useSubtopicProgress'
 import Chip from './Chip'
 import EquationEntry, { type EquationField, type EquationFields } from './EquationEntry'
 import EquationSolutionSteps from './EquationSolutionSteps'
@@ -31,7 +31,7 @@ import SkillPath from './SkillPath'
 import Tex from './Tex'
 
 interface EquationPracticeProps {
-  topic: EquationTopicId
+  topic: EquationSubtopicId
   /** Source of randomness for the series; tests pass a seeded one. */
   rng?: Rng
 }
@@ -64,7 +64,7 @@ function fieldToFocus(feedback: EquationFeedback | null): EquationField | null {
 export default function EquationPractice({ topic, rng = Math.random }: EquationPracticeProps) {
   const [session, setSession] = useState(() => createEquationSession(generateEquationSeries(topic, rng)))
   const [fields, setFields] = useState(EMPTY_FIELDS)
-  const { progress, saveFailed, record, reset } = useTopicProgress(topic)
+  const { progress, saveFailed, record, reset } = useSubtopicProgress(topic)
 
   const solutionId = useId()
   const operationRef = useRef<HTMLInputElement>(null)

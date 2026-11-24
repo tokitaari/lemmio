@@ -10,8 +10,8 @@ import {
   subtopicPath,
   type Area,
 } from './catalog'
-import { topicContent } from './content'
-import { ALL_TOPIC_IDS, EQUATION_TOPIC_IDS, TOPIC_IDS } from './math'
+import { subtopicContent } from './content'
+import { ALL_SUBTOPIC_IDS, EQUATION_SUBTOPIC_IDS, SUBTOPIC_IDS } from './math'
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
@@ -66,14 +66,14 @@ describe('catalog data', () => {
 
   it('lists exactly the subtopics that have a task generator and a content', () => {
     const ids = allSubtopics().map((s) => s.id)
-    expect([...ids].sort()).toEqual([...ALL_TOPIC_IDS].sort())
-    expect(Object.keys(topicContent).sort()).toEqual([...ids].sort())
+    expect([...ids].sort()).toEqual([...ALL_SUBTOPIC_IDS].sort())
+    expect(Object.keys(subtopicContent).sort()).toEqual([...ids].sort())
   })
 
   it('keeps term and equation subtopics in separate registers', () => {
-    const terms: readonly string[] = TOPIC_IDS
-    expect(EQUATION_TOPIC_IDS.filter((id) => terms.includes(id))).toEqual([])
-    expect(EQUATION_TOPIC_IDS.length).toBeGreaterThan(0)
+    const terms: readonly string[] = SUBTOPIC_IDS
+    expect(EQUATION_SUBTOPIC_IDS.filter((id) => terms.includes(id))).toEqual([])
+    expect(EQUATION_SUBTOPIC_IDS.length).toBeGreaterThan(0)
   })
 })
 

@@ -1,4 +1,4 @@
-import type { TopicId } from './math'
+import type { SubtopicId } from './math'
 
 /*
  * The catalog is the single source of truth for the structure of the app:
@@ -7,7 +7,7 @@ import type { TopicId } from './math'
  * The school year (Klasse) is a property of a topic, not part of the path.
  *
  * A subtopic is reachable at `/area/topic/subtopic`; that path without the
- * leading slash is its `TopicId` (see src/math/tasks/types.ts).
+ * leading slash is its `SubtopicId` (see src/math/tasks/types.ts).
  */
 
 export interface Subtopic {
@@ -90,7 +90,7 @@ export const catalog: readonly Area[] = [
 
 /** A subtopic together with the area and topic it belongs to. */
 export interface SubtopicRef {
-  id: TopicId
+  id: SubtopicId
   area: Area
   topic: Topic
   subtopic: Subtopic
@@ -123,7 +123,7 @@ export function findSubtopic(
 }
 
 /** Route of a subtopic, e.g. "/algebra/terme/faktorisieren". */
-export function subtopicPath(id: TopicId): string {
+export function subtopicPath(id: SubtopicId): string {
   return `/${id}`
 }
 

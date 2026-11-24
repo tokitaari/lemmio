@@ -1,10 +1,10 @@
 import { buildEquationTask, parse } from '../math'
-import type { TopicContent } from './types'
+import type { SubtopicContent } from './types'
 
 const TOPIC = 'algebra/lineare-gleichungen/klammern'
 
 /** Linear equations 2: brackets are removed first ("Term umformen"), then the equation is solved as usual. */
-export const gleichungenKlammern: TopicContent = {
+export const gleichungenKlammern: SubtopicContent = {
   cards: [
     {
       id: 'worum-geht-es',

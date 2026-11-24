@@ -34,11 +34,11 @@ Abhängigkeiten zeigen nur nach unten. `src/math` kennt weder React noch den Bro
 | `src/cards/` | `types.ts`, `deck.ts`, `storage.ts`, `useDeck.ts`, `validate.ts`; Logik der Widgets: `areaModel.ts`, `balance.ts`, `equationSteps.ts` |
 | `src/motion/` | `motion.ts` (`animate`, `runSequence`, Presets), `hooks.ts` |
 | `src/content/` | Inhalte je Teilthema (`ausmultiplizieren.ts`, …, `gleichungen-umformen.ts`, …), `index.ts`, `formulas.ts`, `markup.ts`, `types.ts`, `poly.ts` |
-| `src/practice/` | `session.ts`, `equationSession.ts`, `progress.ts`, `useTopicProgress.ts` |
+| `src/practice/` | `session.ts`, `equationSession.ts`, `progress.ts`, `useSubtopicProgress.ts` |
 | `src/theme/` | `theme.ts`, `useTheme.ts` |
 | `src/components/` | `Layout`, `Breadcrumb`, `ThemeToggle`, `Practice`, `EquationPractice`, `EquationEntry`, `MathInput`, `PracticeProgress`, `SeriesSummary`, `SkillPath`, `Chip`, `InputEcho`, `SolutionSteps`, `EquationSolutionSteps`, `Tex`, `RichText`, `FormulaList`, `WorkedExampleCard` |
 | `src/components/cards/` | `CardDeck`, `CardPath`, `CardWidgetView`, `ChoiceQuestionView`, `TermQuestionView`, `QuestionStatus`, `TermStepsView`, `AreaModelView`, `BalanceView`, `EquationStepsView` |
-| `src/pages/` | `Home`, `TopicPage`, `FormulaSheet`, `NotFound`; `dev/` mit der Kartendemo |
+| `src/pages/` | `Home`, `SubtopicPage`, `FormulaSheet`, `NotFound`; `dev/` mit der Kartendemo |
 | `src/index.css` | Design-Tokens beider Themes und alle Styles (eine Datei) |
 | `src/test/` | Testumgebung (`setup.ts`, jest-dom) und Testhilfe `matchMedia.ts` (`mockReducedMotion`) |
 
@@ -48,7 +48,7 @@ Tests liegen neben dem Code (`*.test.ts` bzw. `*.test.tsx`).
 
 `src/catalog.ts` ist die einzige Quelle der Struktur: `Area` → `Topic` (mit `grade`, der Klasse) → `Subtopic`. Startseite, Navigation, Breadcrumb, Fußzeile und Formelsatz werden daraus abgeleitet. Hilfen: `allSubtopics`, `findSubtopic`, `subtopicPath`, `gradesOf`, `filterByGrade`, `gradeLabel`. Bereiche richten sich nach den Inhaltsfeldern des KLP NRW.
 
-Der **Pfad `bereich/thema/teilthema`** ist überall derselbe Schlüssel: die Route (mit führendem Slash), die `TopicId` im Mathe-Kern, die Deck-Id der Karten, der Schlüssel für Inhalte und Fortschritt. `TopicId` ist nur als Muster `${string}/${string}/${string}` typisiert; welche Ids es gibt, entscheiden der Katalog und die Generator-Register. Begriffsfalle: `TopicId` bezeichnet die Teilthema-Ebene, `Topic` im Katalog die Thema-Ebene.
+Der **Pfad `bereich/thema/teilthema`** ist überall derselbe Schlüssel: die Route (mit führendem Slash), die `SubtopicId` im Mathe-Kern, die Deck-Id der Karten, der Schlüssel für Inhalte und Fortschritt. `SubtopicId` ist nur als Muster `${string}/${string}/${string}` typisiert; welche Ids es gibt, entscheiden der Katalog und die Generator-Register. `SubtopicId` bezeichnet wie `Subtopic` im Katalog die Teilthema-Ebene, `Topic` die Thema-Ebene.
 
 Routen (`routes.tsx`, alle unter `Layout`):
 
@@ -56,7 +56,7 @@ Routen (`routes.tsx`, alle unter `Layout`):
 |---|---|
 | `/` | `Home`: Teilthemen nach Bereich und Thema, Klassen-Badge, Filter (`?klasse=8`) |
 | `/formelsatz` | `FormulaSheet` |
-| `/:area/:topic/:subtopic` | `TopicPage`; ein Pfad, der nicht im Katalog steht, liefert `NotFound` |
+| `/:area/:topic/:subtopic` | `SubtopicPage`; ein Pfad, der nicht im Katalog steht, liefert `NotFound` |
 | `/dev/karten` | Kartendemo, nur bei `import.meta.env.DEV`; im Build fehlt die Route samt Modul |
 | `*` | `NotFound` |
 
@@ -72,7 +72,7 @@ Einstieg ist `src/math/index.ts`.
 - **Normalform:** `polynomial.ts` und `normalize.ts` bringen einen Term in ein kanonisches Polynom (`Polynomial`, Koeffizienten als `Rational`). Zwei Terme sind gleichwertig, wenn ihre Polynome gleich sind (`areEquivalent`).
 - **Prüfung:** `checkAnswer(task, input)` prüft zuerst Äquivalenz, dann die verlangte Form (`form.ts`: `expanded` oder `factored`). Ergebnis: `correct`, `wrong`, `wrong-form` (mit `hint.code` und deutschem `hint.message`) oder `invalid` (mit `error.code`, `error.message`, `error.position`, `error.length`). `checkAnswer` nimmt jeden `AnswerKey` (`expected`, `form`), nicht nur `Task`; so prüfen auch die Term-Fragen der Karten.
 - **Ausgabe:** `toLatex` für KaTeX, `toText` für Klartext (wieder einlesbar).
-- **Aufgaben:** `tasks/` enthält je Teilthema einen Generator (`expand.ts`, `binomial.ts`, `factor.ts`). `generators` ist die Tabelle `TopicId → Generator`, `TOPIC_IDS` wird daraus abgeleitet. `generateTask` und `generateSeries` vermeiden Wiederholungen über `task.key`. Jede `Task` trägt `instruction`, `prompt`, `steps[]` (Musterlösung), `solution`, `key` und `form`. `build*Task`-Funktionen erzeugen dieselben Aufgaben mit festen Zahlen für Beispiele.
+- **Aufgaben:** `tasks/` enthält je Teilthema einen Generator (`expand.ts`, `binomial.ts`, `factor.ts`). `generators` ist die Tabelle `SubtopicId → Generator`, `SUBTOPIC_IDS` wird daraus abgeleitet. `generateTask` und `generateSeries` vermeiden Wiederholungen über `task.key`. Jede `Task` trägt `instruction`, `prompt`, `steps[]` (Musterlösung), `solution`, `key` und `form`. `build*Task`-Funktionen erzeugen dieselben Aufgaben mit festen Zahlen für Beispiele.
 - **Zufall:** `Rng` ist eine Funktion `() => number`. In der App ist es `Math.random`, in Tests `createRng(seed)`.
 
 Aufgaben haben nur ganzzahlige Koeffizienten; Variablen sind `x`, `y`, `a`, `b`.
@@ -86,11 +86,11 @@ Aufgaben haben nur ganzzahlige Koeffizienten; Variablen sind `x`, `y`, `a`, `b`.
 - **Prüfen:** `checkStep(previous, operation, input)` → `correct` (mit der geparsten `equation` für die nächste Zeile), `wrong` (`left` und `right` je Seite, `keepsSolutions`: Zeile hat noch dieselbe Lösungsmenge, passt aber nicht zur angegebenen Umformung, z. B. zwei Schritte auf einmal) oder `invalid`. `checkSolutionSet(task, input)` → `correct`, `wrong` (`given`) oder `invalid`. Jede Seite wird für sich auf Äquivalenz zu „alte Seite ∘ Umformung“ geprüft; wie weit zusammengefasst ist, spielt keine Rolle. `equationForm(equation)` unterscheidet `solved` (`x = c`), `solved-swapped` (`c = x`), `statement` (`3 = 5`) und `open`.
 - **Ausgabe:** `equationToText/Latex`, `operationToText/Latex`, `solutionSetToText/Latex`; der Text ist wieder einlesbar.
 - **Musterlösung:** `solveStepByStep(equation)` löst Klammern auf, ordnet und fasst zusammen (je „Term umformen“), tauscht die Seiten, falls die Variable nur rechts steht, bringt die Variablen-Terme nach links und die Zahlen nach rechts und teilt durch den Koeffizienten (bei −1 mit `| · (-1)`). Sie endet mit `x = c` oder einer Aussage ohne Variable.
-- **Generatoren** (`tasks.ts`): `equationGenerators` (Tabelle `TopicId → Generator`) und `EQUATION_TOPIC_IDS` daraus. `buildEquationTask(topic, left, right)` erzeugt eine Aufgabe mit festen Zahlen (für Beispiele); `generateEquationTask` und `generateEquationSeries` verhalten sich wie bei Termen. Jede Aufgabe geht von einer ganzzahligen Lösung aus und rechnet die letzte freie Zahl daraus; Lösungen liegen in −9…9, alle Zahlen in der Rechnung unter 100 (`hasSmallIntegers`).
+- **Generatoren** (`tasks.ts`): `equationGenerators` (Tabelle `SubtopicId → Generator`) und `EQUATION_SUBTOPIC_IDS` daraus. `buildEquationTask(topic, left, right)` erzeugt eine Aufgabe mit festen Zahlen (für Beispiele); `generateEquationTask` und `generateEquationSeries` verhalten sich wie bei Termen. Jede Aufgabe geht von einer ganzzahligen Lösung aus und rechnet die letzte freie Zahl daraus; Lösungen liegen in −9…9, alle Zahlen in der Rechnung unter 100 (`hasSmallIntegers`).
 
 ### Zwei Register
 
-Term- und Gleichungs-Generatoren stehen bewusst in getrennten Tabellen (`generators`/`TOPIC_IDS` und `equationGenerators`/`EQUATION_TOPIC_IDS`). `src/math/topics.ts` fasst sie zusammen: `ALL_TOPIC_IDS`, `isTermTopic`, `isEquationTopic` und die Typen `TermTopicId`, `EquationTopicId`, `AnyTopicId`. Alles, was alle Teilthemen betrifft (Katalogtest, Inhalte, gespeicherter Fortschritt), nutzt `ALL_TOPIC_IDS`; `TopicPage` wählt über die Prüffunktionen die passende Übung.
+Term- und Gleichungs-Generatoren stehen bewusst in getrennten Tabellen (`generators`/`SUBTOPIC_IDS` und `equationGenerators`/`EQUATION_SUBTOPIC_IDS`). `src/math/topics.ts` fasst sie zusammen: `ALL_SUBTOPIC_IDS`, `isTermSubtopic`, `isEquationSubtopic` und die Typen `TermSubtopicId`, `EquationSubtopicId`, `AnySubtopicId`. Alles, was alle Teilthemen betrifft (Katalogtest, Inhalte, gespeicherter Fortschritt), nutzt `ALL_SUBTOPIC_IDS`; `SubtopicPage` wählt über die Prüffunktionen die passende Übung.
 
 ## Karten (`src/cards`, `components/cards`)
 
@@ -98,7 +98,7 @@ Erklärungen sind Kartenfolgen (ähnlich brilliant.org): Eine Karte zur Zeit, je
 
 ### Datenmodell (`types.ts`)
 
-- `Deck`: `id` (der `TopicId`-Pfad) und `cards`.
+- `Deck`: `id` (der `SubtopicId`-Pfad) und `cards`.
 - `Card`: `id` (stabil, Kleinbuchstaben und Bindestriche; der gespeicherte Stand bezieht sich darauf), `title`, `body` (Absätze als Markup), optional `widget` und `question`.
 - `CardWidget` ist eine Union mit dem Diskriminator `kind`: `term-steps`, `area-model`, `balance`, `equation-steps`.
 - `CardQuestion`: `choice` (`prompt`, `options[]` mit `text`, genau eine mit `correct: true`, optional `feedback`; `explanation?`) oder `term` (`prompt`, `term?` groß angezeigt, `answer` als Musterlösung in Eingabesyntax, `form`, `variables?`, `explanation?`). Term-Fragen werden mit `checkAnswer` geprüft (`termQuestionKey` baut den Schlüssel).
@@ -142,7 +142,7 @@ Neue Widget-Arten: [Anleitung](neue-einheit.md#neue-widget-art).
 
 ## Inhalte (`src/content`)
 
-`topicContent[topicId]` ist ein `TopicContent`: `cards` (die Kartenfolge), `examples` (Titel, `task`, optional `comment`) und `formulaIds`. `topicContent` ist mit `satisfies Record<TopicId, TopicContent>` typisiert; `findContent(id)` gibt für unbekannte Ids `undefined` zurück.
+`subtopicContent[subtopicId]` ist ein `SubtopicContent`: `cards` (die Kartenfolge), `examples` (Titel, `task`, optional `comment`) und `formulaIds`. `subtopicContent` ist mit `satisfies Record<SubtopicId, SubtopicContent>` typisiert; `findContent(id)` gibt für unbekannte Ids `undefined` zurück.
 
 - **Beispiele:** `WorkedExample.task` ist eine `Task` (Terme) oder eine `EquationTask`; `isEquationTask` unterscheidet. Die Beispiele entstehen mit `build*Task` bzw. `buildEquationTask`, die Musterlösung kommt also aus dem Mathe-Kern. `WorkedExampleCard` zeigt Terme mit `SolutionSteps`, Gleichungen mit `EquationSolutionSteps` (Schulnotation: Umformung und Notiz neben der Zeile, letzte Zeile die Lösungsmenge).
 - **Markup:** `$…$` steht für einen Term in Eingabesyntax, auch als Kette mit `=` und `≠`; `markup.ts` setzt ihn über `toLatex`, Malpunkte aus der Quelle bleiben erhalten. Jede Kette in `$…$` wird als **Behauptung** geprüft: nie `$a = 3x$` als Zuordnung schreiben, sondern „$3x$ steht für $a$“; falsche Gleichungen nur mit `≠`.
@@ -152,12 +152,12 @@ Neue Widget-Arten: [Anleitung](neue-einheit.md#neue-widget-art).
 
 ## Übung (`src/practice`)
 
-Es gibt zwei Übungsarten mit derselben Serienlogik. `TopicPage` wählt `Practice` für Term-Teilthemen und `EquationPractice` für Gleichungs-Teilthemen (`isTermTopic`, `isEquationTopic`) und bindet sie mit `key={id}` an das Teilthema: Ein Wechsel startet eine frische Serie.
+Es gibt zwei Übungsarten mit derselben Serienlogik. `SubtopicPage` wählt `Practice` für Term-Teilthemen und `EquationPractice` für Gleichungs-Teilthemen (`isTermSubtopic`, `isEquationSubtopic`) und bindet sie mit `key={id}` an das Teilthema: Ein Wechsel startet eine frische Serie.
 
 **Gemeinsam:**
 
 - `SeriesState` in `session.ts` (`tasks`, `index`, `outcomes`) mit `isTaskFinished`, `isSeriesOver`, `countCorrect`, `finishedBetween`. Eine Serie hat `SERIES_LENGTH` = 10 Aufgaben; „Lösung anzeigen“ zählt als falsch.
-- `progress.ts` und `useTopicProgress.ts`: Fortschritt je Teilthema (`answered`, `correct`, `lastSeries`) unter `lemmio:progress` (Version 1, ein Eintrag für alle Teilthemen aus `ALL_TOPIC_IDS`). Beim Lesen wird validiert; kaputte oder fremde Daten fallen auf „leer“ zurück. Ist Speichern nicht möglich, zeigt die Übung eine Warnung und arbeitet im Speicher weiter. Ein neues Teilthema braucht keine Migration.
+- `progress.ts` und `useSubtopicProgress.ts`: Fortschritt je Teilthema (`answered`, `correct`, `lastSeries`) unter `lemmio:progress` (Version 1, ein Eintrag für alle Teilthemen aus `ALL_SUBTOPIC_IDS`). Beim Lesen wird validiert; kaputte oder fremde Daten fallen auf „leer“ zurück. Ist Speichern nicht möglich, zeigt die Übung eine Warnung und arbeitet im Speicher weiter. Ein neues Teilthema braucht keine Migration.
 - Komponenten `PracticeProgress` (Fortschrittstext, Speicherwarnung, bestätigtes Zurücksetzen), `SeriesSummary` (Serienergebnis), `SkillPath`, `Chip`, `InputEcho`.
 
 ### Terme (`Practice`, `session.ts`)

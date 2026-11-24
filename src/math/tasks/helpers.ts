@@ -4,7 +4,7 @@ import { polynomialToExpr, toPolynomial } from '../normalize'
 import { Polynomial } from '../polynomial'
 import { toText } from '../printer'
 import { pick, type Rng } from '../random'
-import type { SolutionStep, Task, TopicId } from './types'
+import type { SolutionStep, Task, SubtopicId } from './types'
 
 /** Variable letters for single-variable tasks; x is the most common in class 8. */
 const SINGLE_VARS = ['x', 'x', 'x', 'a', 'y'] as const
@@ -45,7 +45,7 @@ export function isBinomialPattern(f: Polynomial, g: Polynomial): boolean {
 }
 
 interface TaskSpec {
-  topic: TopicId
+  topic: SubtopicId
   variant: string
   instruction: string
   prompt: Expr

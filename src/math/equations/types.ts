@@ -1,7 +1,7 @@
 import type { Expr } from '../ast'
 import type { Rng } from '../random'
 import type { Rational } from '../rational'
-import type { TopicId } from '../tasks/types'
+import type { SubtopicId } from '../tasks/types'
 
 /** An equation `left = right`; both sides are ordinary terms. */
 export interface Equation {
@@ -33,7 +33,7 @@ export interface EquationStep {
 }
 
 export interface EquationTask {
-  topic: TopicId
+  topic: SubtopicId
   /** Generator variant, e.g. "both-sides"; useful for tests and later statistics. */
   variant: string
   /** Identity of the exercise (the printed equation); used to avoid repetitions. */

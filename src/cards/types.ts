@@ -188,7 +188,7 @@ export interface TermQuestion {
 
 /** A deck of cards for one subtopic (or a demo). */
 export interface Deck {
-  /** Storage key of the deck, e.g. the TopicId "algebra/terme/ausmultiplizieren". */
+  /** Storage key of the deck, e.g. the SubtopicId "algebra/terme/ausmultiplizieren". */
   id: string
   cards: Card[]
 }

@@ -50,7 +50,7 @@ export {
 export { solveStepByStep, type WorkedSolution } from './solve'
 export {
   buildEquationTask,
-  EQUATION_TOPIC_IDS,
+  EQUATION_SUBTOPIC_IDS,
   equationGenerators,
   generateEquationSeries,
   generateEquationTask,

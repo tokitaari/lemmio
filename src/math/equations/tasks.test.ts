@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { parse } from '../parser'
 import { createRng } from '../random'
-import { SERIES_LENGTH, TOPIC_IDS } from '../tasks'
+import { SERIES_LENGTH, SUBTOPIC_IDS } from '../tasks'
 import { checkStep } from './check'
 import {
   equationForm,
@@ -16,7 +16,7 @@ import { operationToLatex, operationToText, readOperation } from './operation'
 import { checkSolutionSet, solutionSetToLatex, solutionSetToText } from './solutionSet'
 import {
   buildEquationTask,
-  EQUATION_TOPIC_IDS,
+  EQUATION_SUBTOPIC_IDS,
   equationGenerators,
   generateEquationSeries,
   generateEquationTask,
@@ -25,7 +25,7 @@ import type { EquationTask } from './types'
 
 const SAMPLES = 400
 
-type EquationTopic = (typeof EQUATION_TOPIC_IDS)[number]
+type EquationTopic = (typeof EQUATION_SUBTOPIC_IDS)[number]
 
 function sample(topic: EquationTopic, seed: number, count = SAMPLES): EquationTask[] {
   const rng = createRng(seed)
@@ -34,15 +34,15 @@ function sample(topic: EquationTopic, seed: number, count = SAMPLES): EquationTa
 
 describe('equation generators', () => {
   it('cover the three subtopics of linear equations and none of the term subtopics', () => {
-    expect([...EQUATION_TOPIC_IDS].sort()).toEqual([
+    expect([...EQUATION_SUBTOPIC_IDS].sort()).toEqual([
       'algebra/lineare-gleichungen/klammern',
       'algebra/lineare-gleichungen/sonderfaelle',
       'algebra/lineare-gleichungen/umformen',
     ])
-    expect(EQUATION_TOPIC_IDS.filter((id) => (TOPIC_IDS as readonly string[]).includes(id))).toEqual([])
+    expect(EQUATION_SUBTOPIC_IDS.filter((id) => (SUBTOPIC_IDS as readonly string[]).includes(id))).toEqual([])
   })
 
-  describe.each(EQUATION_TOPIC_IDS)('%s', (topic) => {
+  describe.each(EQUATION_SUBTOPIC_IDS)('%s', (topic) => {
     const tasks = sample(topic, 2026)
 
     it('is deterministic for a given seed', () => {

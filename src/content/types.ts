@@ -59,8 +59,8 @@ export interface FormulaGroup {
   formulas: SheetEntry[]
 }
 
-export interface TopicContent {
-  /** Explanation as a deck of cards (see src/cards); the deck id is the subtopic's `TopicId`. */
+export interface SubtopicContent {
+  /** Explanation as a deck of cards (see src/cards); the deck id is the subtopic's `SubtopicId`. */
   cards: Card[]
   examples: WorkedExample[]
   /** Entries of the formula sheet that belong to this subtopic. */

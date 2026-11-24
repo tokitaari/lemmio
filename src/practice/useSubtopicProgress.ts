@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import type { TopicId } from '../math'
+import type { SubtopicId } from '../math'
 import { applyAnswer, EMPTY_PROGRESS, loadProgress, saveProgress, type SeriesResult, type TopicProgress } from './progress'
 
 /** Progress of one subtopic, kept in React state and mirrored to localStorage. */
-export function useTopicProgress(topic: TopicId) {
+export function useSubtopicProgress(topic: SubtopicId) {
   const [progress, setProgress] = useState<TopicProgress>(() => loadProgress(topic))
   const [saveFailed, setSaveFailed] = useState(false)
 

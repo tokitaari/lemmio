@@ -2,7 +2,7 @@
 import katex from 'katex'
 import { describe, expect, it } from 'vitest'
 import {
-  ALL_TOPIC_IDS,
+  ALL_SUBTOPIC_IDS,
   areEquivalent,
   checkAnswer,
   checkSolutionSet,
@@ -10,7 +10,7 @@ import {
   equalSolutionSets,
   equationToLatex,
   equationToText,
-  isTermTopic,
+  isTermSubtopic,
   operationToLatex,
   parse,
   readEquation,
@@ -33,13 +33,13 @@ import {
   findFormula,
   formulaGroupsOf,
   formulaSheets,
-  topicContent,
+  subtopicContent,
 } from './index'
 import { chainToLatex, equationPieces, equationToLatexMarkup, splitChain, splitMarkup, termToLatex } from './markup'
-import { isEquationTask, type EquivalenceRule, type SolutionSetRule, type TopicContent } from './types'
+import { isEquationTask, type EquivalenceRule, type SolutionSetRule, type SubtopicContent } from './types'
 
 /** Every markup text of a topic: all texts of its cards and the example comments. */
-function markupTexts(content: TopicContent): string[] {
+function markupTexts(content: SubtopicContent): string[] {
   return [
     ...deckMarkup({ id: 'content', cards: content.cards }),
     ...content.examples.flatMap((e) => (e.comment ? [e.comment] : [])),
@@ -207,13 +207,13 @@ describe('formula sheet', () => {
 
 describe('topic content', () => {
   it('exists for exactly the subtopics of the app', () => {
-    expect(Object.keys(topicContent).sort()).toEqual(allSubtopics().map((s) => s.id).sort())
+    expect(Object.keys(subtopicContent).sort()).toEqual(allSubtopics().map((s) => s.id).sort())
     expect(findContent('gibt-es-nicht')).toBeUndefined()
     expect(findContent('toString')).toBeUndefined()
   })
 
-  describe.each(ALL_TOPIC_IDS)('%s', (topic) => {
-    const content = topicContent[topic]
+  describe.each(ALL_SUBTOPIC_IDS)('%s', (topic) => {
+    const content = subtopicContent[topic]
 
     it('has a card deck and at least one worked example', () => {
       expect(content.cards.length).toBeGreaterThan(0)
@@ -229,7 +229,7 @@ describe('topic content', () => {
       const kinds = new Set(cards.flatMap((c) => (c.widget ? [c.widget.kind] : [])))
       expect(cards.some((c) => c.question?.kind === 'choice')).toBe(true)
       expect(cards.some((c) => c.question?.kind === 'term')).toBe(true)
-      if (isTermTopic(topic)) expect(kinds.has('area-model')).toBe(true)
+      if (isTermSubtopic(topic)) expect(kinds.has('area-model')).toBe(true)
       else expect([kinds.has('balance'), kinds.has('equation-steps')]).toEqual([true, true])
     })
 
@@ -320,9 +320,9 @@ describe('topic content', () => {
 
   it('works through the planned examples', () => {
     const summary = Object.fromEntries(
-      ALL_TOPIC_IDS.map((topic) => [
+      ALL_SUBTOPIC_IDS.map((topic) => [
         topic,
-        topicContent[topic].examples.map(({ task }) =>
+        subtopicContent[topic].examples.map(({ task }) =>
           isEquationTask(task)
             ? `${equationToText(task.equation)} → ${solutionSetToText(task.solutionSet)}`
             : `${toText(task.prompt)} = ${toText(task.solution)}`,

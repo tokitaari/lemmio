@@ -5,7 +5,7 @@ Diese Anleitung beschreibt, welche Stellen im Code angefasst werden, wenn Lemmio
 Begriffe:
 
 - **Bereich → Thema → Teilthema** ist die Gliederung der App (`src/catalog.ts`). Das **Teilthema** ist die kleinste Lerneinheit: Erklärung als Kartenfolge, Beispiele, Formeln, Übung. Die Klasse hängt am Thema.
-- Der **Pfad** `bereich/thema/teilthema` (z. B. `algebra/lineare-gleichungen/umformen`) ist zugleich Route (mit führendem Slash), `TopicId`, Deck-Id und Schlüssel für Inhalt und Fortschritt.
+- Der **Pfad** `bereich/thema/teilthema` (z. B. `algebra/lineare-gleichungen/umformen`) ist zugleich Route (mit führendem Slash), `SubtopicId`, Deck-Id und Schlüssel für Inhalt und Fortschritt.
 - **Einheit** ist nur ein interner Begriff für eine Iteration und ihr Release; im Code und in der App kommt er nicht vor.
 
 ## Welche Art von Teilthema?
@@ -39,7 +39,7 @@ Eine Route muss nicht angelegt werden: `:area/:topic/:subtopic` in `routes.tsx` 
 
 Ein neues Thema erscheint im Formelsatz, sobald es in `formulaSheets` (Schlüssel `bereich/thema`) einen Eintrag hat (Schritt 3).
 
-Der Test `lists exactly the subtopics that have a task generator and a content` in `catalog.test.ts` schlägt fehl, solange Generator (Schritt 2) und Inhalt (Schritt 3) fehlen; er stellt die Übereinstimmung von Katalog, `ALL_TOPIC_IDS` und `topicContent` sicher.
+Der Test `lists exactly the subtopics that have a task generator and a content` in `catalog.test.ts` schlägt fehl, solange Generator (Schritt 2) und Inhalt (Schritt 3) fehlen; er stellt die Übereinstimmung von Katalog, `ALL_SUBTOPIC_IDS` und `subtopicContent` sicher.
 
 ## Schritt 2: Mathe-Kern
 
@@ -50,9 +50,9 @@ Dateien: `src/math/tasks/` und `src/math/index.ts`.
 1. Generator in `tasks/<name>.ts` schreiben: Funktion `(rng: Rng) => Task`. Zufallszahlen nur über `rng` (`randInt`, `randNonZero`, `pick`, `pickWeighted` aus `random.ts`), nie `Math.random` direkt. Das Ergebnis baut `makeTask` aus `helpers.ts`: Es füllt `key`, `expected` und `solution` aus dem Prompt und den Schritten.
 2. Die Musterlösung ist eine Liste `steps` (`expr`, optional `note` als deutscher Klartext). **Jeder Schritt muss zum Prompt äquivalent sein.**
 3. Zusätzlich eine `build<Name>Task`-Funktion mit festen Zahlen anbieten, die der Generator selbst benutzt. Sie liefert die Beispiele in den Erklärtexten.
-4. In `tasks/index.ts` in die Tabelle `generators` eintragen (der Schlüssel ist der Pfad des Teilthemas) und die `build*`-Funktion exportieren; in `src/math/index.ts` ebenfalls exportieren. `TOPIC_IDS` und `ALL_TOPIC_IDS` leiten sich ab.
+4. In `tasks/index.ts` in die Tabelle `generators` eintragen (der Schlüssel ist der Pfad des Teilthemas) und die `build*`-Funktion exportieren; in `src/math/index.ts` ebenfalls exportieren. `SUBTOPIC_IDS` und `ALL_SUBTOPIC_IDS` leiten sich ab.
 
-Tests: `tasks.test.ts` läuft mit `describe.each(TOPIC_IDS)` über alle Term-Teilthemen und prüft für jedes Äquivalenz der Schritte, dass die Musterlösung als `correct` gilt, dass der unveränderte Prompt `wrong-form` ergibt, kleine ganze Zahlen und Determinismus bei gleichem Seed. Ein neues Teilthema wird davon automatisch erfasst. Eigene Besonderheiten des Generators (Varianten, Grenzfälle) bekommen eigene Tests im selben File.
+Tests: `tasks.test.ts` läuft mit `describe.each(SUBTOPIC_IDS)` über alle Term-Teilthemen und prüft für jedes Äquivalenz der Schritte, dass die Musterlösung als `correct` gilt, dass der unveränderte Prompt `wrong-form` ergibt, kleine ganze Zahlen und Determinismus bei gleichem Seed. Ein neues Teilthema wird davon automatisch erfasst. Eigene Besonderheiten des Generators (Varianten, Grenzfälle) bekommen eigene Tests im selben File.
 
 ### Gleichungs-Teilthema
 
@@ -62,11 +62,11 @@ Siehe [Neues Gleichungs-Teilthema](#neues-gleichungs-teilthema).
 
 Dateien: `src/content/<name>.ts`, `src/content/index.ts`, ggf. `src/content/formulas.ts`.
 
-1. Eine Datei mit einem `TopicContent` anlegen. Vorlage für Terme ist `ausmultiplizieren.ts`, für Gleichungen `gleichungen-umformen.ts`:
+1. Eine Datei mit einem `SubtopicContent` anlegen. Vorlage für Terme ist `ausmultiplizieren.ts`, für Gleichungen `gleichungen-umformen.ts`:
    - `cards`: die Kartenfolge (siehe unten)
    - `examples`: Titel, `task` aus `build*Task` bzw. `buildEquationTask`, optional `comment` (Markup)
    - `formulaIds`: Ids aus dem Formelsatz
-2. In `index.ts` in `topicContent` eintragen (Schlüssel: der Pfad). Weil das Objekt mit `satisfies Record<TopicId, TopicContent>` typisiert ist, meldet TypeScript Einträge, die kein `TopicContent` sind; ein fehlender Eintrag fällt im Test `exists for exactly the subtopics of the app` auf.
+2. In `index.ts` in `subtopicContent` eintragen (Schlüssel: der Pfad). Weil das Objekt mit `satisfies Record<SubtopicId, SubtopicContent>` typisiert ist, meldet TypeScript Einträge, die kein `SubtopicContent` sind; ein fehlender Eintrag fällt im Test `exists for exactly the subtopics of the app` auf.
 3. Neue Formeln und Regeln in `formulas.ts` in eine Gruppe von `formulaSheets` aufnehmen (Schlüssel `bereich/thema`). Ein Eintrag ist eine `Formula` (`id`, `name`, `lhs`, `rhs` in Eingabesyntax), eine `EquivalenceRule` (`kind: 'equivalence'`, `from`, `to`, `condition?`) oder eine `SolutionSetRule` (`kind: 'solution-set'`, `line`, `set`). Die `id` ist eindeutig; die Tests prüfen jeden Eintrag.
 
 ### Karten schreiben
@@ -89,9 +89,9 @@ Tests: `content.test.ts` prüft für jedes Teilthema: gültiges Deck, beide Frag
 
 Hier ist meist nichts zu tun:
 
-- `TopicPage` rendert Erklärung (`CardDeck`), Beispiele, Formeln und die Übung für jeden Pfad aus dem Katalog; `isTermTopic` bzw. `isEquationTopic` wählt `Practice` oder `EquationPractice`.
+- `SubtopicPage` rendert Erklärung (`CardDeck`), Beispiele, Formeln und die Übung für jeden Pfad aus dem Katalog; `isTermSubtopic` bzw. `isEquationSubtopic` wählt `Practice` oder `EquationPractice`.
 - Beide Übungen und ihre Zustände sind themenunabhängig. Bei Termen ergeben sich die Eingabetasten aus den Buchstaben der Aufgabe.
-- `progress.ts` legt den Fortschritt für alle Einträge von `ALL_TOPIC_IDS` an. Neue Teilthemen brauchen keine Migration; ältere Speicherstände bleiben gültig. Der Kartenstand (`lemmio:cards`) ist je Deck-Id getrennt.
+- `progress.ts` legt den Fortschritt für alle Einträge von `ALL_SUBTOPIC_IDS` an. Neue Teilthemen brauchen keine Migration; ältere Speicherstände bleiben gültig. Der Kartenstand (`lemmio:cards`) ist je Deck-Id getrennt.
 
 Nur wenn ein Teilthema eine andere Eingabe oder Rückmeldung braucht (andere Tasten, andere Chips), werden `MathInput.tsx` bzw. `EquationEntry.tsx` erweitert. Die Rückmeldung der Term-Übung ist an `CheckResult` gebunden, die der Gleichungs-Übung an `EquationFeedback` (siehe [Architektur](architektur.md#übung-srcpractice)).
 
@@ -133,17 +133,17 @@ Datei: `src/math/equations/tasks.ts`.
 1. **Konstante** neben `TRANSFORM`, `BRACKETS` und `SPECIAL` anlegen: `const EXAMPLE = 'algebra/lineare-gleichungen/beispiel'`.
 2. **Varianten** als Union (`type ExampleVariant = …`) und als gewichtete Liste `readonly (readonly [Variante, Gewicht])[]` (mit Beispielgleichung im Kommentar) anlegen. Genug Varianten und Wertebereiche, damit eine Serie aus 10 Aufgaben ohne Wiederholung entsteht (der Test `offers enough variety` prüft das).
 3. **Entwurfsfunktion** `draftExample(rng: Rng): Draft` schreiben. Sie wählt eine Variante (`pickWeighted`) und gibt `{ variant, left, right }` zurück oder `undefined`, wenn die gezogenen Zahlen nicht passen (der Generator zieht dann neu). Jeder Entwurf geht von einer **ganzzahligen Lösung `s`** aus (`randInt(rng, -9, 9)`) und rechnet die letzte freie Zahl daraus, damit die Lösung ganz bleibt. Bausteine: `lin(a, b, x)` (`a·x + b`), `scaled(p, inner)` (`p(inner)`), `mostlyPositive`, `randInt`, `randNonZero`, `pickVar` (Variable), `add`, `neg`, `group`, `num`. Zufall nur über `rng`.
-4. **Registrieren** in `equationGenerators`: `[EXAMPLE]: generatorFor(EXAMPLE, draftExample)`. `EQUATION_TOPIC_IDS` und `ALL_TOPIC_IDS` leiten sich ab. `generatorFor` baut die Aufgabe mit `buildEquationTask` (Musterlösung aus `solveStepByStep`) und verwirft Aufgaben, in denen irgendeine Zahl keine ganze Zahl oder größer als 99 ist (`hasSmallIntegers`). Passt kaum ein Entwurf, läuft der Generator in einer Endlosschleife; die Wertebereiche also großzügig wählen und im Test prüfen.
+4. **Registrieren** in `equationGenerators`: `[EXAMPLE]: generatorFor(EXAMPLE, draftExample)`. `EQUATION_SUBTOPIC_IDS` und `ALL_SUBTOPIC_IDS` leiten sich ab. `generatorFor` baut die Aufgabe mit `buildEquationTask` (Musterlösung aus `solveStepByStep`) und verwirft Aufgaben, in denen irgendeine Zahl keine ganze Zahl oder größer als 99 ist (`hasSmallIntegers`). Passt kaum ein Entwurf, läuft der Generator in einer Endlosschleife; die Wertebereiche also großzügig wählen und im Test prüfen.
 5. **Musterlösung:** `solveStepByStep` löst Klammern auf, fasst zusammen, bringt x nach links und die Zahlen nach rechts und teilt. Reicht dieser Weg für das Teilthema, ist nichts zu tun. Braucht das Teilthema einen anderen Lösungsweg, wird `src/math/equations/solve.ts` erweitert (und seine Tests); das gilt dann für alle Gleichungs-Teilthemen.
 6. **Varianten benennen:** Der Name der Variante erscheint in Tests und später in Statistiken. Bei Sonderfällen sagt das Präfix die erwartete Lösungsmenge (`none-…`, `all-…`, `single-…`); der Test `sonderfaelle` liest sie daran ab.
 
-Nichts weiter exportieren: `src/math/equations/index.ts` exportiert `equationGenerators`, `EQUATION_TOPIC_IDS`, `generateEquationTask`, `generateEquationSeries` und `buildEquationTask` bereits.
+Nichts weiter exportieren: `src/math/equations/index.ts` exportiert `equationGenerators`, `EQUATION_SUBTOPIC_IDS`, `generateEquationTask`, `generateEquationSeries` und `buildEquationTask` bereits.
 
 ### G3: Inhalt
 
 Datei: `src/content/gleichungen-<name>.ts`, registriert in `src/content/index.ts` (Schritt 3).
 
-1. `const TOPIC = 'algebra/lineare-gleichungen/beispiel'` und ein `TopicContent` mit `cards`, `examples`, `formulaIds`.
+1. `const TOPIC = 'algebra/lineare-gleichungen/beispiel'` und ein `SubtopicContent` mit `cards`, `examples`, `formulaIds`.
 2. **Karten:** mindestens eine `balance` und ein `equation-steps`; beide Fragearten.
    - `equation-steps`: `start` (Gleichung in Eingabesyntax), `steps[]` mit `operation` (`'| - x'`, `'| : 2'`, `'T'` für „Term umformen“, `'⇄'`), `equation` (die Zeile **nach** der Umformung), `note?`; `solution` (z. B. `'L = {3}'`). Jeder Schritt wird mit `checkStep` geprüft, die Lösungsmenge gegen `solveEquation`. Ist `equation` zusammengefasster als nötig, ist das erlaubt.
    - `balance`: `equation`, `mode` (`steps` mit `steps: ['| - x', '| - 2', '| : 2']`, oder `explore`, optional mit `operations`). Eine eindeutige Lösung muss ganzzahlig und ≥ 0 sein; je Seite höchstens 6 x-Stücke und 12 Einer. `steps` kennt nur `+ T`, `- T`, `: n` (2 bis 6, nur bei gleichmäßiger Teilbarkeit) und `· (-1)`; „Term umformen“ und „⇄“ lassen sich nicht darstellen, die Musterlösung aus `solveStepByStep` also nicht ungeprüft übernehmen. Gleichungen mit negativer Lösung sind (noch) nicht darstellbar und gehören in `equation-steps`.
@@ -163,11 +163,11 @@ Diese Stellen enthalten feste Tabellen oder Zahlen und laufen nicht von selbst m
 | `src/routes.test.tsx` | `expect(subtopics).toHaveLength(6)` auf die neue Zahl |
 | `src/content/content.test.ts` | nur wenn eine neue Formelgruppe entsteht: `has rules for equations and the three kinds of solution sets` (Liste der Gruppentitel) |
 
-Alles andere (Katalog, Inhalte, Seiten, Fortschritt, Generator-Eigenschaften wie Determinismus, kleine ganze Zahlen, Musterlösung Zeile für Zeile gültig) läuft über `ALL_TOPIC_IDS` bzw. `EQUATION_TOPIC_IDS` automatisch mit.
+Alles andere (Katalog, Inhalte, Seiten, Fortschritt, Generator-Eigenschaften wie Determinismus, kleine ganze Zahlen, Musterlösung Zeile für Zeile gültig) läuft über `ALL_SUBTOPIC_IDS` bzw. `EQUATION_SUBTOPIC_IDS` automatisch mit.
 
 ### G5: Übung
 
-Nichts zu tun: `EquationPractice` und `equationSession.ts` arbeiten mit jeder Id aus `EQUATION_TOPIC_IDS`. Fortschritt, Skill-Pfad und Serienergebnis kommen mit. Nur wenn das Teilthema andere Umformungen braucht als `+ − · :`, „Term umformen“ und „⇄“, müssen `readOperation`, `checkStep` und die Tastenreihe in `EquationEntry.tsx` erweitert werden.
+Nichts zu tun: `EquationPractice` und `equationSession.ts` arbeiten mit jeder Id aus `EQUATION_SUBTOPIC_IDS`. Fortschritt, Skill-Pfad und Serienergebnis kommen mit. Nur wenn das Teilthema andere Umformungen braucht als `+ − · :`, „Term umformen“ und „⇄“, müssen `readOperation`, `checkStep` und die Tastenreihe in `EquationEntry.tsx` erweitert werden.
 
 ## Neue Widget-Art
 
@@ -188,7 +188,7 @@ Interaktive Elemente sind Datenobjekte mit Diskriminator `kind`. Eine neue Art b
 Die Antwort ist weder ein Term noch eine zeilenweise gelöste lineare Gleichung (z. B. eine Zahl, ein Funktionsterm, eine Zeichnung, eine Bruchgleichung). Dann gilt wie bei den Gleichungen: eigenes Register statt Aufweichen der bestehenden.
 
 1. **Mathe-Kern:** eigenes Modul (z. B. `src/math/<art>/`) mit Aufgabentyp, Lesen der Eingabe, Prüfung, Generatoren und Musterlösung; ohne React, mit Unit-Tests.
-2. **Register:** `<art>Generators` und `<ART>_TOPIC_IDS` im Modul, in `src/math/topics.ts` in `ALL_TOPIC_IDS` und `AnyTopicId` aufnehmen und eine Prüffunktion `is<Art>Topic` ergänzen; `src/math/index.ts` exportiert sie.
-3. **Übung:** eigene Zustandsdatei in `src/practice/` (wie `equationSession.ts`, auf Basis von `SeriesState`) und eine eigene Komponente (wie `EquationPractice`) mit `PracticeProgress`, `SeriesSummary` und `SkillPath`; in `TopicPage` über die Prüffunktion einbinden.
+2. **Register:** `<art>Generators` und `<ART>_TOPIC_IDS` im Modul, in `src/math/topics.ts` in `ALL_SUBTOPIC_IDS` und `AnySubtopicId` aufnehmen und eine Prüffunktion `is<Art>Topic` ergänzen; `src/math/index.ts` exportiert sie.
+3. **Übung:** eigene Zustandsdatei in `src/practice/` (wie `equationSession.ts`, auf Basis von `SeriesState`) und eine eigene Komponente (wie `EquationPractice`) mit `PracticeProgress`, `SeriesSummary` und `SkillPath`; in `SubtopicPage` über die Prüffunktion einbinden.
 4. **Inhalte:** `WorkedExample.task` und `isEquationTask` in `src/content/types.ts` um die neue Aufgabe erweitern; das Beispiel-Rendering in `WorkedExampleCard` ergänzen. Die Tests in `content.test.ts` und `pages.test.tsx` unterscheiden bisher nur Term- und Gleichungs-Teilthemen und werden um die neue Art erweitert.
-5. **Fortschritt:** `progress.ts` nimmt jede Id aus `ALL_TOPIC_IDS` auf; eine Migration ist nicht nötig.
+5. **Fortschritt:** `progress.ts` nimmt jede Id aus `ALL_SUBTOPIC_IDS` auf; eine Migration ist nicht nötig.
