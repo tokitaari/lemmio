@@ -183,7 +183,9 @@ describe('reading and typing a function equation', () => {
     s.write('Deine Funktionsgleichung', functionToText(task.fn))
     await s.check()
     expect(s.status().getByText('✓ Richtig!')).toBeInTheDocument()
-    expect(screen.getByText('Bisher: 1 von 1 richtig.')).toBeInTheDocument()
+    // The tasks before were skipped with "Lösung anzeigen" and count as wrong.
+    const answered = s.tasks.indexOf(task) + 1
+    expect(screen.getByText(`Bisher: 1 von ${answered} richtig.`)).toBeInTheDocument()
   })
 
   it('inserts "f(x) =" with its key', async () => {
