@@ -14,6 +14,10 @@ export type FormHintCode =
   | 'inner-not-simplified'
   | 'common-factor-left'
   | 'factor-further'
+  // Linear functions (src/math/functions)
+  | 'wrong-name'
+  | 'unevaluated-coordinate'
+  | 'unevaluated-value'
 
 export interface FormHint {
   code: FormHintCode
@@ -42,6 +46,9 @@ const MESSAGES: Record<FormHintCode, string> = {
   'inner-not-simplified': 'Vereinfache den Term in der Klammer.',
   'common-factor-left': 'In einer Klammer steckt noch ein gemeinsamer Faktor. Klammere ihn aus.',
   'factor-further': 'Das lässt sich noch weiter zerlegen. Erkennst du eine binomische Formel?',
+  'wrong-name': 'Achte auf den Namen der Funktion.',
+  'unevaluated-coordinate': 'Rechne die Koordinaten aus, z. B. P(2|5) statt P(2|2·2 + 1).',
+  'unevaluated-value': 'Rechne bis zu einer einzelnen Zahl aus, z. B. f(2) = 2·2 + 1 = 5.',
 }
 
 /** Order in which problems are reported when several apply. */
