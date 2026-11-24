@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { allSubtopics } from '../../catalog'
 import { checkAnswer } from '../check'
-import { EQUATION_TOPIC_IDS } from '../equations'
+import { EQUATION_SUBTOPIC_IDS } from '../equations'
 import { polynomialToExpr, toPolynomial } from '../normalize'
 import { parse } from '../parser'
 import { Polynomial } from '../polynomial'
@@ -19,23 +19,23 @@ import {
   generateTask,
   generators,
   SERIES_LENGTH,
-  TOPIC_IDS,
+  SUBTOPIC_IDS,
   type Task,
 } from './index'
 
 const SAMPLES = 400
 
-function sample(topic: (typeof TOPIC_IDS)[number], seed: number, count = SAMPLES): Task[] {
+function sample(topic: (typeof SUBTOPIC_IDS)[number], seed: number, count = SAMPLES): Task[] {
   const rng = createRng(seed)
   return Array.from({ length: count }, () => generators[topic](rng))
 }
 
 describe('task generators', () => {
   it('cover, together with the equation generators, exactly the subtopics of the app', () => {
-    expect([...TOPIC_IDS, ...EQUATION_TOPIC_IDS].sort()).toEqual(allSubtopics().map((s) => s.id).sort())
+    expect([...SUBTOPIC_IDS, ...EQUATION_SUBTOPIC_IDS].sort()).toEqual(allSubtopics().map((s) => s.id).sort())
   })
 
-  describe.each(TOPIC_IDS)('%s', (topic) => {
+  describe.each(SUBTOPIC_IDS)('%s', (topic) => {
     const tasks = sample(topic, 2026)
 
     it('is deterministic for a given seed', () => {

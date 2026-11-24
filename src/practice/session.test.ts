@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createRng, generateSeries, toText, TOPIC_IDS, type Task } from '../math'
+import { createRng, generateSeries, toText, SUBTOPIC_IDS, type Task } from '../math'
 import {
   countCorrect,
   createSession,
@@ -13,7 +13,7 @@ import {
   taskVariables,
 } from './session'
 
-function series(topic: (typeof TOPIC_IDS)[number] = 'algebra/terme/ausmultiplizieren', seed = 7): Task[] {
+function series(topic: (typeof SUBTOPIC_IDS)[number] = 'algebra/terme/ausmultiplizieren', seed = 7): Task[] {
   return generateSeries(topic, createRng(seed))
 }
 
@@ -36,7 +36,7 @@ describe('submitAnswer', () => {
     expect((next.feedback as { answer: unknown }).answer).not.toBeNull()
   })
 
-  it.each(TOPIC_IDS)('%s: an equivalent answer in the wrong form gives a hint and allows another try', (topic) => {
+  it.each(SUBTOPIC_IDS)('%s: an equivalent answer in the wrong form gives a hint and allows another try', (topic) => {
     const s = createSession(series(topic))
     // The task itself is equivalent to its solution but not yet in the requested form.
     const next = submitAnswer(s, toText(s.tasks[0]!.prompt))
@@ -119,7 +119,7 @@ describe('finishedBetween', () => {
 })
 
 describe('series', () => {
-  it.each(TOPIC_IDS)('%s: ten tasks without a repeat', (topic) => {
+  it.each(SUBTOPIC_IDS)('%s: ten tasks without a repeat', (topic) => {
     for (let seed = 1; seed <= 30; seed++) {
       const tasks = series(topic, seed)
       expect(tasks).toHaveLength(10)

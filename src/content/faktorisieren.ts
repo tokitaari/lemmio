@@ -1,9 +1,9 @@
 import { buildBinomialFactorTask, buildCommonFactorTask, buildCommonThenBinomialTask } from '../math'
 import { poly } from './poly'
-import type { TopicContent } from './types'
+import type { SubtopicContent } from './types'
 
 /** Subtopic 3: factoring by taking out a common factor and with binomial formulas backwards. */
-export const faktorisieren: TopicContent = {
+export const faktorisieren: SubtopicContent = {
   cards: [
     {
       id: 'umkehrung',

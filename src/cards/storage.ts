@@ -22,7 +22,7 @@ export interface StoredDeck {
 
 /** Card ids: lower case, digits, hyphens (checked for every deck in validateDeck). */
 export const CARD_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-/** Deck ids: card-id segments joined by "/", e.g. a TopicId. Also keeps keys like "__proto__" out. */
+/** Deck ids: card-id segments joined by "/", e.g. a SubtopicId. Also keeps keys like "__proto__" out. */
 export const DECK_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/
 
 function isRecord(value: unknown): value is Record<string, unknown> {

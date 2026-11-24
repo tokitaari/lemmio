@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { catalog } from '../catalog'
-import { allEntries, formulaGroupsOf, isEquationTask, topicContent } from '../content'
-import { ALL_TOPIC_IDS, EQUATION_TOPIC_IDS, TOPIC_IDS } from '../math'
+import { allEntries, formulaGroupsOf, isEquationTask, subtopicContent } from '../content'
+import { ALL_SUBTOPIC_IDS, EQUATION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
 import { routes } from '../routes'
 
 function renderAt(path: string) {
@@ -18,8 +18,8 @@ beforeEach(() => {
 })
 
 describe('topic page', () => {
-  it.each(ALL_TOPIC_IDS)('%s shows explanation, worked examples and formulas', (topic) => {
-    const content = topicContent[topic]
+  it.each(ALL_SUBTOPIC_IDS)('%s shows explanation, worked examples and formulas', (topic) => {
+    const content = subtopicContent[topic]
     const { container } = renderAt(`/${topic}`)
 
     const firstCard = content.cards[0]!
@@ -44,7 +44,7 @@ describe('topic page', () => {
     expect(container.querySelector('.katex-error')).toBeNull()
   })
 
-  it.each(TOPIC_IDS)('%s has a practice area with a task and an input', (topic) => {
+  it.each(SUBTOPIC_IDS)('%s has a practice area with a task and an input', (topic) => {
     renderAt(`/${topic}`)
     const practice = within(screen.getByRole('region', { name: 'Übung' }))
     expect(practice.getByText('Aufgabe 1 von 10')).toBeInTheDocument()
@@ -52,7 +52,7 @@ describe('topic page', () => {
     expect(practice.getByRole('button', { name: 'Prüfen' })).toBeInTheDocument()
   })
 
-  it.each(EQUATION_TOPIC_IDS)('%s has a practice area with an equation and the line input', (topic) => {
+  it.each(EQUATION_SUBTOPIC_IDS)('%s has a practice area with an equation and the line input', (topic) => {
     renderAt(`/${topic}`)
     const practice = within(screen.getByRole('region', { name: 'Übung' }))
     expect(practice.getByText('Aufgabe 1 von 10')).toBeInTheDocument()

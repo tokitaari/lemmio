@@ -1,10 +1,10 @@
 import { buildEquationTask, parse } from '../math'
-import type { TopicContent } from './types'
+import type { SubtopicContent } from './types'
 
 const TOPIC = 'algebra/lineare-gleichungen/umformen'
 
 /** Linear equations 1: equivalence transformations with x on both sides. */
-export const gleichungenUmformen: TopicContent = {
+export const gleichungenUmformen: SubtopicContent = {
   cards: [
     {
       id: 'worum-geht-es',

@@ -2,7 +2,7 @@ import { add, group, mul, neg, num, type Expr } from '../ast'
 import { pickWeighted, randInt, randNonZero, type Rng } from '../random'
 import { SERIES_LENGTH } from '../tasks'
 import { ex, mono, pickVar, sum } from '../tasks/helpers'
-import type { TopicId } from '../tasks/types'
+import type { SubtopicId } from '../tasks/types'
 import { equationToText, sidePolynomials } from './equation'
 import { solveStepByStep } from './solve'
 import type { Equation, EquationTask, EquationTaskGenerator } from './types'
@@ -22,7 +22,7 @@ const MAX_NUMBER = 99
  *
  * @throws RangeError if the equation is not linear in a single variable.
  */
-export function buildEquationTask(topic: TopicId, left: Expr, right: Expr, variant = 'example'): EquationTask {
+export function buildEquationTask(topic: SubtopicId, left: Expr, right: Expr, variant = 'example'): EquationTask {
   const equation: Equation = { left, right }
   const solution = solveStepByStep(equation)
   return {
@@ -64,7 +64,7 @@ function hasSmallIntegers(task: EquationTask): boolean {
   })
 }
 
-function generatorFor(topic: TopicId, draft: (rng: Rng) => Draft): EquationTaskGenerator {
+function generatorFor(topic: SubtopicId, draft: (rng: Rng) => Draft): EquationTaskGenerator {
   return (rng) => {
     for (;;) {
       const drawn = draft(rng)
@@ -306,15 +306,15 @@ export const equationGenerators = {
   [TRANSFORM]: generatorFor(TRANSFORM, draftTransform),
   [BRACKETS]: generatorFor(BRACKETS, draftBrackets),
   [SPECIAL]: generatorFor(SPECIAL, draftSpecial),
-} as const satisfies Record<TopicId, EquationTaskGenerator>
+} as const satisfies Record<SubtopicId, EquationTaskGenerator>
 
 /** All subtopics that have an equation generator. */
-export const EQUATION_TOPIC_IDS = Object.keys(equationGenerators) as (keyof typeof equationGenerators)[]
+export const EQUATION_SUBTOPIC_IDS = Object.keys(equationGenerators) as (keyof typeof equationGenerators)[]
 
 const MAX_ATTEMPTS = 200
 
 /** Generates an equation task whose key is not in `exclude` (see `generateTask`). */
-export function generateEquationTask(topic: TopicId, rng: Rng, exclude: Iterable<string> = []): EquationTask {
+export function generateEquationTask(topic: SubtopicId, rng: Rng, exclude: Iterable<string> = []): EquationTask {
   const excluded = new Set(exclude)
   if (!Object.hasOwn(equationGenerators, topic)) throw new Error(`No equation generator for subtopic "${topic}"`)
   const generate: EquationTaskGenerator = equationGenerators[topic as keyof typeof equationGenerators]
@@ -324,7 +324,7 @@ export function generateEquationTask(topic: TopicId, rng: Rng, exclude: Iterable
 }
 
 /** A series of equation tasks without repetitions. */
-export function generateEquationSeries(topic: TopicId, rng: Rng, length = SERIES_LENGTH): EquationTask[] {
+export function generateEquationSeries(topic: SubtopicId, rng: Rng, length = SERIES_LENGTH): EquationTask[] {
   const tasks: EquationTask[] = []
   for (let i = 0; i < length; i++) {
     tasks.push(generateEquationTask(topic, rng, tasks.map((t) => t.key)))

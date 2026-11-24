@@ -1,4 +1,4 @@
-import { ALL_TOPIC_IDS, type TopicId } from '../math'
+import { ALL_SUBTOPIC_IDS, type SubtopicId } from '../math'
 
 /** Result of one completed series, e.g. 8 of 10. */
 export interface SeriesResult {
@@ -23,7 +23,7 @@ export const STORAGE_KEY = 'lemmio:progress'
 const STORAGE_VERSION = 1
 const MAX_COUNT = 1_000_000
 
-type StoredTopics = Partial<Record<TopicId, TopicProgress>>
+type StoredTopics = Partial<Record<SubtopicId, TopicProgress>>
 
 /** Progress after one finished task; `series` is set when that task completed a series. */
 export function applyAnswer(progress: TopicProgress, correct: boolean, series?: SeriesResult): TopicProgress {
@@ -72,7 +72,7 @@ function readAll(storage: Storage | null): StoredTopics {
     const data: unknown = JSON.parse(raw)
     if (!isRecord(data) || data.version !== STORAGE_VERSION || !isRecord(data.topics)) return {}
     const topics: StoredTopics = {}
-    for (const id of ALL_TOPIC_IDS) {
+    for (const id of ALL_SUBTOPIC_IDS) {
       const parsed = parseTopicProgress(data.topics[id])
       if (parsed) topics[id] = parsed
     }
@@ -82,7 +82,7 @@ function readAll(storage: Storage | null): StoredTopics {
   }
 }
 
-export function loadProgress(topic: TopicId): TopicProgress {
+export function loadProgress(topic: SubtopicId): TopicProgress {
   return readAll(getStorage())[topic] ?? EMPTY_PROGRESS
 }
 
@@ -90,7 +90,7 @@ export function loadProgress(topic: TopicId): TopicProgress {
  * Stores the progress of one subtopic and leaves the others untouched.
  * `EMPTY_PROGRESS` removes the entry. Returns false if the browser refused to save.
  */
-export function saveProgress(topic: TopicId, progress: TopicProgress): boolean {
+export function saveProgress(topic: SubtopicId, progress: TopicProgress): boolean {
   const storage = getStorage()
   if (!storage) return false
   try {

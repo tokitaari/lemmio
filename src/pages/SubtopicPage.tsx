@@ -7,7 +7,7 @@ import Practice from '../components/Practice'
 import WorkedExampleCard from '../components/WorkedExampleCard'
 import { findSubtopic } from '../catalog'
 import { findContent, findFormula } from '../content'
-import { isEquationTopic, isTermTopic } from '../math'
+import { isEquationSubtopic, isTermSubtopic } from '../math'
 import NotFound from './NotFound'
 
 /**
@@ -15,7 +15,7 @@ import NotFound from './NotFound'
  * examples, formulas and the practice area (terms are answered in one field,
  * equations are solved line by line).
  */
-export default function TopicPage() {
+export default function SubtopicPage() {
   const params = useParams()
   const ref = findSubtopic(params.area, params.topic, params.subtopic)
   const content = ref && findContent(ref.id)
@@ -60,8 +60,8 @@ export default function TopicPage() {
       </section>
 
       {/* Keyed by id: switching subtopics starts a fresh series instead of reusing the old state. */}
-      {isTermTopic(id) && <Practice key={id} topic={id} />}
-      {isEquationTopic(id) && <EquationPractice key={id} topic={id} />}
+      {isTermSubtopic(id) && <Practice key={id} topic={id} />}
+      {isEquationSubtopic(id) && <EquationPractice key={id} topic={id} />}
     </>
   )
 }

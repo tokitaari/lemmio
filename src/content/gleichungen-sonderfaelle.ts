@@ -1,10 +1,10 @@
 import { buildEquationTask, parse } from '../math'
-import type { TopicContent } from './types'
+import type { SubtopicContent } from './types'
 
 const TOPIC = 'algebra/lineare-gleichungen/sonderfaelle'
 
 /** Linear equations 3: x drops out, a false statement (L = { }) or a true one (L = ℚ) is left. */
-export const gleichungenSonderfaelle: TopicContent = {
+export const gleichungenSonderfaelle: SubtopicContent = {
   cards: [
     {
       id: 'worum-geht-es',

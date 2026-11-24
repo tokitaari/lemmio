@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { checkAnswer, createRng, generateSeries, toText, type TopicId } from '../math'
+import { checkAnswer, createRng, generateSeries, toText, type SubtopicId } from '../math'
 import { STORAGE_KEY } from '../practice/progress'
 import { taskVariables } from '../practice/session'
 import Practice from './Practice'
@@ -12,7 +12,7 @@ beforeEach(() => {
   localStorage.clear()
 })
 
-function setup(topic: TopicId = 'algebra/terme/ausmultiplizieren') {
+function setup(topic: SubtopicId = 'algebra/terme/ausmultiplizieren') {
   const tasks = generateSeries(topic, createRng(SEED))
   const rng = createRng(SEED)
   const user = userEvent.setup()
@@ -102,7 +102,7 @@ describe('practice area', () => {
     expect(nodes()[1]).toHaveTextContent('Aufgabe 2: aktuell')
   })
 
-  it.each<TopicId>(['algebra/terme/ausmultiplizieren', 'algebra/terme/binomische-formeln', 'algebra/terme/faktorisieren'])(
+  it.each<SubtopicId>(['algebra/terme/ausmultiplizieren', 'algebra/terme/binomische-formeln', 'algebra/terme/faktorisieren'])(
     '%s: an equivalent term in the wrong form gets a hint and can be corrected',
     async (topic) => {
       const { tasks, answer, status, input } = setup(topic)

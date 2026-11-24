@@ -27,12 +27,12 @@ export { Polynomial } from './polynomial'
 export { toLatex, toText } from './printer'
 export { createRng, type Rng } from './random'
 export {
-  ALL_TOPIC_IDS,
-  isEquationTopic,
-  isTermTopic,
-  type AnyTopicId,
-  type EquationTopicId,
-  type TermTopicId,
+  ALL_SUBTOPIC_IDS,
+  isEquationSubtopic,
+  isTermSubtopic,
+  type AnySubtopicId,
+  type EquationSubtopicId,
+  type TermSubtopicId,
 } from './topics'
 export { Rational } from './rational'
 export {
@@ -46,11 +46,11 @@ export {
   generateTask,
   generators,
   SERIES_LENGTH,
-  TOPIC_IDS,
+  SUBTOPIC_IDS,
   type BinomialKind,
   type BinomialParts,
   type SolutionStep,
   type Task,
   type TaskGenerator,
-  type TopicId,
+  type SubtopicId,
 } from './tasks'
