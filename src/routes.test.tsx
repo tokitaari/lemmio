@@ -18,7 +18,7 @@ describe('Routing and layout', () => {
   it('shows all subtopics on the home page', () => {
     renderAt('/')
     expect(screen.getByRole('heading', { level: 1, name: /Willkommen bei Lemmio/ })).toBeInTheDocument()
-    expect(subtopics).toHaveLength(6)
+    expect(subtopics).toHaveLength(10)
     const main = within(screen.getByRole('main'))
     for (const { subtopic } of subtopics) {
       expect(main.getByRole('link', { name: new RegExp(subtopic.title) })).toBeInTheDocument()
@@ -41,6 +41,10 @@ describe('Routing and layout', () => {
       '/algebra/lineare-gleichungen/umformen',
       '/algebra/lineare-gleichungen/klammern',
       '/algebra/lineare-gleichungen/sonderfaelle',
+      '/funktionen/lineare-funktionen/steigung-und-graph',
+      '/funktionen/lineare-funktionen/gleichung-aufstellen',
+      '/funktionen/lineare-funktionen/punktprobe-nullstelle',
+      '/funktionen/lineare-funktionen/schnittpunkt',
     ])
   })
 
@@ -66,10 +70,16 @@ describe('Routing and layout', () => {
 
   it('names the areas of the catalog in the footer', () => {
     renderAt('/')
-    expect(screen.getByRole('contentinfo')).toHaveTextContent('Lemmio · Algebra · Dein Fortschritt bleibt in deinem Browser.')
+    expect(screen.getByRole('contentinfo')).toHaveTextContent('Lemmio · Algebra · Funktionen · Dein Fortschritt bleibt in deinem Browser.')
   })
 
-  it.each(['/', '/formelsatz', '/algebra/terme/ausmultiplizieren', '/algebra/lineare-gleichungen/umformen'])('does not mention "Einheit" on %s', (path) => {
+  it.each([
+    '/',
+    '/formelsatz',
+    '/algebra/terme/ausmultiplizieren',
+    '/algebra/lineare-gleichungen/umformen',
+    '/funktionen/lineare-funktionen/schnittpunkt',
+  ])('does not mention "Einheit" on %s', (path) => {
     renderAt(path)
     expect(document.body).not.toHaveTextContent(/einheit/i)
   })

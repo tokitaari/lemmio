@@ -3,22 +3,20 @@ import { FUNCTION_SUBTOPIC_IDS } from './functions'
 import { SUBTOPIC_IDS } from './tasks'
 
 /**
- * Both registers of subtopics: term tasks (`generators`, `SUBTOPIC_IDS`) and
- * equation tasks (`equationGenerators`, `EQUATION_SUBTOPIC_IDS`). They stay
- * apart because an equation is solved line by line and has no single term as
- * its answer; everything that covers all subtopics (catalog test, stored
+ * All three registers of subtopics: term tasks (`generators`,
+ * `SUBTOPIC_IDS`), equation tasks (`equationGenerators`,
+ * `EQUATION_SUBTOPIC_IDS`) and function tasks (`functionGenerators`,
+ * `FUNCTION_SUBTOPIC_IDS`). They stay apart because their answers differ: a
+ * term, an equation solved line by line, or function equations, points and
+ * drawn graphs. Everything that covers all subtopics (catalog test, stored
  * progress) uses this list.
- *
- * Function tasks (`functionGenerators`, `FUNCTION_SUBTOPIC_IDS`) are the third
- * register. They join this list together with their catalog entries and
- * contents (unit 3, sub-task 6); until then they have no page.
  */
-export const ALL_SUBTOPIC_IDS = [...SUBTOPIC_IDS, ...EQUATION_SUBTOPIC_IDS]
+export const ALL_SUBTOPIC_IDS = [...SUBTOPIC_IDS, ...EQUATION_SUBTOPIC_IDS, ...FUNCTION_SUBTOPIC_IDS]
 
 export type TermSubtopicId = (typeof SUBTOPIC_IDS)[number]
 export type EquationSubtopicId = (typeof EQUATION_SUBTOPIC_IDS)[number]
-export type AnySubtopicId = TermSubtopicId | EquationSubtopicId
 export type FunctionSubtopicId = (typeof FUNCTION_SUBTOPIC_IDS)[number]
+export type AnySubtopicId = TermSubtopicId | EquationSubtopicId | FunctionSubtopicId
 
 /** True for a subtopic whose tasks are terms (see `generators`). */
 export function isTermSubtopic(id: string): id is TermSubtopicId {

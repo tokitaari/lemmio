@@ -468,6 +468,11 @@ h1 {
   margin-bottom: 0;
 }
 
+/* Graph of a worked example about linear functions; the plane itself limits its width. */
+.example-plane {
+  margin: 0.75rem 0;
+}
+
 /* Worked solution: "= expression" per line, explanation next to it or below on narrow screens */
 
 .solution {

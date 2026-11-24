@@ -89,9 +89,9 @@ describe('function generators', () => {
     expect(isFunctionSubtopic('algebra/lineare-gleichungen/umformen')).toBe(false)
   })
 
-  it('join ALL_SUBTOPIC_IDS only with their catalog entries (sub-task 6)', () => {
+  it('are part of ALL_SUBTOPIC_IDS, together with their catalog entries', () => {
     const all: readonly string[] = ALL_SUBTOPIC_IDS
-    expect(FUNCTION_SUBTOPIC_IDS.filter((id) => all.includes(id))).toEqual([])
+    expect(FUNCTION_SUBTOPIC_IDS.filter((id) => !all.includes(id))).toEqual([])
   })
 
   describe.each(FUNCTION_SUBTOPIC_IDS)('%s', (topic) => {

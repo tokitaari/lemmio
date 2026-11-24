@@ -86,6 +86,40 @@ export const catalog: readonly Area[] = [
       },
     ],
   },
+  {
+    slug: 'funktionen',
+    title: 'Funktionen',
+    topics: [
+      {
+        slug: 'lineare-funktionen',
+        title: 'Lineare Funktionen',
+        summary: 'Geraden zeichnen, ablesen, aufstellen und schneiden.',
+        grade: 8,
+        subtopics: [
+          {
+            slug: 'steigung-und-graph',
+            title: 'Steigung und Graph',
+            summary: 'm und n ablesen, den Graphen zeichnen.',
+          },
+          {
+            slug: 'gleichung-aufstellen',
+            title: 'Funktionsgleichung aufstellen',
+            summary: 'Aus Punkt und Steigung oder aus zwei Punkten.',
+          },
+          {
+            slug: 'punktprobe-nullstelle',
+            title: 'Punktprobe und Nullstelle',
+            summary: 'Liegt der Punkt auf der Geraden? Wo schneidet sie die x-Achse?',
+          },
+          {
+            slug: 'schnittpunkt',
+            title: 'Schnittpunkt zweier Geraden',
+            summary: 'Gleichsetzen, auch bei parallelen und identischen Geraden.',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 /** A subtopic together with the area and topic it belongs to. */
