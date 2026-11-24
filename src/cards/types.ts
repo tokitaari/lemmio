@@ -1,6 +1,6 @@
 import type { Markup } from '../content/types'
 import type { Coordinates, FormRequirement } from '../math'
-import type { PlaneWindow } from '../plane'
+import type { PlaneWindow, Range } from '../plane'
 
 /**
  * Explanations are decks of cards (similar to brilliant.org): one card at a
@@ -35,6 +35,8 @@ export type CardWidget =
   | LineSlidersWidget
   | SlopeTriangleWidget
   | LinePointsWidget
+  | ValueTableWidget
+  | TwoLinesWidget
 
 /**
  * A transformation shown line by line: the start term, then `= term` per step
@@ -235,6 +237,68 @@ export interface LinePointsWidget {
   name?: string
   window?: PlaneWindow
   label?: string
+}
+
+/**
+ * Table of values for f(x) = mx + n: the learner enters the y values, each
+ * correct value puts its point into the coordinate plane. With `show:
+ * 'equation'` the equation is given and the line appears once every value
+ * is right; with `show: 'graph'` the line is given (values are read off the
+ * graph) and the equation appears at the end. Logic and checks:
+ * src/cards/valueTable.ts.
+ */
+export interface ValueTableWidget {
+  kind: 'value-table'
+  /** Slope, a whole number. */
+  m: number
+  /** y-intercept, a whole number. */
+  n: number
+  /** x values (1–7 different whole numbers); every point (x|f(x)) must lie in the window. Default: −2…2. */
+  table?: readonly number[]
+  /** x values from `table` whose y value is filled in already; at least one value stays open. */
+  given?: readonly number[]
+  /** What is given: the equation (default) or the graph. */
+  show?: ValueTableShow
+  name?: string
+  window?: PlaneWindow
+  label?: string
+}
+
+export type ValueTableShow = 'equation' | 'graph'
+
+/**
+ * Two lines f and g with their intersection: a point S, parallel (no
+ * point) or identical (all points). With `vary` the slope and/or
+ * y-intercept of g get sliders, so the case can change. Logic and checks:
+ * src/cards/twoLines.ts.
+ */
+export interface TwoLinesWidget {
+  kind: 'two-lines'
+  /** f(x) = mx + n; whole numbers, n inside the y-range of the window. */
+  f: LineCoefficients
+  /**
+   * g(x) = mx + n, or a term in x shown as written, e.g. `2(x + 1) - 3`
+   * (linear, whole m and n; only with `vary: 'none'`).
+   */
+  g: LineCoefficients | string
+  /** Sliders for g. Default: `none`. */
+  vary?: TwoLinesVary
+  /** Slider ranges of g; defaults like `line-sliders` (m −4…4, n the y-range). */
+  gRange?: { m?: Range; n?: Range }
+  /** Shows the equation f(x) = g(x) with its solution set. Default: false. */
+  equate?: boolean
+  /** Names of f and g, different lower-case letters. Default: f, g. */
+  names?: readonly [string, string]
+  window?: PlaneWindow
+  label?: string
+}
+
+export type TwoLinesVary = 'none' | 'm' | 'n' | 'both'
+
+/** Slope m and y-intercept n of a line. */
+export interface LineCoefficients {
+  m: number
+  n: number
 }
 
 export type CardQuestion = ChoiceQuestion | TermQuestion

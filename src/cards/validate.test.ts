@@ -164,6 +164,34 @@ describe('line widgets', () => {
   })
 })
 
+describe('value table and two lines', () => {
+  it('reports their problems with the card', () => {
+    const table = card({ widget: { kind: 'value-table', m: 2, n: -3, table: [0, 6] } })
+    expect(validateDeck(deckOf(table))).toEqual(['card "karte": value-table: point (6|9) lies outside the window'])
+    const lines = card({ widget: { kind: 'two-lines', f: { m: 2, n: 1 }, g: '2(x + 1) - 1', vary: 'n' } })
+    expect(validateDeck(deckOf(lines))).toEqual(['card "karte": two-lines: g as a term needs vary none'])
+  })
+
+  it('collects equations, values, equating and the point as LaTeX', () => {
+    const deck = deckOf(
+      card({ id: 'a', widget: { kind: 'value-table', m: -1, n: 2, table: [0, 1] } }),
+      card({ id: 'b', widget: { kind: 'two-lines', f: { m: 2, n: 1 }, g: { m: -1, n: 7 }, equate: true } }),
+      card({ id: 'c', widget: { kind: 'value-table', m: 1, n: 0, table: [9] } }),
+    )
+    expect(deckLatex(deck)).toEqual([
+      'f(x) = -x + 2',
+      '2',
+      '1',
+      'f(x) = 2x + 1',
+      'g(x) = -x + 7',
+      '2x + 1 = -x + 7',
+      '\\mathbb{L} = \\{2\\}',
+      'S(2 \\mid 5)',
+    ])
+    for (const latex of deckLatex(deck)) expect(() => renderStrict(latex)).not.toThrow()
+  })
+})
+
 describe('deckTerms', () => {
   it('collects widget lines and the terms of term questions', () => {
     const terms = deckTerms(

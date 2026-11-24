@@ -66,17 +66,22 @@ export function linePointsProblems(widget: LinePointsWidget): string[] {
   const [p, q] = widget.points
   if (p[0] === q[0] && p[1] === q[1]) problems.push(`${at}: P and Q must be different points`)
   const table = widget.table
-  if (table !== undefined && table !== false) {
-    if (table.length < 1 || table.length > TABLE_MAX) problems.push(`${at}: table needs 1 to ${TABLE_MAX} x values`)
-    if (table.some((x) => !isWhole(x) || Math.abs(x) > TABLE_LIMIT)) {
-      problems.push(`${at}: table x values must be whole numbers within −${TABLE_LIMIT}…${TABLE_LIMIT}`)
-    }
-    if (new Set(table).size !== table.length) problems.push(`${at}: table x values must be different`)
-  }
+  if (table !== undefined && table !== false) problems.push(...tableProblems(at, table))
   if (widget.target) {
     problems.push(...targetProblems(at, widget.target, window))
     if (problems.length === 0 && matchesStart(widget)) problems.push(`${at}: target equals the start`)
   }
+  return problems
+}
+
+/** Problems of the x values of a table of values; also used by `value-table`. */
+export function tableProblems(at: string, table: readonly number[]): string[] {
+  const problems: string[] = []
+  if (table.length < 1 || table.length > TABLE_MAX) problems.push(`${at}: table needs 1 to ${TABLE_MAX} x values`)
+  if (table.some((x) => !isWhole(x) || Math.abs(x) > TABLE_LIMIT)) {
+    problems.push(`${at}: table x values must be whole numbers within −${TABLE_LIMIT}…${TABLE_LIMIT}`)
+  }
+  if (new Set(table).size !== table.length) problems.push(`${at}: table x values must be different`)
   return problems
 }
 

@@ -6,6 +6,8 @@ import LinePointsView from './LinePointsView'
 import LineSlidersView from './LineSlidersView'
 import SlopeTriangleView from './SlopeTriangleView'
 import TermStepsView from './TermStepsView'
+import TwoLinesView from './TwoLinesView'
+import ValueTableView from './ValueTableView'
 
 /**
  * Renders the interactive element of a card. New widget kinds get a case
@@ -30,5 +32,9 @@ export default function CardWidgetView({ widget }: { widget: CardWidget }) {
       return <SlopeTriangleView widget={widget} />
     case 'line-points':
       return <LinePointsView widget={widget} />
+    case 'value-table':
+      return <ValueTableView widget={widget} />
+    case 'two-lines':
+      return <TwoLinesView widget={widget} />
   }
 }

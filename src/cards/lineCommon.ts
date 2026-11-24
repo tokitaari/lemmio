@@ -21,6 +21,11 @@ export interface LineWidgetBase {
   window?: PlaneWindow
 }
 
+/** True for a valid function name: one lower-case letter other than x and y. */
+export function isFunctionName(name: string): boolean {
+  return FUNCTION_NAME.test(name)
+}
+
 export function widgetName(widget: { name?: string }): string {
   return widget.name ?? DEFAULT_FUNCTION_NAME
 }
@@ -32,7 +37,7 @@ export function widgetWindow(widget: { window?: PlaneWindow }): PlaneWindow {
 /** Problems of name and window, prefixed with the widget kind. */
 export function commonLineProblems(widget: LineWidgetBase): string[] {
   const problems: string[] = []
-  if (widget.name !== undefined && !FUNCTION_NAME.test(widget.name)) {
+  if (widget.name !== undefined && !isFunctionName(widget.name)) {
     problems.push(`${widget.kind}: name "${widget.name}" must be a single lower-case letter other than x and y`)
   }
   if (widget.window) problems.push(...planeWindowProblems(widget.window).map((p) => `${widget.kind}: window: ${p}`))

@@ -20,6 +20,7 @@ export {
   equationToLatex,
   equationToText,
   haveSameSolutions,
+  isPlainNumber,
   parseEquation,
   readEquation,
   solveEquation,

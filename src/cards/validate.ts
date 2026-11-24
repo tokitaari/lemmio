@@ -6,8 +6,10 @@ import { termQuestionKey } from './deck'
 import { buildEquationSteps, equationStepsLatex, equationStepsProblems, equationStepsTerms } from './equationSteps'
 import { buildLinePoints, linePointsLatex, linePointsProblems } from './linePoints'
 import { buildLineSliders, lineSlidersLatex, lineSlidersProblems } from './lineSliders'
+import { buildValueTable, valueTableLatex, valueTableProblems } from './valueTable'
 import { buildSlopeTriangle, slopeTriangleLatex, slopeTriangleProblems } from './slopeTriangle'
 import { CARD_ID, DECK_ID } from './storage'
+import { buildTwoLines, twoLinesLatex, twoLinesProblems } from './twoLines'
 import type { Card, CardQuestion, CardWidget, Deck } from './types'
 
 /**
@@ -67,6 +69,10 @@ function widgetProblems(widget: CardWidget): string[] {
       return slopeTriangleProblems(widget)
     case 'line-points':
       return linePointsProblems(widget)
+    case 'value-table':
+      return valueTableProblems(widget)
+    case 'two-lines':
+      return twoLinesProblems(widget)
   }
 }
 
@@ -120,7 +126,8 @@ function cardTerms(card: Card): string[] {
 /**
  * LaTeX that a deck shows besides terms and markup, e.g. operations,
  * intermediate lines and solution sets of equation steps, or the start
- * equations of the line widgets (their other states are covered by the
+ * equations of the line widgets, including a term given for g in
+ * `two-lines` (their other states are covered by the
  * unit tests of the widgets). Content tests render it with KaTeX in strict
  * mode. Widgets with problems are skipped.
  */
@@ -137,6 +144,10 @@ export function deckLatex(deck: Deck): string[] {
         return slopeTriangleLatex(buildSlopeTriangle(widget))
       case 'line-points':
         return linePointsLatex(buildLinePoints(widget))
+      case 'value-table':
+        return valueTableLatex(buildValueTable(widget))
+      case 'two-lines':
+        return twoLinesLatex(buildTwoLines(widget))
       default:
         return []
     }

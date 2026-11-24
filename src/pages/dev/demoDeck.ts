@@ -4,7 +4,7 @@ import type { Deck } from '../../cards'
  * Demo deck for the card framework, shown at /dev/karten in the dev server
  * only. It uses every card feature at least once, including the three modes
  * of the area model, both modes of the balance and the line widgets of the
- * coordinate plane; real decks arrive with the subtopics.
+ * coordinate plane (including the table of values and two lines); real decks arrive with the subtopics.
  */
 export const demoDeck: Deck = {
   id: 'dev/karten/demo',
@@ -243,6 +243,45 @@ export const demoDeck: Deck = {
         ],
         target: { m: -1, n: 2 },
       },
+    },
+    {
+      id: 'wertetabelle-rechnen',
+      title: 'Wertetabelle ausfüllen',
+      body: [
+        'Setze jeden x-Wert in die Gleichung ein und trage den y-Wert ein. Enter prüft.',
+        'Jeder richtige Wert setzt einen Punkt. Sind alle richtig, erscheint die Gerade.',
+      ],
+      widget: { kind: 'value-table', m: 2, n: -3, given: [0] },
+    },
+    {
+      id: 'wertetabelle-ablesen',
+      title: 'Werte am Graphen ablesen',
+      body: ['Lies die y-Werte am Graphen ab. Die Gleichung erscheint, wenn alle Werte stimmen.'],
+      widget: { kind: 'value-table', m: -1, n: 2, table: [-3, -1, 0, 2, 4], show: 'graph' },
+    },
+    {
+      id: 'schnittpunkt',
+      title: 'Zwei Geraden schneiden sich',
+      body: [
+        'Verändere die Gerade g. Wo schneidet sie f?',
+        'Beim Gleichsetzen suchst du das x, an dem beide Funktionen denselben Wert haben.',
+      ],
+      widget: { kind: 'two-lines', f: { m: 2, n: 1 }, g: { m: -1, n: 7 }, vary: 'both', equate: true },
+    },
+    {
+      id: 'parallel-identisch',
+      title: 'Parallel oder identisch',
+      body: [
+        'Beide Geraden haben dieselbe Steigung. Verschiebe g mit $n$.',
+        'Meist gibt es keinen Schnittpunkt. Bei einem Wert von $n$ liegen beide Geraden aufeinander.',
+      ],
+      widget: { kind: 'two-lines', f: { m: 2, n: 1 }, g: { m: 2, n: -3 }, vary: 'n', equate: true },
+    },
+    {
+      id: 'identisch-klammer',
+      title: 'Gleich, nur anders geschrieben',
+      body: ['Die Gleichung von g sieht anders aus als die von f. Trotzdem liegen beide Geraden aufeinander.'],
+      widget: { kind: 'two-lines', f: { m: 2, n: 1 }, g: '2(x + 1) - 1', equate: true },
     },
   ],
 }

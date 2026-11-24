@@ -1426,6 +1426,10 @@ p .tex {
   --plane-tone: var(--danger);
 }
 
+.plane-tone-text {
+  --plane-tone: var(--text);
+}
+
 .plane-line line {
   stroke: var(--plane-tone);
   stroke-width: 3;
@@ -1621,6 +1625,89 @@ p .tex {
 .value-table .is-marked {
   background: var(--accent-soft);
   font-weight: 600;
+}
+
+/* value-table: y values typed into the table */
+.value-table-input td {
+  min-width: 3.25rem;
+}
+
+.value-table .is-given {
+  color: var(--muted);
+}
+
+.value-table .is-done {
+  background: var(--success-bg);
+  color: var(--success);
+  font-weight: 600;
+}
+
+.value-table .is-wrong {
+  background: var(--danger-bg);
+}
+
+.value-input {
+  width: 3.25rem;
+  min-height: 2.75rem;
+  padding: 0.25rem;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  caret-color: var(--pink);
+  color: var(--text);
+  /* At least 16 px: iOS zooms into smaller fields. */
+  font: inherit;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.value-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.value-input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.value-table-feedback {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+.value-table-feedback.is-correct {
+  color: var(--success);
+}
+
+.value-table-feedback.is-wrong {
+  color: var(--danger);
+}
+
+/* two-lines: equations of f and g, equating, intersection */
+.two-lines-equations {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 1.5rem;
+}
+
+.two-lines-equate {
+  margin: 0.5rem 0 0;
+  text-align: center;
+}
+
+.two-lines-equate-label {
+  color: var(--muted);
+}
+
+.two-lines-equate-set {
+  margin-left: 1rem;
+}
+
+.two-lines-point {
+  pointer-events: none;
 }
 
 /* Balance: an equation as a pair of scales; figure margins come from .widget */
