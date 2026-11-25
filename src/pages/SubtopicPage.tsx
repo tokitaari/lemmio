@@ -4,20 +4,20 @@ import CardDeck from '../components/cards/CardDeck'
 import EquationPractice from '../components/EquationPractice'
 import FormulaList from '../components/FormulaList'
 import FunctionPractice from '../components/FunctionPractice'
+import IntersectionPractice from '../components/IntersectionPractice'
 import Practice from '../components/Practice'
 import WorkedExampleCard from '../components/WorkedExampleCard'
 import { findSubtopic } from '../catalog'
 import { findContent, findFormula } from '../content'
-import { isEquationSubtopic, isFunctionSubtopic, isTermSubtopic } from '../math'
-import { isFunctionPracticeSubtopic } from '../practice/functionSession'
+import { isEquationSubtopic, isTermSubtopic } from '../math'
+import { isIntersectionSubtopic, isTaskPracticeSubtopic } from '../practice/functionSession'
 import NotFound from './NotFound'
 
 /**
  * A subtopic at `/area/topic/subtopic`: explanation as a card deck, worked
  * examples, formulas and the practice area (terms are answered in one field,
- * equations are solved line by line, functions are read, typed and drawn).
- * The practice of the intersection of two lines follows later; until then its
- * section only says so.
+ * equations are solved line by line, functions are read, typed and drawn, the
+ * intersection of two lines is read and calculated).
  */
 export default function SubtopicPage() {
   const params = useParams()
@@ -66,13 +66,8 @@ export default function SubtopicPage() {
       {/* Keyed by id: switching subtopics starts a fresh series instead of reusing the old state. */}
       {isTermSubtopic(id) && <Practice key={id} topic={id} />}
       {isEquationSubtopic(id) && <EquationPractice key={id} topic={id} />}
-      {isFunctionPracticeSubtopic(id) && <FunctionPractice key={id} topic={id} />}
-      {isFunctionSubtopic(id) && !isFunctionPracticeSubtopic(id) && (
-        <section aria-labelledby="uebung" className="panel practice">
-          <h2 id="uebung">Übung</h2>
-          <p>Übungsaufgaben zu diesem Teilthema folgen bald.</p>
-        </section>
-      )}
+      {isTaskPracticeSubtopic(id) && <FunctionPractice key={id} topic={id} />}
+      {isIntersectionSubtopic(id) && <IntersectionPractice key={id} topic={id} />}
     </>
   )
 }

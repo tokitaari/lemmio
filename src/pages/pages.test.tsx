@@ -4,8 +4,8 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { catalog } from '../catalog'
 import { allEntries, formulaGroupsOf, isEquationTask, isFunctionTask, subtopicContent } from '../content'
-import { ALL_SUBTOPIC_IDS, EQUATION_SUBTOPIC_IDS, FUNCTION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
-import { FUNCTION_PRACTICE_SUBTOPIC_IDS, isFunctionPracticeSubtopic } from '../practice/functionSession'
+import { ALL_SUBTOPIC_IDS, EQUATION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
+import { TASK_PRACTICE_SUBTOPIC_IDS } from '../practice/functionSession'
 import { routes } from '../routes'
 
 function renderAt(path: string) {
@@ -67,7 +67,7 @@ describe('topic page', () => {
     expect(practice.queryByText(/folgen bald/)).not.toBeInTheDocument()
   })
 
-  it.each(FUNCTION_PRACTICE_SUBTOPIC_IDS)('%s has the practice of functions', (topic) => {
+  it.each(TASK_PRACTICE_SUBTOPIC_IDS)('%s has the practice of functions', (topic) => {
     renderAt(`/${topic}`)
     const practice = within(screen.getByRole('region', { name: 'Übung' }))
     expect(practice.getByText('Aufgabe 1 von 10')).toBeInTheDocument()
@@ -75,15 +75,16 @@ describe('topic page', () => {
     expect(practice.queryByText(/folgen bald/)).not.toBeInTheDocument()
   })
 
-  it.each(FUNCTION_SUBTOPIC_IDS.filter((id) => !isFunctionPracticeSubtopic(id)))(
-    '%s says that its practice follows later',
-    (topic) => {
-      renderAt(`/${topic}`)
-      const practice = within(screen.getByRole('region', { name: 'Übung' }))
-      expect(practice.getByText('Übungsaufgaben zu diesem Teilthema folgen bald.')).toBeInTheDocument()
-      expect(document.getElementById('uebung')).not.toBeNull()
-    },
-  )
+  it('has the practice of the intersection: the first task reads the graphs', () => {
+    renderAt('/funktionen/lineare-funktionen/schnittpunkt')
+    const practice = within(screen.getByRole('region', { name: 'Übung' }))
+    expect(practice.getByText('Aufgabe 1 von 10')).toBeInTheDocument()
+    expect(practice.getByRole('group', { name: /^Graphen von f und g/ })).toBeInTheDocument()
+    expect(practice.getByRole('button', { name: 'kein Schnittpunkt' })).toBeInTheDocument()
+    expect(practice.getByRole('button', { name: 'unendlich viele' })).toBeInTheDocument()
+    expect(practice.queryByLabelText('Umformung')).not.toBeInTheDocument()
+    expect(practice.queryByText(/folgen bald/)).not.toBeInTheDocument()
+  })
 
   it('shows the graph of a worked example about functions', () => {
     renderAt('/funktionen/lineare-funktionen/schnittpunkt')

@@ -15,6 +15,9 @@ import {
   createFunctionSession,
   currentFunctionTask,
   FUNCTION_PRACTICE_SUBTOPIC_IDS,
+  TASK_PRACTICE_SUBTOPIC_IDS,
+  isIntersectionSubtopic,
+  isTaskPracticeSubtopic,
   isFinalFeedback,
   isFunctionPracticeSubtopic,
   nextFunctionTask,
@@ -43,10 +46,13 @@ const zeroTask = () => buildZeroTask([2, 4])
 const noZero = () => buildZeroTask([0, 3])
 
 describe('subtopics', () => {
-  it('covers the first three function subtopics, not the intersection yet', () => {
-    expect(FUNCTION_PRACTICE_SUBTOPIC_IDS).toEqual(FUNCTION_SUBTOPIC_IDS.slice(0, 3))
+  it('covers all function subtopics: three task practices and the intersection', () => {
+    expect(TASK_PRACTICE_SUBTOPIC_IDS).toEqual(FUNCTION_SUBTOPIC_IDS.slice(0, 3))
+    expect(FUNCTION_PRACTICE_SUBTOPIC_IDS).toEqual(FUNCTION_SUBTOPIC_IDS)
+    expect(isTaskPracticeSubtopic('funktionen/lineare-funktionen/schnittpunkt')).toBe(false)
+    expect(isIntersectionSubtopic('funktionen/lineare-funktionen/schnittpunkt')).toBe(true)
     expect(isFunctionPracticeSubtopic('funktionen/lineare-funktionen/steigung-und-graph')).toBe(true)
-    expect(isFunctionPracticeSubtopic('funktionen/lineare-funktionen/schnittpunkt')).toBe(false)
+    expect(isFunctionPracticeSubtopic('funktionen/lineare-funktionen/schnittpunkt')).toBe(true)
     expect(isFunctionPracticeSubtopic('algebra/terme/faktorisieren')).toBe(false)
   })
 

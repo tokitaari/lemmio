@@ -31,3 +31,10 @@ export const ZERO_KEYS: readonly MathKey[] = [
   { text: '|', label: 'Strich' },
   { text: '−', label: 'Minus' },
 ]
+
+/** Keys for an intersection `S(…|…)`: the caret lands inside the bracket. */
+export const POINT_KEYS: readonly MathKey[] = [
+  { text: 'S(|)', display: 'S(…|…)', label: 'Schnittpunkt S', caretBack: 2, wide: true },
+  { text: '|', label: 'Strich' },
+  { text: '−', label: 'Minus' },
+]

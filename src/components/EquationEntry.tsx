@@ -68,11 +68,12 @@ interface EquationEntryProps {
   values: EquationFields
   onChange: (field: EquationField, value: string) => void
   onSubmitLine: () => void
-  onSubmitSolutionSet: () => void
+  /** Without this (and `setRef`) the field "Lösungsmenge" is left out, e.g. when the result is asked for elsewhere. */
+  onSubmitSolutionSet?: () => void
   onReveal: () => void
   operationRef: RefObject<HTMLInputElement | null>
   equationRef: RefObject<HTMLInputElement | null>
-  setRef: RefObject<HTMLInputElement | null>
+  setRef?: RefObject<HTMLInputElement | null>
 }
 
 /**
@@ -102,7 +103,7 @@ export default function EquationEntry({
     const target = caret.current
     if (!target) return
     const input =
-      target.field === 'operation' ? operationRef.current : target.field === 'equation' ? equationRef.current : setRef.current
+      target.field === 'operation' ? operationRef.current : target.field === 'equation' ? equationRef.current : setRef?.current
     if (!input) return
     caret.current = null
     input.focus()
@@ -110,7 +111,7 @@ export default function EquationEntry({
   }, [values, operationRef, equationRef, setRef])
 
   const inputOf = (field: EquationField) =>
-    field === 'operation' ? operationRef.current : field === 'equation' ? equationRef.current : setRef.current
+    field === 'operation' ? operationRef.current : field === 'equation' ? equationRef.current : setRef?.current
 
   /** Writes `next` into the active field and puts the caret at `position`. */
   const write = (next: string, position: number) => {
@@ -187,29 +188,31 @@ export default function EquationEntry({
         </div>
       </form>
 
-      <form
-        className="equation-set"
-        onSubmit={(e) => {
-          e.preventDefault()
-          onSubmitSolutionSet()
-        }}
-        noValidate
-      >
-        <Field
-          id={`${ids}-set`}
-          label={FIELD_NAMES.set}
-          placeholder="z. B. L = {3}"
-          value={values.set}
-          onChange={(value) => onChange('set', value)}
-          onFocus={() => setActive('set')}
-          inputRef={setRef}
-        />
-        <div className="practice-actions">
-          <button type="submit" className="btn btn-primary">
-            Lösungsmenge prüfen
-          </button>
-        </div>
-      </form>
+      {onSubmitSolutionSet && setRef && (
+        <form
+          className="equation-set"
+          onSubmit={(e) => {
+            e.preventDefault()
+            onSubmitSolutionSet()
+          }}
+          noValidate
+        >
+          <Field
+            id={`${ids}-set`}
+            label={FIELD_NAMES.set}
+            placeholder="z. B. L = {3}"
+            value={values.set}
+            onChange={(value) => onChange('set', value)}
+            onFocus={() => setActive('set')}
+            inputRef={setRef}
+          />
+          <div className="practice-actions">
+            <button type="submit" className="btn btn-primary">
+              Lösungsmenge prüfen
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="math-keys" role="group" aria-label="Mathe-Tasten">
         {keys.map((key) => (

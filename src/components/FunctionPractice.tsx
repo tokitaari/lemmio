@@ -21,7 +21,7 @@ import {
   type FunctionAnswer,
   type FunctionAnswerKind,
   type FunctionFeedback,
-  type FunctionPracticeSubtopicId,
+  type TaskPracticeSubtopicId,
   type FunctionSession,
 } from '../practice/functionSession'
 import { finishedBetween, isSeriesOver, isTaskFinished } from '../practice/session'
@@ -39,7 +39,7 @@ import SkillPath from './SkillPath'
 import Tex from './Tex'
 
 interface FunctionPracticeProps {
-  topic: FunctionPracticeSubtopicId
+  topic: TaskPracticeSubtopicId
   /** Source of randomness for the series; tests pass a seeded one. */
   rng?: Rng
 }
