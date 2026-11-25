@@ -12,12 +12,15 @@ Die App ist nach Bereich, Thema und Teilthema gegliedert. Die Klasse ist eine Ei
 |---|---|---|
 | Algebra | Terme und binomische Formeln (8) | Klammern ausmultiplizieren · Binomische Formeln · Faktorisieren |
 | Algebra | Lineare Gleichungen (8) | Gleichungen umformen · Gleichungen mit Klammern · Sonderfälle |
+| Funktionen | Lineare Funktionen (8) | Steigung und Graph · Funktionsgleichung aufstellen · Punktprobe und Nullstelle · Schnittpunkt zweier Geraden |
 
-**Erklärung als Karten.** Je Karte ein kurzer Text, höchstens ein interaktives Element und meist eine Zwischenfrage; „Weiter“ bleibt gesperrt, bis die Frage gelöst ist oder die Lösung angezeigt wurde. Interaktive Elemente: Flächenmodell (Ausmultiplizieren, binomische Formeln, Faktorisieren), Waage und Umformungsschritte (Gleichungen) sowie Rechnungen Zeile für Zeile. Alle Animationen laufen im Browser und beachten `prefers-reduced-motion`. Der Kartenstand wird je Teilthema gespeichert.
+**Erklärung als Karten.** Je Karte ein kurzer Text, höchstens ein interaktives Element und meist eine Zwischenfrage; „Weiter“ bleibt gesperrt, bis die Frage gelöst ist oder die Lösung angezeigt wurde. Interaktive Elemente: Flächenmodell (Ausmultiplizieren, binomische Formeln, Faktorisieren), Waage und Umformungsschritte (Gleichungen) sowie Rechnungen Zeile für Zeile. Bei den Funktionen kommen Koordinatensystem-Elemente dazu: Regler für Steigung und y-Achsenabschnitt, Steigungsdreieck, ziehbare Punkte mit Wertetabelle, Wertetabelle zum Eintragen und zwei Geraden mit Schnittpunkt. Alle Animationen laufen im Browser und beachten `prefers-reduced-motion`. Der Kartenstand wird je Teilthema gespeichert.
 
 **Übung bei Termen.** Serien aus 10 Aufgaben. Die Antwort ist ein Term (`x^2+6x+9`, `x²+6x+9`, `9+6x+x^2` sind gleichwertig) und wird doppelt geprüft: auf algebraische Äquivalenz und auf die verlangte Form (z. B. „ausmultipliziert“). Die Rückmeldung zeigt beides getrennt als Chips „äquivalent“ und „Form ok“, danach folgt die Musterlösung.
 
 **Übung bei Gleichungen.** Serien aus 10 Aufgaben, die Zeile für Zeile gelöst werden. Zu jeder neuen Zeile gibt man die Umformung an (`| + 3x`, `| : 2`, „Term umformen“, „⇄“); geprüft werden die Umformung und beide Seiten der neuen Zeile. Am Ende steht die Lösungsmenge (`L = {3}`, `L = { }`, `L = ℚ`). Gewertet wird nur das Ergebnis: Fehler in einer Zeile lassen sich beliebig oft korrigieren, eine falsche Lösungsmenge beendet die Aufgabe.
+
+**Übung bei Funktionen.** Serien aus 10 Aufgaben mit Zahlen ohne Brüche. Je nach Teilthema wird die Gleichung `f(x) = mx + n` vom Graphen abgelesen und eingegeben, ein Graph durch zwei gesetzte oder gezogene Punkte gezeichnet (geprüft wird die Gerade, nicht die Wahl der Punkte), eine Funktionsgleichung aufgestellt, eine Punktprobe mit Rechnung gemacht oder eine Nullstelle `N(z|0)` bestimmt. Beim Schnittpunkt wechseln sich zwei Formen ab: den Schnittpunkt aus dem Graphen ablesen und `S(x|y)` eingeben, oder `f(x) = g(x)` Zeile für Zeile lösen (wie bei den Gleichungen), y ausrechnen und `S(x|y)` angeben. Parallele und identische Geraden werden mit den Tasten „kein Schnittpunkt“ und „unendlich viele“ beantwortet.
 
 Der Fortschritt je Teilthema (beantwortet, richtig, letzte Serie) steht in `localStorage`. Der Formelsatz unter `/formelsatz` ist nach Themen gegliedert.
 
@@ -38,7 +41,7 @@ npm run build     # Typprüfung + Produktions-Build nach dist/
 npm run preview   # Build lokal ansehen
 ```
 
-Im Dev-Server gibt es zusätzlich die Demo-Seite `/dev/karten` mit Beispielkarten für alle interaktiven Elemente. Sie ist nicht Teil des Builds.
+Im Dev-Server gibt es zusätzlich die Demo-Seiten `/dev/karten` (Beispielkarten für alle interaktiven Elemente) und `/dev/koordinaten` (das Koordinatensystem mit ziehbaren und setzbaren Punkten). Sie sind nicht Teil des Builds.
 
 ### Dev-Container
 
@@ -67,21 +70,24 @@ index.html        Einstieg mit Inline-Skript für das Theme
 src/catalog.ts    Struktur der App: Bereich → Thema → Teilthema (einzige Quelle)
 src/math/         Mathe-Kern: Parser, Polynome, Prüfung, Aufgabengeneratoren (ohne React)
 src/math/equations/  Mathe-Kern für Gleichungen: Umformungen, Zeilenprüfung, Lösungsmenge
+src/math/functions/  Mathe-Kern für lineare Funktionen: Lesen, Prüfen, Analyse, Generatoren
+src/plane/        Koordinatensystem: reine Logik (Fenster, Gitter, Snapping, Texte)
 src/cards/        Kartenfolgen: Datenmodell, Zustand, Speicher, Logik der interaktiven Elemente
 src/motion/       Kleine Animationsschicht (Web Animations API, reduzierte Bewegung)
 src/content/      Karten, Beispiele und Formelsatz je Teilthema
 src/practice/     Übungsserien als reiner Zustand und Fortschritt in localStorage
 src/theme/        Theme-System (hell/dunkel)
-src/components/   React-Bausteine (Practice, EquationPractice, SkillPath, MathInput, ...)
-src/components/cards/  Kartenfolge und interaktive Elemente (Flächenmodell, Waage, ...)
-src/pages/        Seiten: Startseite, Teilthema, Formelsatz, nicht gefunden (dev/: Demo)
+src/components/   React-Bausteine (Practice, EquationPractice, FunctionPractice, IntersectionPractice, SkillPath, MathInput, ...)
+src/components/plane/  Koordinatensystem als SVG-Komponente (`CoordinatePlane`)
+src/components/cards/  Kartenfolge und interaktive Elemente (Flächenmodell, Waage, Geraden-Widgets, ...)
+src/pages/        Seiten: Startseite, Teilthema, Formelsatz, nicht gefunden (dev/: Demos)
 src/index.css     Design-Tokens beider Themes und alle Styles
 ```
 
 Mehr dazu:
 
 - [Architekturüberblick](docs/architektur.md)
-- [Anleitung: neues Teilthema, neues Thema oder neues Gleichungs-Teilthema hinzufügen](docs/neue-einheit.md)
+- [Anleitung: neues Teilthema, neues Thema, neues Gleichungs- oder Funktions-Teilthema hinzufügen](docs/neue-einheit.md)
 
 ## Stack
 
