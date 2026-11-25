@@ -1,11 +1,12 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { catalog } from '../catalog'
 import { allEntries, formulaGroupsOf, isEquationTask, isFunctionTask, subtopicContent } from '../content'
-import { ALL_SUBTOPIC_IDS, EQUATION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
+import { ALL_SUBTOPIC_IDS, createRng, EQUATION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
 import { TASK_PRACTICE_SUBTOPIC_IDS } from '../practice/functionSession'
+import { generateIntersectionSeries } from '../practice/intersectionSession'
 import { routes } from '../routes'
 
 function renderAt(path: string) {
@@ -16,6 +17,10 @@ function renderAt(path: string) {
 
 beforeEach(() => {
   localStorage.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe('topic page', () => {
@@ -76,6 +81,11 @@ describe('topic page', () => {
   })
 
   it('has the practice of the intersection: the first task reads the graphs', () => {
+    // Identical lines are always calculated, so the series must not start with them (it is random otherwise).
+    const seed = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].find(
+      (s) => generateIntersectionSeries(createRng(s))[0]?.intersection.kind !== 'identical',
+    )!
+    vi.spyOn(Math, 'random').mockImplementation(createRng(seed))
     renderAt('/funktionen/lineare-funktionen/schnittpunkt')
     const practice = within(screen.getByRole('region', { name: 'Übung' }))
     expect(practice.getByText('Aufgabe 1 von 10')).toBeInTheDocument()
