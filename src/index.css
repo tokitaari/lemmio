@@ -473,6 +473,15 @@ h1 {
   margin: 0.75rem 0;
 }
 
+/* Practice of linear functions: decision of a Punktprobe below the calculation */
+.function-decision {
+  margin: 0.75rem 0;
+}
+
+.function-decision legend {
+  margin-bottom: 0.5rem;
+}
+
 /* Worked solution: "= expression" per line, explanation next to it or below on narrow screens */
 
 .solution {
