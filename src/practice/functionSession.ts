@@ -16,14 +16,37 @@ import type { GridPoint } from '../plane'
 import { isTaskFinished, type Outcome, type SeriesState } from './session'
 
 /**
- * Function subtopics that have a practice area so far. The intersection of
- * two lines follows in a later step (it is solved line by line like an
- * equation); its page still says that the practice follows later.
+ * Function subtopics whose practice answers one task at a time with an
+ * equation, a drawn graph, a Punktprobe or a zero (`FunctionPractice`).
  */
-export const FUNCTION_PRACTICE_SUBTOPIC_IDS = [
+export const TASK_PRACTICE_SUBTOPIC_IDS = [
   'funktionen/lineare-funktionen/steigung-und-graph',
   'funktionen/lineare-funktionen/gleichung-aufstellen',
   'funktionen/lineare-funktionen/punktprobe-nullstelle',
+] as const satisfies readonly FunctionSubtopicId[]
+
+export type TaskPracticeSubtopicId = (typeof TASK_PRACTICE_SUBTOPIC_IDS)[number]
+
+export function isTaskPracticeSubtopic(id: string): id is TaskPracticeSubtopicId {
+  return (TASK_PRACTICE_SUBTOPIC_IDS as readonly string[]).includes(id)
+}
+
+/**
+ * The intersection of two lines is practised by `IntersectionPractice`: it
+ * is read from a graph or solved line by line like an equation.
+ */
+export const INTERSECTION_SUBTOPIC_ID = 'funktionen/lineare-funktionen/schnittpunkt' as const satisfies FunctionSubtopicId
+
+export type IntersectionSubtopicId = typeof INTERSECTION_SUBTOPIC_ID
+
+export function isIntersectionSubtopic(id: string): id is IntersectionSubtopicId {
+  return id === INTERSECTION_SUBTOPIC_ID
+}
+
+/** All function subtopics that have a practice area. */
+export const FUNCTION_PRACTICE_SUBTOPIC_IDS = [
+  ...TASK_PRACTICE_SUBTOPIC_IDS,
+  INTERSECTION_SUBTOPIC_ID,
 ] as const satisfies readonly FunctionSubtopicId[]
 
 export type FunctionPracticeSubtopicId = (typeof FUNCTION_PRACTICE_SUBTOPIC_IDS)[number]
@@ -45,7 +68,7 @@ export type FunctionAnswer =
 
 export type FunctionAnswerKind = FunctionAnswer['kind']
 
-/** The kind of answer a task expects, or `null` for tasks this practice does not handle yet (intersection). */
+/** The kind of answer a task expects, or `null` for the intersection, which `IntersectionPractice` handles. */
 export function answerKind(task: FunctionTask): FunctionAnswerKind | null {
   switch (task.kind) {
     case 'read-equation':

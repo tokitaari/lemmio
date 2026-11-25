@@ -11,12 +11,12 @@ import {
   type FunctionTask,
 } from '../math'
 import { STORAGE_KEY } from '../practice/progress'
-import { FUNCTION_PRACTICE_SUBTOPIC_IDS, type FunctionPracticeSubtopicId } from '../practice/functionSession'
+import { TASK_PRACTICE_SUBTOPIC_IDS, type TaskPracticeSubtopicId } from '../practice/functionSession'
 import FunctionPractice from './FunctionPractice'
 
 const SEED = 3
-const GRAPH: FunctionPracticeSubtopicId = 'funktionen/lineare-funktionen/steigung-und-graph'
-const POINT_ZERO: FunctionPracticeSubtopicId = 'funktionen/lineare-funktionen/punktprobe-nullstelle'
+const GRAPH: TaskPracticeSubtopicId = 'funktionen/lineare-funktionen/steigung-und-graph'
+const POINT_ZERO: TaskPracticeSubtopicId = 'funktionen/lineare-funktionen/punktprobe-nullstelle'
 // A whole series answers ten tasks, some of them by moving points key by key.
 const SERIES_TIMEOUT = 20_000
 
@@ -32,7 +32,7 @@ function position(slider: HTMLElement) {
   return { x: n(match[1]!), y: n(match[2]!) }
 }
 
-function setup(topic: FunctionPracticeSubtopicId = GRAPH) {
+function setup(topic: TaskPracticeSubtopicId = GRAPH) {
   const tasks = generateFunctionSeries(topic, createRng(SEED))
   const user = userEvent.setup()
   const view = render(<FunctionPractice topic={topic} rng={createRng(SEED)} />)
@@ -106,7 +106,7 @@ describe('function practice', () => {
     expect(screen.queryByRole('heading', { name: 'Musterlösung' })).not.toBeInTheDocument()
   })
 
-  it.each(FUNCTION_PRACTICE_SUBTOPIC_IDS)(
+  it.each(TASK_PRACTICE_SUBTOPIC_IDS)(
     'accepts the model answers of a whole series of %s and stores the result',
     async (topic) => {
       const s = setup(topic)
