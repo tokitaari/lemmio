@@ -2,6 +2,35 @@
 
 Alle wichtigen Änderungen an Lemmio. Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Ein Release entspricht einer Lerneinheit; die Versionsnummer zählt die Einheiten.
 
+## [0.0.3] – 2026-11-25
+
+Einheit 3: Lineare Funktionen.
+
+### Hinzugefügt
+
+- Neuer Bereich „Funktionen“ mit dem Thema „Lineare Funktionen“ (Klasse 8) und vier Teilthemen: Steigung und Graph, Funktionsgleichung aufstellen, Punktprobe und Nullstelle, Schnittpunkt zweier Geraden. Nur ganze Zahlen für Steigung, y-Achsenabschnitt und Punkte.
+- Schreibweise `f(x) = mx + n` mit Funktionswerten wie `f(2) = 5`; Punkte werden als `P(2|5)` geschrieben (Eingabe auch mit `;`).
+- Koordinatensystem als wiederverwendbarer Baustein: gleicher Maßstab auf beiden Achsen, Punkte rasten auf Gitterpunkte ein und lassen sich mit Maus, Touch und Tastatur ziehen (Pfeiltasten, Pos1/Ende, Bild↑/Bild↓), Ansagen für Screenreader.
+- Neue interaktive Elemente in den Karten: Regler für Steigung m und y-Achsenabschnitt n, Steigungsdreieck („rechts“ und „hoch“) entlang der Geraden, zwei ziehbare Punkte mit mitlaufender Gleichung und Wertetabelle, Wertetabelle zum Ausfüllen (Punkte erscheinen mit jedem richtigen Wert) sowie zwei Geraden mit Schnittpunkt, auch parallel und identisch.
+- Übung für die ersten drei Teilthemen: Gleichung vom Graphen ablesen, Graph zeichnen (zwei Punkte setzen oder ziehen, geprüft wird die Gerade), Gleichung aufstellen aus Punkt und Steigung bzw. aus zwei Punkten, Punktprobe mit Rechnung und Entscheidung, Nullstelle. Serien aus 10 Aufgaben mit Musterlösung samt Graph.
+- Übung zum Schnittpunkt in zwei Formen, die sich abwechseln: Ablesen aus dem Graphen (`S(x|y)` oder „kein Schnittpunkt“ bzw. „unendlich viele“) und Rechnen (Gleichsetzen Zeile für Zeile wie bei den Gleichungen, dann y berechnen und den Punkt angeben).
+- Formelsatz-Gruppen zu Funktionen: Funktionsgleichung, Steigung aus zwei Punkten, Nullstelle, Schnittpunkt.
+- Lizenzen: Quellcode unter GPL-3.0-oder-später, Lerninhalte unter CC BY-SA 4.0 (siehe `LICENSE`, `LICENSE-CONTENT` und README).
+- Dokumentation: README, Architekturüberblick und Anleitung für neue Themen auf den Stand von Einheit 3 gebracht.
+
+### Geändert
+
+- Intern heißt die Teilthema-Ebene jetzt `SubtopicId` (vorher `TopicId`), ebenso abgeleitete Namen wie `SubtopicPage`. Das Verhalten ist unverändert, der gespeicherte Fortschritt bleibt erhalten.
+- Die Fußzeile nennt jetzt zwei Bereiche.
+
+### Technik
+
+- Mathe-Kern für Funktionen (`src/math/functions`) ohne React-Abhängigkeit als drittes Register neben Termen und Gleichungen: Lesen und Prüfen von Funktionsgleichungen, Punkten und Funktionswerten, Prüfung gezeichneter Geraden, Nullstelle, Schnittpunkt, Generatoren mit Musterlösung.
+- Koordinatensystem-Logik in `src/plane`, Komponente `CoordinatePlane`; fünf neue Karten-Widgets (`line-sliders`, `slope-triangle`, `line-points`, `value-table`, `two-lines`).
+- Markup `$fn: …$` für Funktionsgleichungen, Funktionswerte und Punkte in Kartentexten.
+- Die Gleichungsübung ist für den Schnittpunkt wiederverwendbar (Eingabe ohne Feld „Lösungsmenge“).
+- Demo-Seiten `/dev/koordinaten` und `/dev/karten` nur im Dev-Server und nicht im Build.
+
 ## [0.0.2] – 2026-11-16
 
 Einheit 2: Lineare Gleichungen und Umbau auf Karten.
