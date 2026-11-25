@@ -103,6 +103,12 @@ Einmalig im Repo einstellen: **Settings → Pages → Build and deployment → S
 
 Ein Release entspricht einer Lerneinheit (Iteration); die Versionsnummer zählt die Einheiten. „Einheit“ ist nur ein interner Begriff und erscheint nicht in der App. Änderungen stehen im [Changelog](CHANGELOG.md), die Release Notes je Version unter `docs/release-notes/`.
 
+## Lizenz
+
+Der Quellcode steht unter der [GNU General Public License v3.0 oder später](LICENSE) (`GPL-3.0-or-later`).
+
+Die Lerninhalte (Erklärtexte, Karten, Zwischenfragen, Beispiele und Formelsatz-Einträge, also die Inhaltsdateien `src/content/ausmultiplizieren.ts`, `binomische-formeln.ts`, `faktorisieren.ts`, `gleichungen-*.ts`, `funktionen-*.ts` und `formulas.ts`) stehen unter [Creative Commons Namensnennung – Weitergabe unter gleichen Bedingungen 4.0 International](LICENSE-CONTENT) (`CC-BY-SA-4.0`). Der Programmcode in diesen Dateien (Typen, Hilfsfunktionen) gehört zum Quellcode und steht unter der GPL.
+
 ## Datenschutz
 
 Keine Konten, kein Backend, kein Tracking, keine Übertragung an Server. Gespeichert werden nur drei Einträge im Browser: `lemmio:progress` (Übungsfortschritt), `lemmio:cards` (Stand der Kartenfolgen) und `lemmio:theme` (gewähltes Design).
