@@ -1,6 +1,6 @@
-# Anleitung: neues Teilthema, neues Thema, neues Gleichungs-Teilthema
+# Anleitung: neues Teilthema, neues Thema, neues Gleichungs- oder Funktions-Teilthema
 
-Diese Anleitung beschreibt, welche Stellen im Code angefasst werden, wenn Lemmio um Inhalt wächst. Sie gilt für den Stand nach Einheit 2. Den Hintergrund liefert der [Architekturüberblick](architektur.md).
+Diese Anleitung beschreibt, welche Stellen im Code angefasst werden, wenn Lemmio um Inhalt wächst. Sie gilt für den Stand nach Einheit 3. Den Hintergrund liefert der [Architekturüberblick](architektur.md).
 
 Begriffe:
 
@@ -14,17 +14,18 @@ Begriffe:
 |---|---|---|
 | ein Term (ausmultiplizieren, faktorisieren, …) | Term-Teilthema | `ausmultiplizieren.ts`, `src/math/tasks/` |
 | eine lineare Gleichung, Zeile für Zeile gelöst | Gleichungs-Teilthema | `gleichungen-umformen.ts`, `src/math/equations/` |
-| etwas anderes (Zahl, Funktionsterm, Zeichnung, Bruchgleichung, …) | neue Aufgabenart | [unten](#neue-aufgabenart) |
+| eine Funktionsgleichung, ein Punkt, ein gezeichneter Graph, eine Nullstelle oder ein Schnittpunkt | Funktions-Teilthema | `funktionen-steigung-und-graph.ts`, `src/math/functions/` |
+| etwas anderes (Bruchgleichung, Textaufgabe, quadratische Funktion, …) | neue Aufgabenart | [unten](#neue-aufgabenart) |
 
-Die Schritte 1, 3 und 4 gelten für alle Arten. Schritt 2 hängt von der Art ab; für Gleichungen gibt es die eigene Anleitung [Neues Gleichungs-Teilthema](#neues-gleichungs-teilthema).
+Die Schritte 1, 3 und 4 gelten für alle Arten. Schritt 2 hängt von der Art ab; für Gleichungen und Funktionen gibt es eigene Anleitungen: [Neues Gleichungs-Teilthema](#neues-gleichungs-teilthema) und [Neues Funktions-Teilthema](#neues-funktions-teilthema).
 
 ## Schritt 0: Planen (nur bei neuer Einheit)
 
 Vor dem ersten Code klären und festhalten:
 
 1. Bereich, Thema (mit Klasse) und Teilthemen, jeweils mit Slug (Kleinbuchstaben und Bindestriche, eindeutig unter demselben Elternteil) und deutschem Titel.
-2. Welche der drei Aufgabenarten gilt (Tabelle oben)? Eine neue Art ist eine Planungsentscheidung, kein Handgriff.
-3. Welche interaktiven Elemente die Karten brauchen. Vorhandene: `term-steps`, `area-model`, `balance`, `equation-steps`. Ein neues Element ist ein eigener Sub-Task (siehe [Neue Widget-Art](#neue-widget-art)).
+2. Welche der vier Aufgabenarten gilt (Tabelle oben)? Eine neue Art ist eine Planungsentscheidung, kein Handgriff.
+3. Welche interaktiven Elemente die Karten brauchen. Vorhandene: `term-steps`, `area-model`, `balance`, `equation-steps` sowie auf dem Koordinatensystem `line-sliders`, `slope-triangle`, `line-points`, `value-table`, `two-lines`. Ein neues Element ist ein eigener Sub-Task (siehe [Neue Widget-Art](#neue-widget-art)).
 4. Was ausdrücklich nicht dazugehört; Ideen kommen ins Backlog.
 
 ## Schritt 1: Katalog
@@ -58,6 +59,10 @@ Tests: `tasks.test.ts` läuft mit `describe.each(SUBTOPIC_IDS)` über alle Term-
 
 Siehe [Neues Gleichungs-Teilthema](#neues-gleichungs-teilthema).
 
+### Funktions-Teilthema
+
+Siehe [Neues Funktions-Teilthema](#neues-funktions-teilthema).
+
 ## Schritt 3: Inhalte
 
 Dateien: `src/content/<name>.ts`, `src/content/index.ts`, ggf. `src/content/formulas.ts`.
@@ -89,11 +94,11 @@ Tests: `content.test.ts` prüft für jedes Teilthema: gültiges Deck, beide Frag
 
 Hier ist meist nichts zu tun:
 
-- `SubtopicPage` rendert Erklärung (`CardDeck`), Beispiele, Formeln und die Übung für jeden Pfad aus dem Katalog; `isTermSubtopic` bzw. `isEquationSubtopic` wählt `Practice` oder `EquationPractice`.
-- Beide Übungen und ihre Zustände sind themenunabhängig. Bei Termen ergeben sich die Eingabetasten aus den Buchstaben der Aufgabe.
+- `SubtopicPage` rendert Erklärung (`CardDeck`), Beispiele, Formeln und die Übung für jeden Pfad aus dem Katalog; `isTermSubtopic`, `isEquationSubtopic`, `isTaskPracticeSubtopic` bzw. `isIntersectionSubtopic` wählt `Practice`, `EquationPractice`, `FunctionPractice` oder `IntersectionPractice`.
+- Die Übungen und ihre Zustände sind themenunabhängig; bei Funktionen entscheidet die Aufgabenart über die Antwort (siehe [F5](#f5-übung)). Bei Termen ergeben sich die Eingabetasten aus den Buchstaben der Aufgabe.
 - `progress.ts` legt den Fortschritt für alle Einträge von `ALL_SUBTOPIC_IDS` an. Neue Teilthemen brauchen keine Migration; ältere Speicherstände bleiben gültig. Der Kartenstand (`lemmio:cards`) ist je Deck-Id getrennt.
 
-Nur wenn ein Teilthema eine andere Eingabe oder Rückmeldung braucht (andere Tasten, andere Chips), werden `MathInput.tsx` bzw. `EquationEntry.tsx` erweitert. Die Rückmeldung der Term-Übung ist an `CheckResult` gebunden, die der Gleichungs-Übung an `EquationFeedback` (siehe [Architektur](architektur.md#übung-srcpractice)).
+Nur wenn ein Teilthema eine andere Eingabe oder Rückmeldung braucht (andere Tasten, andere Chips), werden `MathInput.tsx` bzw. `EquationEntry.tsx` erweitert. Die Rückmeldung der Term-Übung ist an `CheckResult` gebunden, die der Gleichungs-Übung an `EquationFeedback`, die der Funktions-Übungen an `FunctionFeedback` bzw. `IntersectionFeedback` (siehe [Architektur](architektur.md#übung-srcpractice)).
 
 ## Schritt 5: Design einhalten
 
@@ -169,6 +174,48 @@ Alles andere (Katalog, Inhalte, Seiten, Fortschritt, Generator-Eigenschaften wie
 
 Nichts zu tun: `EquationPractice` und `equationSession.ts` arbeiten mit jeder Id aus `EQUATION_SUBTOPIC_IDS`. Fortschritt, Skill-Pfad und Serienergebnis kommen mit. Nur wenn das Teilthema andere Umformungen braucht als `+ − · :`, „Term umformen“ und „⇄“, müssen `readOperation`, `checkStep` und die Tastenreihe in `EquationEntry.tsx` erweitert werden.
 
+## Neues Funktions-Teilthema
+
+Beispiel: ein fünftes Teilthema unter `funktionen/lineare-funktionen`. Die Zahlen sind ganz (m, n und alle Punkte), Punkte liegen im Fenster `FUNCTION_WINDOW` (−8…8). Brüche und Dezimalzahlen als Steigung, Textaufgaben und andere Funktionstypen sind eine [neue Aufgabenart](#neue-aufgabenart).
+
+### F1: Katalog
+
+Siehe Schritt 1: Eintrag unter `subtopics` des Themas `lineare-funktionen`, z. B. `slug: 'beispiel'`. Ein neues Thema im Bereich `funktionen` braucht zusätzlich einen Eintrag in `formulaSheets` (Schlüssel `funktionen/<thema>`), damit es im Formelsatz erscheint.
+
+### F2: Generator
+
+Dateien: `src/math/functions/types.ts` und `tasks.ts`.
+
+1. **Aufgabenart:** Passt keine der vorhandenen `FunctionTask`-Arten (`read-equation`, `draw-graph`, `from-point-slope`, `from-two-points`, `point-test`, `zero`, `intersection`), einen neuen Zweig der Union in `types.ts` ergänzen, mit `fn`, `instruction` und `steps` (Musterlösung als `FunctionSolutionLine`, jede Zeile mit `text`, `latex`, `note?`). Ist eine Gleichung zu lösen, trägt die Aufgabe eine `EquationTask` aus `buildEquationTask` in `equation`.
+2. **Builder** `build<Name>Task(…)` mit festen Zahlen anlegen (liefert die Beispiele) und `check…` in `check.ts`, falls die Antwort eine neue Prüfung braucht. Zahlen nur über `Rational` und die Hilfen aus `analysis.ts` (`valueAt`, `zeroOf`, `intersect`, …).
+3. **Generator** `generate<Name>Task(rng)` schreiben, Zufall nur über `rng`; Wertebereiche in der Doku-Kommentarzeile festhalten. Eine Serie aus 10 Aufgaben muss ohne Wiederholung entstehen (`key` der Aufgabe unterscheidet).
+4. **Registrieren** in `functionGenerators` unter dem Pfad des Teilthemas (neue Konstante neben `GRAPH`, `SET_UP`, …). `FUNCTION_SUBTOPIC_IDS`, `ALL_SUBTOPIC_IDS` und `AnySubtopicId` leiten sich ab. Neue `check…`/`build…`-Funktionen in `src/math/functions/index.ts` exportieren.
+
+### F3: Inhalt
+
+Datei: `src/content/funktionen-<name>.ts`, registriert in `src/content/index.ts` (Schritt 3).
+
+1. **Karten:** Der Test verlangt mindestens ein Koordinatensystem-Widget (`line-sliders`, `slope-triangle`, `line-points`, `value-table`, `two-lines`) und beide Fragearten (`choice`, `term`). Funktionsterme in Term-Fragen ohne Präfix („Ergänze f(x) = …“). Daten der Widgets: [Architektur](architektur.md#interaktive-elemente); Punkte müssen im Fenster liegen, Werte ganz sein; `validateDeck` meldet Verstöße.
+2. **Funktionen im Text** als `$fn: …$` (Funktionsgleichung, Funktionswert, Punkt, Wert von m oder n). Nie `$…$` für Funktionsgleichungen: sie würden als Term-Identität geprüft. Buchstaben wie m und n gehen in `$fn:` nicht, `f(0) = n` steht als Klartext. Gleichungen (`x = -2`) und Lösungsmengen bleiben `$eq: …$`.
+3. **Beispiele:** `task: buildPointSlopeTask(…)`, `buildTwoPointsTask(…)`, … aus `src/math/functions`. Die Beispiel-Karte zeigt automatisch ein statisches Koordinatensystem (`functionExampleFigure` in `functionFigure.ts`) und den Lösungsweg. Figur ganzzahlig und im Fenster; bei neuer Aufgabenart `functionExampleFigure` und `FunctionSolutionSteps` ergänzen.
+4. **Formeln:** `formulaIds` verweist auf Einträge aus `formulaSheets['funktionen/lineare-funktionen']`; neue Einträge als `StatementEntry` (`kind: 'statement'`, `latex`; nur gesetzt, nicht nachgerechnet).
+
+### F4: Tests von Hand ergänzen
+
+| Datei | Was ergänzen |
+|---|---|
+| `src/math/functions/tasks.test.ts` | Liste der Funktions-Ids (`FUNCTION_SUBTOPIC_IDS` muss genau die vier bzw. fünf Ids enthalten); ein Test für die Besonderheiten der neuen Aufgaben (Wertebereiche, Sonderfälle) |
+| `src/content/content.test.ts` | Test `works through the planned examples`: Beispiele des neuen Teilthemas; ggf. die Liste der Formelgruppen |
+| `src/routes.test.tsx` | `expect(subtopics).toHaveLength(10)` auf die neue Zahl |
+
+Katalog, Inhalte, Seiten, Fortschritt und die Eigenschaften der Generatoren (Determinismus, Musterlösung gilt als richtig) laufen über `ALL_SUBTOPIC_IDS` bzw. `FUNCTION_SUBTOPIC_IDS` automatisch mit.
+
+### F5: Übung
+
+- Antwortet das Teilthema mit einer der vorhandenen Arten (Gleichung, gezeichneter Graph, Punktprobe, Nullstelle), die Id in `TASK_PRACTICE_SUBTOPIC_IDS` (`src/practice/functionSession.ts`) aufnehmen: `FunctionPractice` und `SubtopicPage` greifen dann von selbst. `answerKind(task)` ordnet die Aufgabenart ihrer Antwortart zu.
+- Eine neue Antwortart bekommt einen Zweig in `FunctionAnswer` und `submitFunctionAnswer`, eine Eingabe in `FunctionPractice.tsx` und Rückmeldungen in `FunctionFeedback`.
+- Braucht das Teilthema eine Rechnung Zeile für Zeile (wie der Schnittpunkt), eine eigene Zustandsdatei auf Basis von `equationSession.ts` anlegen (Vorlage: `intersectionSession.ts`, eingebettete `EquationSession`) und eine eigene Komponente (Vorlage: `IntersectionPractice`); `EquationEntry` lässt das Feld „Lösungsmenge“ weg, wenn man ihm keinen Handler übergibt.
+
 ## Neue Widget-Art
 
 Interaktive Elemente sind Datenobjekte mit Diskriminator `kind`. Eine neue Art braucht:
@@ -177,6 +224,7 @@ Interaktive Elemente sind Datenobjekte mit Diskriminator `kind`. Eine neue Art b
 2. **Logik** in `src/cards/<name>.ts`, rein und ohne React: Modell aus den Daten bauen, `…Problems(widget)` für die Prüfung (leere Liste = gültig), Zustandsübergänge als Funktionen, Texte für die Live-Region, Terme für den Satz. Über `src/cards/index.ts` exportieren.
 3. **Validierung** in `src/cards/validate.ts`: Fall in `widgetProblems`, die Terme in `cardTerms`, ggf. LaTeX in `deckLatex` und Notizen in `cardMarkup`. Der `switch` ist erschöpfend, TypeScript meldet fehlende Fälle.
 4. **Ansicht** in `src/components/cards/<Name>View.tsx` und ein `case` in `CardWidgetView.tsx`.
+   - Widgets mit Koordinatensystem bauen auf `CoordinatePlane` (`src/components/plane`) und `src/plane` auf; die gemeinsamen Daten (`name`, `window`, `label`) und Prüfungen stehen in `src/cards/lineCommon.ts`; das Koordinatensystem selbst ist gesteuert, der Zustand liegt im Widget.
    - Bedienung per Maus, Touch und Tastatur; `prefers-reduced-motion` beachten (`useReducedMotion`, `animate` aus `src/motion`).
    - Eine Live-Region sagt jeden Schritt an; Zustände nie nur über Farbe.
    - Widgets, die Pfeiltasten selbst nutzen, rufen `preventDefault()` auf, sonst blättert das Deck mit.
@@ -185,10 +233,10 @@ Interaktive Elemente sind Datenobjekte mit Diskriminator `kind`. Eine neue Art b
 
 ## Neue Aufgabenart
 
-Die Antwort ist weder ein Term noch eine zeilenweise gelöste lineare Gleichung (z. B. eine Zahl, ein Funktionsterm, eine Zeichnung, eine Bruchgleichung). Dann gilt wie bei den Gleichungen: eigenes Register statt Aufweichen der bestehenden.
+Die Antwort ist weder ein Term noch eine zeilenweise gelöste lineare Gleichung noch eine der Funktions-Antworten (z. B. eine Bruchgleichung, eine Textaufgabe, eine quadratische Funktion). Dann gilt wie bei den Gleichungen und Funktionen: eigenes Register statt Aufweichen der bestehenden. Das dritte Register (`src/math/functions`, `functionSession.ts`, `FunctionPractice`) ist die jüngste Vorlage.
 
 1. **Mathe-Kern:** eigenes Modul (z. B. `src/math/<art>/`) mit Aufgabentyp, Lesen der Eingabe, Prüfung, Generatoren und Musterlösung; ohne React, mit Unit-Tests.
-2. **Register:** `<art>Generators` und `<ART>_TOPIC_IDS` im Modul, in `src/math/topics.ts` in `ALL_SUBTOPIC_IDS` und `AnySubtopicId` aufnehmen und eine Prüffunktion `is<Art>Topic` ergänzen; `src/math/index.ts` exportiert sie.
+2. **Register:** `<art>Generators` und `<ART>_TOPIC_IDS` im Modul, in `src/math/topics.ts` in `ALL_SUBTOPIC_IDS` und `AnySubtopicId` aufnehmen und eine Prüffunktion `is<Art>Subtopic` ergänzen; `src/math/index.ts` exportiert sie.
 3. **Übung:** eigene Zustandsdatei in `src/practice/` (wie `equationSession.ts`, auf Basis von `SeriesState`) und eine eigene Komponente (wie `EquationPractice`) mit `PracticeProgress`, `SeriesSummary` und `SkillPath`; in `SubtopicPage` über die Prüffunktion einbinden.
-4. **Inhalte:** `WorkedExample.task` und `isEquationTask` in `src/content/types.ts` um die neue Aufgabe erweitern; das Beispiel-Rendering in `WorkedExampleCard` ergänzen. Die Tests in `content.test.ts` und `pages.test.tsx` unterscheiden bisher nur Term- und Gleichungs-Teilthemen und werden um die neue Art erweitert.
+4. **Inhalte:** `WorkedExample.task` und die Prüffunktionen (`isEquationTask`, `isFunctionTask`) in `src/content/types.ts` um die neue Aufgabe erweitern; das Beispiel-Rendering in `WorkedExampleCard` ergänzen. Die Tests in `content.test.ts` und `pages.test.tsx` unterscheiden bisher nur Term-, Gleichungs- und Funktions-Teilthemen und werden um die neue Art erweitert.
 5. **Fortschritt:** `progress.ts` nimmt jede Id aus `ALL_SUBTOPIC_IDS` auf; eine Migration ist nicht nötig.
