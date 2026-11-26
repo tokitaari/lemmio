@@ -72,6 +72,10 @@ describe('frame', () => {
     expect(planeFrame({ x: [0, 10], y: [0, 10] }).view).toEqual({ x: -28, y: -222, width: 250, height: 250 })
   })
 
+  it('leaves a narrow margin on every side of a grid without axes', () => {
+    expect(planeFrame({ x: [0, 12], y: [0, 10] }, { axes: false }).view).toEqual({ x: -8, y: -208, width: 256, height: 216 })
+  })
+
   it('converts between grid units, SVG units and client pixels', () => {
     expect(toView({ x: 2, y: -3 })).toEqual({ x: 40, y: 60 })
     expect(toView({ x: 0, y: 0 })).toEqual({ x: 0, y: 0 })
@@ -290,6 +294,10 @@ describe('texts', () => {
 
   it('names the window and explains the keys', () => {
     expect(describeWindow(W)).toBe('Koordinatensystem, x von −8 bis 8, y von −8 bis 8')
+    expect(describeWindow({ x: [0, 12], y: [0, 10] }, { axes: false })).toBe(
+      'Gitter, 12 mal 10 Kästchen, ein Kästchen 1 cm; x zählt die Kästchen nach rechts, y nach oben, ab der Ecke unten links',
+    )
+    expect(describeWindow({ x: [2, 8], y: [1, 5] }, { axes: false })).toMatch(/6 mal 4 Kästchen.*\(dort x = 2, y = 1\)$/)
     expect(dragHint('free')).toMatch(/^Pfeiltasten/)
     expect(dragHint('on-line')).toMatch(/Geraden/)
   })
