@@ -124,15 +124,25 @@ export interface PlaneFrame {
   view: { x: number; y: number; width: number; height: number }
 }
 
-export function planeFrame(window: PlaneWindow): PlaneFrame {
+/**
+ * Frame of a window. Without axes (`axes: false`, a plain grid for geometry)
+ * every side gets the narrow margin, since there are no arrows, numbers or
+ * axis names.
+ */
+export function planeFrame(window: PlaneWindow, { axes = true }: { axes?: boolean } = {}): PlaneFrame {
+  if (!axes) return frameWithMargins(window, MARGIN.side, MARGIN.side, MARGIN.side, MARGIN.side)
   const left = window.x[0] === 0 ? MARGIN.labels : MARGIN.side
   const bottom = window.y[0] === 0 ? MARGIN.labels : MARGIN.side
+  return frameWithMargins(window, left, bottom, MARGIN.right, MARGIN.top)
+}
+
+function frameWithMargins(window: PlaneWindow, left: number, bottom: number, right: number, top: number): PlaneFrame {
   // Rounded, so the viewBox carries no floating-point noise.
   const r = (v: number) => Math.round(v * 100) / 100 + 0
   const x = r((window.x[0] - left) * UNIT)
-  const y = r(-(window.y[1] + MARGIN.top) * UNIT)
-  const width = r((window.x[1] - window.x[0] + left + MARGIN.right) * UNIT)
-  const height = r((window.y[1] - window.y[0] + bottom + MARGIN.top) * UNIT)
+  const y = r(-(window.y[1] + top) * UNIT)
+  const width = r((window.x[1] - window.x[0] + left + right) * UNIT)
+  const height = r((window.y[1] - window.y[0] + bottom + top) * UNIT)
   return { window, view: { x, y, width, height } }
 }
 
@@ -501,10 +511,25 @@ export function lineText(line: PlaneLine, name?: string): string {
   return displayText(name ? text : `y${text.slice(text.indexOf(' ='))}`)
 }
 
-/** Accessible name of the plane, e.g. `Koordinatensystem, x von −8 bis 8, y von −8 bis 8`. */
-export function describeWindow(window: PlaneWindow): string {
+/**
+ * Accessible name of the plane, e.g. `Koordinatensystem, x von −8 bis 8, y von −8 bis 8`.
+ * Without axes (geometry grid, one square = 1 cm): `Gitter, 12 mal 10 Kästchen, ein Kästchen 1 cm, …`.
+ */
+export function describeWindow(window: PlaneWindow, { axes = true }: { axes?: boolean } = {}): string {
+  if (!axes) return describeGrid(window)
   const range = ([min, max]: Range) => `von ${formatNumber(min)} bis ${formatNumber(max)}`
   return `Koordinatensystem, x ${range(window.x)}, y ${range(window.y)}`
+}
+
+function describeGrid(window: PlaneWindow): string {
+  const columns = window.x[1] - window.x[0]
+  const rows = window.y[1] - window.y[0]
+  const origin =
+    window.x[0] === 0 && window.y[0] === 0 ? '' : ` (dort x = ${formatNumber(window.x[0])}, y = ${formatNumber(window.y[0])})`
+  return (
+    `Gitter, ${columns} mal ${rows} Kästchen, ein Kästchen 1 cm; ` +
+    `x zählt die Kästchen nach rechts, y nach oben, ab der Ecke unten links${origin}`
+  )
 }
 
 /** Keyboard hint for a movable point, linked with aria-describedby. */

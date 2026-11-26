@@ -62,6 +62,19 @@ export interface PlanePointItem {
   showCoordinates?: boolean
 }
 
+/** A filled polygon, e.g. a figure drawn on the geometry grid. */
+export interface PlanePolygonItem {
+  id: string
+  /** Vertices in grid units, in order. */
+  points: readonly PlanePosition[]
+  tone?: PlaneTone
+  dashed?: boolean
+  /** Lightly filled in its tone; false: outline only. Default true. */
+  filled?: boolean
+  /** Accessible name, e.g. "Dreieck ABC mit A(2|2), B(8|2), C(4|7)". */
+  description: string
+}
+
 /** What an overlay needs to draw in the plane's coordinates. */
 export interface PlaneGeometry {
   window: PlaneWindow
@@ -74,7 +87,11 @@ export interface PlaneGeometry {
 export interface CoordinatePlaneProps {
   /** Visible window; −8…8 on both axes by default. Check custom windows with `planeWindowProblems`. */
   window?: PlaneWindow
+  /** False: a plain grid without axes, numbers and axis names (geometry, one square = 1 cm). Default true. */
+  axes?: boolean
   lines?: readonly PlaneLineItem[]
+  /** Drawn above the grid, below lines, overlay and points. */
+  polygons?: readonly PlanePolygonItem[]
   points?: readonly PlanePointItem[]
   /** A movable point snapped to a new grid point (pointer or keyboard). The caller updates `points`. */
   onPointChange?: (id: string, p: GridPoint) => void
@@ -99,9 +116,20 @@ const TICK = { size: 4, below: 15, left: 6 } as const
 
 const geometryToView = (p: PlanePosition) => toView(p)
 
+/** SVG points attribute of a polygon in grid units. */
+function polygonPoints(points: readonly PlanePosition[]): string {
+  return points
+    .map((p) => {
+      const v = toView(p)
+      return `${v.x},${v.y}`
+    })
+    .join(' ')
+}
+
 /**
- * Coordinate plane as SVG: grid, axes with numbers, lines clipped to the
- * window, fixed and movable points. Movable points snap to grid points while
+ * Coordinate plane as SVG: grid, axes with numbers (or, with
+ * `axes={false}`, a plain grid), polygons, lines clipped to the window,
+ * fixed and movable points. Movable points snap to grid points while
  * they are dragged (Pointer Events with pointer capture) and move with the
  * arrow keys, Pos1/Ende and Bild↑/Bild↓; they are sliders for assistive
  * technology, and every completed move is announced in a live region.
@@ -113,7 +141,9 @@ const geometryToView = (p: PlanePosition) => toView(p)
  */
 export default function CoordinatePlane({
   window: win = DEFAULT_WINDOW,
+  axes = true,
   lines = [],
+  polygons = [],
   points = [],
   onPointChange,
   onPlace,
@@ -121,7 +151,7 @@ export default function CoordinatePlane({
   label,
   overlay,
 }: CoordinatePlaneProps) {
-  const frame = useMemo(() => planeFrame(win), [win])
+  const frame = useMemo(() => planeFrame(win, { axes }), [win, axes])
   const grid = useMemo(() => gridLines(win), [win])
   const ticks = useMemo(() => ({ x: axisTicks(win, 'x'), y: axisTicks(win, 'y') }), [win])
 
@@ -214,7 +244,8 @@ export default function CoordinatePlane({
   const hintKinds = [...new Set(points.flatMap((p) => (p.drag ? [p.drag.kind] : [])))]
   const xTip = (xMax + AXIS_OVERSHOOT) * UNIT
   const yTip = -(yMax + AXIS_OVERSHOOT) * UNIT
-  const name = label ? `${label}. ${describeWindow(win)}` : describeWindow(win)
+  const windowText = describeWindow(win, { axes })
+  const name = label ? `${label}. ${windowText}` : windowText
 
   return (
     <div className="plane">
@@ -234,63 +265,83 @@ export default function CoordinatePlane({
           ))}
         </g>
 
-        <g className="plane-axes" aria-hidden="true">
-          <line x1={xMin * UNIT} y1={0} x2={xTip} y2={0} />
-          <line x1={0} y1={-yMin * UNIT} x2={0} y2={yTip} />
-          <polygon
-            className="plane-arrow"
-            points={`${xTip},0 ${xTip - ARROW.length},${-ARROW.half} ${xTip - ARROW.length},${ARROW.half}`}
-          />
-          <polygon
-            className="plane-arrow"
-            points={`0,${yTip} ${-ARROW.half},${yTip + ARROW.length} ${ARROW.half},${yTip + ARROW.length}`}
-          />
-          {ticks.x.map((t) => (
-            <line key={`tx${t.value}`} x1={t.value * UNIT} y1={-TICK.size} x2={t.value * UNIT} y2={TICK.size} />
-          ))}
-          {ticks.y.map((t) => (
-            <line key={`ty${t.value}`} x1={-TICK.size} y1={-t.value * UNIT} x2={TICK.size} y2={-t.value * UNIT} />
-          ))}
-          {ticks.x.map(
-            (t) =>
-              t.label && (
-                <text
-                  key={`lx${t.value}`}
-                  className="plane-number"
-                  x={t.value * UNIT}
-                  y={TICK.below}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                >
-                  {t.label}
-                </text>
-              ),
-          )}
-          {ticks.y.map(
-            (t) =>
-              t.label && (
-                <text
-                  key={`ly${t.value}`}
-                  className="plane-number"
-                  x={-TICK.left}
-                  y={-t.value * UNIT}
-                  textAnchor="end"
-                  dominantBaseline="central"
-                >
-                  {t.label}
-                </text>
-              ),
-          )}
-          <text className="plane-number" x={-TICK.left} y={TICK.below} textAnchor="end" dominantBaseline="central">
-            {formatNumber(0)}
-          </text>
-          <text className="plane-axis-name" x={xTip} y={-14} textAnchor="end" dominantBaseline="central">
-            x
-          </text>
-          <text className="plane-axis-name" x={12} y={yTip + 4} textAnchor="start" dominantBaseline="central">
-            y
-          </text>
-        </g>
+        {axes && (
+          <g className="plane-axes" aria-hidden="true">
+            <line x1={xMin * UNIT} y1={0} x2={xTip} y2={0} />
+            <line x1={0} y1={-yMin * UNIT} x2={0} y2={yTip} />
+            <polygon
+              className="plane-arrow"
+              points={`${xTip},0 ${xTip - ARROW.length},${-ARROW.half} ${xTip - ARROW.length},${ARROW.half}`}
+            />
+            <polygon
+              className="plane-arrow"
+              points={`0,${yTip} ${-ARROW.half},${yTip + ARROW.length} ${ARROW.half},${yTip + ARROW.length}`}
+            />
+            {ticks.x.map((t) => (
+              <line key={`tx${t.value}`} x1={t.value * UNIT} y1={-TICK.size} x2={t.value * UNIT} y2={TICK.size} />
+            ))}
+            {ticks.y.map((t) => (
+              <line key={`ty${t.value}`} x1={-TICK.size} y1={-t.value * UNIT} x2={TICK.size} y2={-t.value * UNIT} />
+            ))}
+            {ticks.x.map(
+              (t) =>
+                t.label && (
+                  <text
+                    key={`lx${t.value}`}
+                    className="plane-number"
+                    x={t.value * UNIT}
+                    y={TICK.below}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                  >
+                    {t.label}
+                  </text>
+                ),
+            )}
+            {ticks.y.map(
+              (t) =>
+                t.label && (
+                  <text
+                    key={`ly${t.value}`}
+                    className="plane-number"
+                    x={-TICK.left}
+                    y={-t.value * UNIT}
+                    textAnchor="end"
+                    dominantBaseline="central"
+                  >
+                    {t.label}
+                  </text>
+                ),
+            )}
+            <text className="plane-number" x={-TICK.left} y={TICK.below} textAnchor="end" dominantBaseline="central">
+              {formatNumber(0)}
+            </text>
+            <text className="plane-axis-name" x={xTip} y={-14} textAnchor="end" dominantBaseline="central">
+              x
+            </text>
+            <text className="plane-axis-name" x={12} y={yTip + 4} textAnchor="start" dominantBaseline="central">
+              y
+            </text>
+          </g>
+        )}
+
+        {polygons.map((item) => (
+          <g
+            key={item.id}
+            className={[
+              'plane-polygon',
+              `plane-tone-${item.tone ?? 'accent'}`,
+              item.filled === false ? '' : 'is-filled',
+              item.dashed ? 'is-dashed' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            role="img"
+            aria-label={item.description}
+          >
+            <polygon points={polygonPoints(item.points)} />
+          </g>
+        ))}
 
         {lines.map((item) => {
           const segment = clipLine(item.line, win)

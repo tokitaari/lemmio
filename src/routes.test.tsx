@@ -117,6 +117,14 @@ describe('Routing and layout', () => {
     expect(screen.getAllByRole('slider', { name: /^Punkt / })).toHaveLength(6)
   })
 
+  it('serves the figure demo in the dev server', async () => {
+    renderAt('/dev/figuren')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Figuren-Demo' })).toBeInTheDocument()
+    expect(screen.getAllByRole('img', { name: /^(Parallelogramm|Dreieck|Raute|Trapez) [A-D]+:/ })).toHaveLength(21)
+    expect(screen.getAllByRole('group', { name: /Gitter, 12 mal 10 Kästchen/ })).toHaveLength(2)
+    expect(screen.getByRole('slider', { name: 'Punkt F' })).toBeInTheDocument()
+  })
+
   it('shows "not found" for nested unknown paths', () => {
     renderAt('/a/b/c/d')
     expect(screen.getByRole('heading', { name: 'Seite nicht gefunden' })).toBeInTheDocument()

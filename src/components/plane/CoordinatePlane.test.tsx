@@ -102,6 +102,41 @@ describe('drawing', () => {
     expect(container.querySelector('svg')).toHaveAttribute('viewBox', '-88 -102 190 190')
   })
 
+  it('draws a plain grid without axes and numbers for geometry', () => {
+    const { container } = render(<CoordinatePlane axes={false} window={{ x: [0, 12], y: [0, 10] }} label="Figur" />)
+    expect(
+      screen.getByRole('group', { name: /^Figur\. Gitter, 12 mal 10 Kästchen, ein Kästchen 1 cm/ }),
+    ).toBeInTheDocument()
+    expect(container.querySelector('.plane-axes')).toBeNull()
+    expect(container.querySelectorAll('.plane-number')).toHaveLength(0)
+    expect(container.querySelectorAll('.plane-grid line')).toHaveLength(13 + 11)
+    expect(container.querySelector('svg')).toHaveAttribute('viewBox', '-8 -208 256 216')
+  })
+
+  it('draws polygons below lines and points with their description', () => {
+    const { container } = render(
+      <CoordinatePlane
+        axes={false}
+        window={{ x: [0, 12], y: [0, 10] }}
+        lines={[{ id: 'ab', line: { kind: 'function', m: 0, n: 2 } }]}
+        polygons={[
+          { id: 'abc', points: [{ x: 2, y: 2 }, { x: 8, y: 2 }, { x: 4, y: 7 }], description: 'Dreieck ABC' },
+          { id: 'own', points: [{ x: 1, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 3 }], description: 'Deine Figur', tone: 'danger', dashed: true, filled: false },
+        ]}
+        points={[{ id: 'f', label: 'F', x: 4, y: 2, drag: { kind: 'free' } }]}
+      />,
+    )
+    const triangle = screen.getByRole('img', { name: 'Dreieck ABC' })
+    expect(triangle).toHaveClass('plane-polygon', 'plane-tone-accent', 'is-filled')
+    expect(triangle.querySelector('polygon')).toHaveAttribute('points', '40,-40 160,-40 80,-140')
+    const own = screen.getByRole('img', { name: 'Deine Figur' })
+    expect(own).toHaveClass('plane-tone-danger', 'is-dashed')
+    expect(own).not.toHaveClass('is-filled')
+    // Order in the SVG: polygons, then lines, then points.
+    const order = [...container.querySelectorAll('.plane-polygon, .plane-line, .plane-point')].map((el) => el.classList[0])
+    expect(order).toEqual(['plane-polygon', 'plane-polygon', 'plane-line', 'plane-point'])
+  })
+
   it('passes the geometry to an overlay', () => {
     const { container } = render(
       <CoordinatePlane

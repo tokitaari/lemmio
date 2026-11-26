@@ -1503,6 +1503,105 @@ p .tex {
   stroke-width: 3;
 }
 
+/* Polygons on the coordinate plane, e.g. figures on the geometry grid (axes={false}) */
+.plane-polygon polygon {
+  fill: none;
+  stroke: var(--plane-tone);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.plane-polygon.is-filled polygon {
+  fill: var(--plane-tone);
+  fill-opacity: 0.14;
+}
+
+.plane-polygon.is-dashed polygon {
+  stroke-dasharray: 8 6;
+}
+
+/* Figures (src/components/shapes): true to scale, 1 cm = 25 px at full size (max-width set inline) */
+.shape-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+  font-family: var(--font-sans);
+}
+
+.shape-outline {
+  fill: var(--accent-soft);
+  stroke: var(--text);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.shape-drawing.is-attempt .shape-outline {
+  fill: none;
+  stroke: var(--danger);
+  stroke-dasharray: 8 6;
+}
+
+.shape-height-line {
+  stroke: var(--pink);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.shape-right-angle {
+  fill: none;
+  stroke: var(--pink);
+  stroke-width: 1.5;
+}
+
+.shape-right-angle.is-muted {
+  stroke: var(--muted);
+}
+
+.shape-foot {
+  fill: var(--pink);
+}
+
+.shape-extension {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.shape-diagonal {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+/* Labels: horizontal, with a halo in the surface colour (like the area model) */
+.shape-text {
+  font-size: 14px;
+  fill: var(--text);
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.shape-text-vertex {
+  font-weight: 600;
+}
+
+.shape-text-height {
+  fill: var(--pink);
+}
+
+.shape-text.is-unknown {
+  fill: var(--accent);
+  font-weight: 700;
+}
+
+.shape-letter {
+  font-style: italic;
+}
+
 /* Line widgets (line-sliders, slope-triangle, line-points): equation, sliders, slope triangle, table of values */
 .line-equation,
 .slope-calc {

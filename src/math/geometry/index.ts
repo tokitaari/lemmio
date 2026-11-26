@@ -26,6 +26,7 @@ export {
   type ParsedCalculation,
   type ResultForm,
 } from './calculation'
+export { buildFigure, footOn } from './figures'
 export {
   checkDrawing,
   checkFoot,
