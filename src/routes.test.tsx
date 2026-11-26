@@ -119,11 +119,12 @@ describe('Routing and layout', () => {
 
   it('serves the figure demo in the dev server', async () => {
     renderAt('/dev/figuren')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Figuren-Demo' })).toBeInTheDocument()
+    // The lazy route builds 21 figures and two grids; under a full parallel test run it takes longer than 1 s.
+    expect(await screen.findByRole('heading', { level: 1, name: 'Figuren-Demo' }, { timeout: 10_000 })).toBeInTheDocument()
     expect(screen.getAllByRole('img', { name: /^(Parallelogramm|Dreieck|Raute|Trapez) [A-D]+:/ })).toHaveLength(21)
     expect(screen.getAllByRole('group', { name: /Gitter, 12 mal 10 Kästchen/ })).toHaveLength(2)
     expect(screen.getByRole('slider', { name: 'Punkt F' })).toBeInTheDocument()
-  })
+  }, 20_000)
 
   it('shows "not found" for nested unknown paths', () => {
     renderAt('/a/b/c/d')
