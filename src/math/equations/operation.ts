@@ -2,7 +2,7 @@ import type { Expr } from '../ast'
 import { TermError, toErrorInfo, type TermErrorCode, type TermErrorInfo } from '../errors'
 import { toPolynomial } from '../normalize'
 import type { Polynomial } from '../polynomial'
-import { toLatex, toText } from '../printer'
+import { toLatex, toText, type PrintOptions } from '../printer'
 import { Rational } from '../rational'
 import { parseAt, type Sides } from './equation'
 import type { Operation } from './types'
@@ -211,15 +211,15 @@ const LATEX_SIGNS: Record<ArithmeticKind, string> = {
 }
 
 /** Display text such as `| - 3x`, `| : (-2)`, `| ⇄`; can be read back with `parseOperation`. */
-export function operationToText(operation: Operation): string {
+export function operationToText(operation: Operation, options?: PrintOptions): string {
   if (operation.kind === 'swap') return `| ${SWAP_SYMBOL}`
   if (operation.kind === 'simplify') return `| ${SIMPLIFY_LABEL}`
-  return `| ${TEXT_SIGNS[operation.kind]} ${operandWith(toText, operation.operand)}`
+  return `| ${TEXT_SIGNS[operation.kind]} ${operandWith((e) => toText(e, options), operation.operand)}`
 }
 
 /** LaTeX for KaTeX, e.g. `\mid\; {-}\, 3x`. */
-export function operationToLatex(operation: Operation): string {
+export function operationToLatex(operation: Operation, options?: PrintOptions): string {
   if (operation.kind === 'swap') return '\\mid\\; \\rightleftarrows'
   if (operation.kind === 'simplify') return `\\mid\\; \\text{${SIMPLIFY_LABEL}}`
-  return `\\mid\\; ${LATEX_SIGNS[operation.kind]}\\, ${operandWith(toLatex, operation.operand)}`
+  return `\\mid\\; ${LATEX_SIGNS[operation.kind]}\\, ${operandWith((e) => toLatex(e, options), operation.operand)}`
 }

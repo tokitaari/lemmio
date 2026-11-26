@@ -3,7 +3,7 @@ import { TermError, toErrorInfo, type TermErrorInfo } from '../errors'
 import { toPolynomial } from '../normalize'
 import { MAX_INPUT_LENGTH, parse } from '../parser'
 import type { Polynomial } from '../polynomial'
-import { toLatex, toText } from '../printer'
+import { toLatex, toText, type PrintOptions } from '../printer'
 import { Rational } from '../rational'
 import type { Equation, SolutionSet } from './types'
 
@@ -168,11 +168,11 @@ function isUnsignedNumber(e: Expr): boolean {
 }
 
 /** Display text such as `3x + 5 = x + 9`; can be read back with `parseEquation`. */
-export function equationToText(equation: Equation): string {
-  return `${toText(equation.left)} = ${toText(equation.right)}`
+export function equationToText(equation: Equation, options?: PrintOptions): string {
+  return `${toText(equation.left, options)} = ${toText(equation.right, options)}`
 }
 
 /** LaTeX for KaTeX. */
-export function equationToLatex(equation: Equation): string {
-  return `${toLatex(equation.left)} = ${toLatex(equation.right)}`
+export function equationToLatex(equation: Equation, options?: PrintOptions): string {
+  return `${toLatex(equation.left, options)} = ${toLatex(equation.right, options)}`
 }

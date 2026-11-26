@@ -50,6 +50,11 @@ export interface EquationTask {
   solutionSet: SolutionSet
   /** German sentence that explains the solution set. */
   solutionNote: string
+  /**
+   * `decimal`: print the numbers of this task with `{ numbers: 'decimal' }`
+   * (e.g. `1,5c = 9`); set by geometry tasks. Absent: fractions as usual.
+   */
+  numbers?: 'decimal'
 }
 
 export type EquationTaskGenerator = (rng: Rng) => EquationTask

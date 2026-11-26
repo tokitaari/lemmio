@@ -83,8 +83,8 @@ function functionValueLine(fn: LinearFunction, x: Rational, note: string): Funct
   const value = num(valueAt(fn, x))
   const chain = toText(inserted) === toText(value) ? [value] : [inserted, value]
   return line(
-    `${fn.name}(${t(x)}) = ${chain.map(toText).join(' = ')}`,
-    `${fn.name}(${l(x)}) = ${chain.map(toLatex).join(' = ')}`,
+    `${fn.name}(${t(x)}) = ${chain.map((e) => toText(e)).join(' = ')}`,
+    `${fn.name}(${l(x)}) = ${chain.map((e) => toLatex(e)).join(' = ')}`,
     note,
   )
 }
@@ -218,8 +218,8 @@ export function buildTwoPointsTask(p: Coordinates, q: Coordinates, variant = 'ex
     equation: tail.equation,
     steps: [
       line(
-        `m = ${chain.map(toText).join(' = ')}`,
-        `m = ${chain.map(toLatex).join(' = ')}`,
+        `m = ${chain.map((e) => toText(e)).join(' = ')}`,
+        `m = ${chain.map((e) => toLatex(e)).join(' = ')}`,
         'Steigung aus zwei Punkten: m = (y₂ - y₁)/(x₂ - x₁).',
       ),
       ...tail.steps,

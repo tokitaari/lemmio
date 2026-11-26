@@ -1,5 +1,6 @@
 import { EQUATION_SUBTOPIC_IDS } from './equations'
 import { FUNCTION_SUBTOPIC_IDS } from './functions'
+import { GEOMETRY_SUBTOPIC_IDS } from './geometry'
 import { SUBTOPIC_IDS } from './tasks'
 
 /**
@@ -13,9 +14,15 @@ import { SUBTOPIC_IDS } from './tasks'
  */
 export const ALL_SUBTOPIC_IDS = [...SUBTOPIC_IDS, ...EQUATION_SUBTOPIC_IDS, ...FUNCTION_SUBTOPIC_IDS]
 
+// The fourth register, geometry tasks (`geometryGenerators`,
+// `GEOMETRY_SUBTOPIC_IDS`: calculations with units, substituted formulas,
+// points set in a grid), joins ALL_SUBTOPIC_IDS and AnySubtopicId together
+// with its catalog entries and contents.
+
 export type TermSubtopicId = (typeof SUBTOPIC_IDS)[number]
 export type EquationSubtopicId = (typeof EQUATION_SUBTOPIC_IDS)[number]
 export type FunctionSubtopicId = (typeof FUNCTION_SUBTOPIC_IDS)[number]
+export type GeometrySubtopicId = (typeof GEOMETRY_SUBTOPIC_IDS)[number]
 export type AnySubtopicId = TermSubtopicId | EquationSubtopicId | FunctionSubtopicId
 
 /** True for a subtopic whose tasks are terms (see `generators`). */
@@ -31,4 +38,9 @@ export function isEquationSubtopic(id: string): id is EquationSubtopicId {
 /** True for a subtopic whose tasks are about linear functions (see `functionGenerators`). */
 export function isFunctionSubtopic(id: string): id is FunctionSubtopicId {
   return (FUNCTION_SUBTOPIC_IDS as readonly string[]).includes(id)
+}
+
+/** True for a subtopic whose tasks are about areas and perimeters (see `geometryGenerators`). */
+export function isGeometrySubtopic(id: string): id is GeometrySubtopicId {
+  return (GEOMETRY_SUBTOPIC_IDS as readonly string[]).includes(id)
 }

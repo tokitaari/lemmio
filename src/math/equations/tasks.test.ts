@@ -77,7 +77,7 @@ describe('equation generators', () => {
 
     it('never repeats a line in the worked solution', () => {
       for (const task of tasks) {
-        const lines = [task.equation, ...task.steps.map((s) => s.equation)].map(equationToText)
+        const lines = [task.equation, ...task.steps.map((s) => s.equation)].map((e) => equationToText(e))
         expect(new Set(lines).size, task.key).toBe(lines.length)
       }
     })

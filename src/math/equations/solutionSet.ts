@@ -1,7 +1,7 @@
 import { num } from '../ast'
 import { TermError, toErrorInfo, type TermErrorInfo } from '../errors'
 import { toPolynomial } from '../normalize'
-import { toLatex, toText } from '../printer'
+import { toLatex, toText, type PrintOptions } from '../printer'
 import { equalSolutionSets, parseAt } from './equation'
 import type { SolutionSet } from './types'
 
@@ -55,10 +55,10 @@ export function readSolutionSet(input: string): ReadSolutionSetResult {
 }
 
 /** Display text `L = {3}`, `L = { }` or `L = ℚ`; can be read back with `parseSolutionSet`. */
-export function solutionSetToText(set: SolutionSet): string {
+export function solutionSetToText(set: SolutionSet, options?: PrintOptions): string {
   switch (set.kind) {
     case 'single':
-      return `L = {${toText(num(set.value))}}`
+      return `L = {${toText(num(set.value), options)}}`
     case 'empty':
       return 'L = { }'
     case 'all':
@@ -67,10 +67,10 @@ export function solutionSetToText(set: SolutionSet): string {
 }
 
 /** LaTeX for KaTeX. */
-export function solutionSetToLatex(set: SolutionSet): string {
+export function solutionSetToLatex(set: SolutionSet, options?: PrintOptions): string {
   switch (set.kind) {
     case 'single':
-      return `\\mathbb{L} = \\{${toLatex(num(set.value))}\\}`
+      return `\\mathbb{L} = \\{${toLatex(num(set.value), options)}\\}`
     case 'empty':
       return '\\mathbb{L} = \\{\\,\\}'
     case 'all':

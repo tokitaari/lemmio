@@ -18,6 +18,13 @@ export type FormHintCode =
   | 'wrong-name'
   | 'unevaluated-coordinate'
   | 'unevaluated-value'
+  // Geometry (src/math/geometry)
+  | 'missing-quantity'
+  | 'wrong-quantity'
+  | 'unevaluated-result'
+  | 'decimal-result'
+  | 'missing-calculation'
+  | 'not-substituted-only'
 
 export interface FormHint {
   code: FormHintCode
@@ -49,6 +56,12 @@ const MESSAGES: Record<FormHintCode, string> = {
   'wrong-name': 'Achte auf den Namen der Funktion.',
   'unevaluated-coordinate': 'Rechne die Koordinaten aus, z. B. P(2|5) statt P(2|2·2 + 1).',
   'unevaluated-value': 'Rechne bis zu einer einzelnen Zahl aus, z. B. f(2) = 2·2 + 1 = 5.',
+  'missing-quantity': 'Beginne mit der gesuchten Größe, z. B. A = …',
+  'wrong-quantity': 'Achte auf die gesuchte Größe: A für den Flächeninhalt, u für den Umfang.',
+  'unevaluated-result': 'Rechne bis zu einer einzelnen Zahl aus, z. B. A = 6 · 4 : 2 = 12.',
+  'decimal-result': 'Gib das Ergebnis als Dezimalzahl an, z. B. 7,5 statt 15/2.',
+  'missing-calculation': 'Schreibe die Rechnung dazu, z. B. A = g · h = 6 · 4 = 24.',
+  'not-substituted-only': 'Setze zuerst nur die bekannten Zahlen in die Formel ein. Umformen kommt danach.',
 }
 
 /** Order in which problems are reported when several apply. */

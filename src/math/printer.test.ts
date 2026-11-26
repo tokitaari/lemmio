@@ -56,6 +56,42 @@ describe('toLatex', () => {
   })
 })
 
+describe('decimal numbers', () => {
+  const decimal = { numbers: 'decimal' } as const
+
+  it('prints finite decimal fractions with a decimal comma', () => {
+    expect(toText(num(Rational.of(15, 2)), decimal)).toBe('7,5')
+    expect(toLatex(num(Rational.of(15, 2)), decimal)).toBe('7{,}5')
+    expect(toText(num(Rational.of(1, 20)), decimal)).toBe('0,05')
+    expect(toText(num(Rational.of(-7, 4)), decimal)).toBe('-1,75')
+    expect(toText(num(12), decimal)).toBe('12')
+  })
+
+  it('needs no brackets around decimals', () => {
+    expect(toText(mul(num(Rational.of(3, 2)), v('c')), decimal)).toBe('1,5c')
+    expect(toText(times(num(2), num(Rational.of(15, 2))), decimal)).toBe('2·7,5')
+    expect(toText(add(x, num(Rational.of(-1, 2))), decimal)).toBe('x - 0,5')
+  })
+
+  it('keeps fractions without a finite decimal expansion', () => {
+    expect(toText(num(Rational.of(1, 3)), decimal)).toBe('1/3')
+    expect(toLatex(num(Rational.of(1, 3)), decimal)).toBe('\\frac{1}{3}')
+    expect(toText(mul(num(Rational.of(1, 3)), x), decimal)).toBe('(1/3)x')
+  })
+
+  it('leaves the default output unchanged', () => {
+    expect(toText(num(Rational.of(15, 2)))).toBe('15/2')
+    expect(toText(mul(num(Rational.of(3, 2)), v('c')))).toBe('(3/2)c')
+  })
+
+  it('prints text that parses back to the same value', () => {
+    const poly = Polynomial.monomial(Rational.of(3, 2), { c: 1 }).add(Polynomial.constant(Rational.of(13, 4)))
+    const text = toText(polynomialToExpr(poly), decimal)
+    expect(text).toBe('1,5c + 3,25')
+    expect(toPolynomial(parse(text)).equals(poly)).toBe(true)
+  })
+})
+
 describe('round trip', () => {
   it('parses printed canonical polynomials back to the same value and text', () => {
     const rng = createRng(7)

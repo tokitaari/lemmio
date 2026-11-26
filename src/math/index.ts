@@ -14,7 +14,9 @@
  *
  * Linear equations are solved line by line and have their own tasks, checks
  * and generators; see ./equations. Linear functions (function equations,
- * points, graphs) are the third register; see ./functions.
+ * points, graphs) are the third register; see ./functions. Areas and
+ * perimeters (calculations with units, drawing in a grid) are the fourth;
+ * see ./geometry.
  */
 export * as build from './ast'
 export type { Expr, Span } from './ast'
@@ -22,20 +24,23 @@ export { checkAnswer, readTerm, type AnswerKey, type CheckResult, type ReadResul
 export { TermError, type TermErrorCode, type TermErrorInfo } from './errors'
 export * from './equations'
 export * from './functions'
+export * from './geometry'
 export { checkForm, isExpanded, type FormHint, type FormHintCode, type FormRequirement } from './form'
 export { areEquivalent, polynomialToExpr, toPolynomial } from './normalize'
 export { MAX_EXPONENT, MAX_INPUT_LENGTH, parse } from './parser'
 export { Polynomial } from './polynomial'
-export { toLatex, toText } from './printer'
+export { toLatex, toText, type PrintOptions } from './printer'
 export { createRng, type Rng } from './random'
 export {
   ALL_SUBTOPIC_IDS,
   isEquationSubtopic,
   isFunctionSubtopic,
+  isGeometrySubtopic,
   isTermSubtopic,
   type AnySubtopicId,
   type EquationSubtopicId,
   type FunctionSubtopicId,
+  type GeometrySubtopicId,
   type TermSubtopicId,
 } from './topics'
 export { Rational } from './rational'
