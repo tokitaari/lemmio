@@ -43,6 +43,16 @@ describe('Rational', () => {
     expect(Rational.parseDecimal('-1')).toBeUndefined()
   })
 
+  it('counts the decimal places of finite decimal fractions', () => {
+    expect(Rational.of(12).decimalPlaces()).toBe(0)
+    expect(Rational.of(15, 2).decimalPlaces()).toBe(1)
+    expect(Rational.of(35, 4).decimalPlaces()).toBe(2)
+    expect(Rational.of(-7, 4).decimalPlaces()).toBe(2)
+    expect(Rational.of(1, 40).decimalPlaces()).toBe(3)
+    expect(Rational.of(1, 3).decimalPlaces()).toBeUndefined()
+    expect(Rational.of(1, 6).decimalPlaces()).toBeUndefined()
+  })
+
   it('computes gcd for signed values', () => {
     expect(gcd(12n, -18n)).toBe(6n)
     expect(gcd(0n, 5n)).toBe(5n)

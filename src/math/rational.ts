@@ -90,6 +90,26 @@ export class Rational {
     return this.den === 1n
   }
 
+  /**
+   * Number of digits after the decimal point if the number is a finite
+   * decimal fraction (0 for integers, 1 for 7.5, 2 for 8.75); undefined for
+   * numbers such as 1/3.
+   */
+  decimalPlaces(): number | undefined {
+    let d = this.den
+    let twos = 0
+    let fives = 0
+    while (d % 2n === 0n) {
+      d /= 2n
+      twos++
+    }
+    while (d % 5n === 0n) {
+      d /= 5n
+      fives++
+    }
+    return d === 1n ? Math.max(twos, fives) : undefined
+  }
+
   equals(other: Rational): boolean {
     return this.num === other.num && this.den === other.den
   }

@@ -1,11 +1,25 @@
 import type { Expr } from './ast'
 import type { Rational } from './rational'
 
+/**
+ * How numbers are printed:
+ * - `fraction` (default): non-integers as fractions, e.g. `15/2`
+ * - `decimal`: finite decimal fractions with a decimal comma, e.g. `7,5`
+ *   (LaTeX `7{,}5`); other numbers such as 1/3 stay fractions. Used by the
+ *   geometry tasks, where lengths are whole numbers or end in ,5.
+ */
+export interface PrintOptions {
+  numbers?: 'fraction' | 'decimal'
+}
+
 /** Where a sub-expression is printed; decides whether it needs brackets. */
 type Context = 'top' | 'add' | 'mul-first' | 'mul' | 'neg' | 'pow-base' | 'div-num' | 'div-den'
 
 interface Dialect {
   readonly latex: boolean
+  /** Print finite decimal fractions as decimals (see PrintOptions). */
+  readonly decimal: boolean
+  readonly comma: string
   readonly times: string
   readonly plus: string
   readonly minus: string
@@ -20,6 +34,8 @@ const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹'
 
 const TEXT: Dialect = {
   latex: false,
+  decimal: false,
+  comma: ',',
   times: '·',
   plus: ' + ',
   minus: ' - ',
@@ -37,6 +53,8 @@ const TEXT: Dialect = {
 
 const LATEX: Dialect = {
   latex: true,
+  decimal: false,
+  comma: '{,}',
   times: ' \\cdot ',
   plus: ' + ',
   minus: ' - ',
@@ -51,13 +69,17 @@ const LATEX: Dialect = {
  * Display text such as `x² + 6x + 9` or `2·x·3`. The output can be parsed
  * back with `parse`, so it is also suitable as a typed answer.
  */
-export function toText(expr: Expr): string {
-  return render(expr, 'top', TEXT)
+export function toText(expr: Expr, options?: PrintOptions): string {
+  return render(expr, 'top', dialect(TEXT, options))
 }
 
 /** LaTeX for KaTeX, e.g. `x^{2} + 6x + 9`. */
-export function toLatex(expr: Expr): string {
-  return render(expr, 'top', LATEX)
+export function toLatex(expr: Expr, options?: PrintOptions): string {
+  return render(expr, 'top', dialect(LATEX, options))
+}
+
+function dialect(base: Dialect, options: PrintOptions | undefined): Dialect {
+  return options?.numbers === 'decimal' ? { ...base, decimal: true } : base
 }
 
 function render(e: Expr, ctx: Context, d: Dialect): string {
@@ -106,8 +128,23 @@ function renderRaw(e: Expr, d: Dialect): string {
 
 function formatNumber(value: Rational, d: Dialect): string {
   const abs = value.abs()
-  const body = abs.isInteger() ? abs.num.toString() : d.fraction(abs.num.toString(), abs.den.toString())
+  const body = abs.isInteger()
+    ? abs.num.toString()
+    : ((d.decimal ? decimalBody(abs, d.comma) : undefined) ?? d.fraction(abs.num.toString(), abs.den.toString()))
   return value.sign() < 0 ? d.sign + body : body
+}
+
+/** `7,5` for 15/2; undefined for integers and numbers without a finite decimal expansion. */
+function decimalBody(value: Rational, comma: string): string | undefined {
+  const places = value.decimalPlaces()
+  if (places === undefined || places === 0) return undefined
+  const digits = ((value.num * 10n ** BigInt(places)) / value.den).toString().padStart(places + 1, '0')
+  return digits.slice(0, -places) + comma + digits.slice(-places)
+}
+
+/** True for numbers printed without a fraction: integers, and finite decimals in decimal mode. */
+function printsPlain(value: Rational, d: Dialect): boolean {
+  return value.isInteger() || (d.decimal && value.decimalPlaces() !== undefined)
 }
 
 function needsParens(e: Expr, ctx: Context, d: Dialect): boolean {
@@ -117,7 +154,7 @@ function needsParens(e: Expr, ctx: Context, d: Dialect): boolean {
       return false
     case 'num':
       if (e.value.sign() < 0) return ctx !== 'top' && ctx !== 'mul-first'
-      if (e.value.isInteger()) return false
+      if (printsPlain(e.value, d)) return false
       // Fractions: `(1/2)x` in text; `\frac` is unambiguous except as a base.
       return d.latex ? ctx === 'pow-base' : ctx !== 'top' && ctx !== 'add'
     case 'add':

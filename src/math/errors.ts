@@ -1,6 +1,7 @@
 /**
  * Machine-readable reason why an input could not be read as a term, equation,
- * operation, solution set, function equation, point or function value.
+ * operation, solution set, function equation, point, function value,
+ * calculation (Rechenkette) or substituted formula.
  */
 export type TermErrorCode =
   | 'empty'
@@ -36,6 +37,10 @@ export type TermErrorCode =
   | 'missing-separator'
   | 'comma-separator'
   | 'invalid-function-value'
+  // Geometry (src/math/geometry)
+  | 'unknown-letter'
+  | 'unit-in-input'
+  | 'missing-unknown'
 
 /**
  * Error for invalid input. `message` is German and meant for the learner;

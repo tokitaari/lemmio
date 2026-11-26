@@ -1,7 +1,7 @@
 import { add, num, type Expr } from '../ast'
 import { polynomialToExpr, termToExpr, toPolynomial } from '../normalize'
 import { Polynomial } from '../polynomial'
-import { toText } from '../printer'
+import { toText, type PrintOptions } from '../printer'
 import { Rational } from '../rational'
 import { equationToText, linearParts, sidePolynomials } from './equation'
 import type { Equation, EquationStep, Operation, SolutionSet } from './types'
@@ -32,7 +32,7 @@ function distribute(side: Expr): Expr {
 
 /**
  * Worked solution of a linear equation in one variable, the way it is taught
- * in class 8:
+ * in class 8 (`options` decide how numbers appear in the notes):
  * 1. remove brackets, then combine like terms (both "Term umformen")
  * 2. swap the sides if the variable only occurs on the right
  * 3. bring the variable terms to the left, then the numbers to the right
@@ -41,7 +41,7 @@ function distribute(side: Expr): Expr {
  *
  * @throws RangeError if the equation is not linear in a single variable.
  */
-export function solveStepByStep(start: Equation): WorkedSolution {
+export function solveStepByStep(start: Equation, options?: PrintOptions): WorkedSolution {
   const sides = sidePolynomials(start)
   const leftParts = linearParts(sides.left)
   const rightParts = linearParts(sides.right)
@@ -94,7 +94,7 @@ export function solveStepByStep(start: Equation): WorkedSolution {
   }
 
   if (a.isZero()) {
-    const statement = toText(current.left) + ' = ' + toText(current.right)
+    const statement = toText(current.left, options) + ' = ' + toText(current.right, options)
     return b.equals(d)
       ? {
           variable: x,
@@ -130,6 +130,6 @@ export function solveStepByStep(start: Equation): WorkedSolution {
     variable: x,
     steps,
     solutionSet: { kind: 'single', value: d },
-    solutionNote: `Die Gleichung hat genau eine Lösung: ${x} = ${toText(num(d))}.`,
+    solutionNote: `Die Gleichung hat genau eine Lösung: ${x} = ${toText(num(d), options)}.`,
   }
 }

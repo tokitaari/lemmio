@@ -1,4 +1,5 @@
 import { add, group, mul, neg, num, type Expr } from '../ast'
+import type { PrintOptions } from '../printer'
 import { pickWeighted, randInt, randNonZero, type Rng } from '../random'
 import { SERIES_LENGTH } from '../tasks'
 import { ex, mono, pickVar, sum } from '../tasks/helpers'
@@ -18,20 +19,29 @@ const MAX_NUMBER = 99
 
 /**
  * Task "solve left = right" with its worked solution. Used by the generators
- * and for fixed worked examples in the explanations.
+ * and for fixed worked examples in the explanations. With
+ * `{ numbers: 'decimal' }` the task is marked to be printed with decimals
+ * (key and notes included).
  *
  * @throws RangeError if the equation is not linear in a single variable.
  */
-export function buildEquationTask(topic: SubtopicId, left: Expr, right: Expr, variant = 'example'): EquationTask {
+export function buildEquationTask(
+  topic: SubtopicId,
+  left: Expr,
+  right: Expr,
+  variant = 'example',
+  options?: PrintOptions,
+): EquationTask {
   const equation: Equation = { left, right }
-  const solution = solveStepByStep(equation)
+  const solution = solveStepByStep(equation, options)
   return {
     topic,
     variant,
-    key: equationToText(equation),
+    key: equationToText(equation, options),
     instruction: INSTRUCTION,
     equation,
     ...solution,
+    ...(options?.numbers === 'decimal' ? { numbers: 'decimal' as const } : {}),
   }
 }
 
