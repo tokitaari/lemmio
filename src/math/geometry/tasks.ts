@@ -797,7 +797,7 @@ function trapezoidLengths(rng: Rng): { a: Rational; c: Rational; h: Rational } {
 function trapezoidArea(isosceles: boolean): Builder {
   return (rng, variant) => {
     const { a, c, h } = trapezoidLengths(rng)
-    if (c.compare(a) >= 0) return undefined
+    if (c.compare(a) >= 0 || !fits(a.add(c).mul(h).div(Rational.of(2)))) return undefined
     const s = a.sub(c).toNumber()
     const offset = isosceles ? s / 2 : s * (rng() < 0.5 ? 0.15 : 0.85)
     return buildAreaTask('trapezoid', { a, c, h }, { variant, offset })
