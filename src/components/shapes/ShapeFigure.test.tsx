@@ -32,6 +32,15 @@ describe('ShapeFigure', () => {
     expect(svg?.style.maxWidth).toBe(`${Math.round(width * 1.25)}px`)
   })
 
+  it('uses a fixed frame when one is given', () => {
+    const { container } = render(
+      <ShapeFigure figure={figureOf(buildAreaTask('triangle', { g: 6, h: 4 }))} bounds={{ minX: -1, minY: -1, maxX: 9, maxY: 7 }} />,
+    )
+    const svg = container.querySelector('svg')
+    expect(svg?.getAttribute('viewBox')).toBe('-20 -140 200 160')
+    expect(svg?.style.maxWidth).toBe('250px')
+  })
+
   it('extends the base for a height outside and marks the length asked for', () => {
     const { container } = render(<ShapeFigure figure={figureOf(buildReverseTask('triangle', { g: 5, h: 3 }, 'h', { offset: -2 }))} />)
     expect(screen.getByRole('img', { name: /Höhe h gesucht\. Die Höhe liegt außerhalb, auf der Verlängerung von AB\.$/ })).toBeInTheDocument()

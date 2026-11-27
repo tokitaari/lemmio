@@ -4,6 +4,8 @@ import BalanceView from './BalanceView'
 import EquationStepsView from './EquationStepsView'
 import LinePointsView from './LinePointsView'
 import LineSlidersView from './LineSlidersView'
+import ShapePointsView from './ShapePointsView'
+import ShapeSlidersView from './ShapeSlidersView'
 import SlopeTriangleView from './SlopeTriangleView'
 import TermStepsView from './TermStepsView'
 import TwoLinesView from './TwoLinesView'
@@ -36,5 +38,9 @@ export default function CardWidgetView({ widget }: { widget: CardWidget }) {
       return <ValueTableView widget={widget} />
     case 'two-lines':
       return <TwoLinesView widget={widget} />
+    case 'shape-sliders':
+      return <ShapeSlidersView widget={widget} />
+    case 'shape-points':
+      return <ShapePointsView widget={widget} />
   }
 }

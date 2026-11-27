@@ -4,7 +4,8 @@ import type { Deck } from '../../cards'
  * Demo deck for the card framework, shown at /dev/karten in the dev server
  * only. It uses every card feature at least once, including the three modes
  * of the area model, both modes of the balance and the line widgets of the
- * coordinate plane (including the table of values and two lines); real decks arrive with the subtopics.
+ * coordinate plane (including the table of values and two lines) and the
+ * geometry widgets (sliders for lengths, movable vertices); real decks arrive with the subtopics.
  */
 export const demoDeck: Deck = {
   id: 'dev/karten/demo',
@@ -282,6 +283,103 @@ export const demoDeck: Deck = {
       title: 'Gleich, nur anders geschrieben',
       body: ['Die Gleichung von g sieht anders aus als die von f. Trotzdem liegen beide Geraden aufeinander.'],
       widget: { kind: 'two-lines', f: { m: 2, n: 1 }, g: '2(x + 1) - 1', equate: true },
+    },
+    {
+      id: 'flaeche-regler',
+      title: 'Grundseite und Höhe',
+      body: ['Verändere die Grundseite und die Höhe des Parallelogramms. Die Formel rechnet mit den neuen Zahlen.'],
+      widget: {
+        kind: 'shape-sliders',
+        shape: 'parallelogram',
+        measures: { g: { value: 6, min: 2, max: 10 }, h: { value: 4, min: 1, max: 8 } },
+      },
+    },
+    {
+      id: 'trapez-regler',
+      title: 'Trapez mit Reglern',
+      body: ['Die beiden parallelen Seiten heißen a und c. Die Figur bleibt gleichschenklig.'],
+      widget: {
+        kind: 'shape-sliders',
+        shape: 'trapezoid',
+        measures: { a: { value: 8, min: 5, max: 12 }, c: { value: 4, min: 1, max: 4.5 }, h: { value: 3, min: 1, max: 6 } },
+      },
+    },
+    {
+      id: 'dreieck-stumpf-regler',
+      title: 'Spitze außerhalb',
+      body: ['Die Spitze C bleibt an ihrer Stelle. Wird die Grundseite kürzer, liegt die Höhe außerhalb des Dreiecks.'],
+      widget: { kind: 'shape-sliders', shape: 'triangle', measures: { g: { value: 4, min: 2, max: 8 }, h: 3 }, offset: 6 },
+    },
+    {
+      id: 'umfang-regler',
+      title: 'Umfang eines Dreiecks',
+      body: ['Der Umfang ist die Summe aller Seiten. Die Seite c bleibt fest.'],
+      widget: {
+        kind: 'shape-sliders',
+        shape: 'triangle',
+        quantity: 'perimeter',
+        measures: { a: { value: 5, min: 4, max: 6 }, b: { value: 4, min: 3, max: 5 }, c: 6 },
+      },
+    },
+    {
+      id: 'ecken-parallelogramm',
+      title: 'Ecken ziehen',
+      body: ['Ziehe B und D. C folgt, die Figur bleibt ein Parallelogramm. Grundseite, Höhe und Fläche folgen.'],
+      widget: {
+        kind: 'shape-points',
+        shape: 'parallelogram',
+        vertices: [
+          [2, 2],
+          [7, 2],
+          [9, 5],
+          [4, 5],
+        ],
+      },
+    },
+    {
+      id: 'ecken-dreieck-ziel',
+      title: 'Dreieck mit Ziel',
+      body: ['Ziehe B und C, bis das Dreieck 15 cm² groß ist.'],
+      widget: {
+        kind: 'shape-points',
+        shape: 'triangle',
+        vertices: [
+          [2, 2],
+          [8, 2],
+          [4, 6],
+        ],
+        target: 15,
+      },
+    },
+    {
+      id: 'ecken-raute',
+      title: 'Raute mit Diagonalen',
+      body: ['Ziehe C und D. Die Diagonalen e und f bleiben senkrecht zueinander.'],
+      widget: {
+        kind: 'shape-points',
+        shape: 'rhombus',
+        vertices: [
+          [3, 5],
+          [6, 3],
+          [9, 5],
+          [6, 7],
+        ],
+      },
+    },
+    {
+      id: 'ecken-trapez',
+      title: 'Trapez im Gitter',
+      body: ['Ziehe B, C und D. Die Seiten AB und CD bleiben parallel.'],
+      widget: {
+        kind: 'shape-points',
+        shape: 'trapezoid',
+        vertices: [
+          [1, 2],
+          [9, 2],
+          [7, 6],
+          [3, 6],
+        ],
+      },
     },
   ],
 }

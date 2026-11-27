@@ -241,6 +241,49 @@ describe('deckMarkup', () => {
   })
 })
 
+describe('geometry widgets', () => {
+  it('reports the problems of shape-sliders and shape-points with the card', () => {
+    const sliders = card({ widget: { kind: 'shape-sliders', shape: 'triangle', measures: { g: 6 } } })
+    expect(validateDeck(deckOf(sliders))).toEqual(['card "karte": shape-sliders: missing length h'])
+    const points = card({
+      widget: {
+        kind: 'shape-points',
+        shape: 'triangle',
+        vertices: [
+          [2, 2],
+          [8, 2],
+          [4, 6],
+        ],
+        target: 12,
+      },
+    })
+    expect(validateDeck(deckOf(points))).toEqual(['card "karte": shape-points: target equals the start area'])
+  })
+
+  it('typesets the start calculations', () => {
+    const deck = deckOf(
+      card({ id: 'regler', widget: { kind: 'shape-sliders', shape: 'parallelogram', measures: { g: { value: 6.5 }, h: 4 } } }),
+      card({
+        id: 'ecken',
+        widget: {
+          kind: 'shape-points',
+          shape: 'trapezoid',
+          vertices: [
+            [1, 2],
+            [9, 2],
+            [7, 6],
+            [3, 6],
+          ],
+        },
+      }),
+    )
+    expect(deckLatex(deck)).toEqual([
+      'A = g \\cdot h = 6{,}5 \\cdot 4 = 26\\,\\text{cm}^{2}',
+      'A = \\frac{(a + c) \\cdot h}{2} = \\frac{(8 + 4) \\cdot 4}{2} = \\frac{12 \\cdot 4}{2} = 24\\,\\text{cm}^{2}',
+    ])
+  })
+})
+
 describe('demo deck', () => {
   it('is valid', () => {
     expect(validateDeck(demoDeck)).toEqual([])

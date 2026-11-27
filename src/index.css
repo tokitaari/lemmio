@@ -1602,6 +1602,28 @@ p .tex {
   font-style: italic;
 }
 
+/* Geometry widgets (shape-sliders, shape-points): lengths, formula with numbers, note on the height */
+.shape-formula {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.shape-values {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1.25rem;
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+}
+
+.shape-note {
+  margin: 0.5rem 0 0;
+  color: var(--pink);
+  text-align: center;
+}
+
 /* Line widgets (line-sliders, slope-triangle, line-points): equation, sliders, slope triangle, table of values */
 .line-equation,
 .slope-calc {
