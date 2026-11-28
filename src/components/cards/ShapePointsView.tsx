@@ -13,7 +13,7 @@ import {
   type ShapePointsWidget,
   type ShapeVertices,
 } from '../../cards'
-import { layoutShape, SHAPE_NAMES, VERTEX_NAMES } from '../../shapes'
+import { layoutShape, SHAPE_NAMES, VERTEX_NAMES, vertexLabelDirections } from '../../shapes'
 import CoordinatePlane, { type PlanePointItem } from '../plane/CoordinatePlane'
 import ShapeDrawing from '../shapes/ShapeDrawing'
 import Tex from '../Tex'
@@ -36,9 +36,18 @@ export default function ShapePointsView({ widget }: { widget: ShapePointsWidget 
   const layout = useMemo(() => layoutShape(state.figure), [state.figure])
   const target = model.target
 
+  // Vertex names outside along the bisector (as in ShapeFigure), so they do not run into the side labels.
+  const directions = useMemo(() => vertexLabelDirections(layout.vertices), [layout.vertices])
   const points = vertices.map((v, i): PlanePointItem => {
     const drag = vertexDrag(model, vertices, i)
-    const item = { id: vertexId(i), label: VERTEX_NAMES[i] ?? '?', x: v.x, y: v.y }
+    const direction = directions[i]
+    const item = {
+      id: vertexId(i),
+      label: VERTEX_NAMES[i] ?? '?',
+      x: v.x,
+      y: v.y,
+      ...(direction ? { labelDirection: { x: direction[0], y: direction[1] } } : {}),
+    }
     return drag ? { ...item, drag } : { ...item, tone: 'muted' }
   })
 

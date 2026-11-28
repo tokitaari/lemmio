@@ -24,6 +24,7 @@ import {
   planeKey,
   planeWindowProblems,
   pointAnnouncement,
+  pointLabelOffset,
   pointLabelText,
   pointProblems,
   pointValueRange,
@@ -339,5 +340,24 @@ describe('texts', () => {
     expect(describeWindow({ x: [2, 8], y: [1, 5] }, { axes: false })).toMatch(/6 mal 4 Kästchen.*\(dort x = 2, y = 1\)$/)
     expect(dragHint('free')).toMatch(/^Pfeiltasten/)
     expect(dragHint('on-line')).toMatch(/Geraden/)
+  })
+})
+
+describe('point names', () => {
+  it('puts a name outside the focus ring in the given direction (y up in the plane, down in SVG)', () => {
+    const left = pointLabelOffset({ x: -1, y: 0 }, 'D')
+    expect(left.x).toBeLessThan(-16)
+    expect(left.y).toBeCloseTo(0)
+    const up = pointLabelOffset({ x: 0, y: 2 }, 'D')
+    expect(up.x).toBeCloseTo(0)
+    expect(up.y).toBeLessThan(-16)
+    const diagonal = pointLabelOffset({ x: -1, y: 1 }, 'D')
+    expect(diagonal.x).toBeLessThan(0)
+    expect(diagonal.y).toBeLessThan(0)
+    expect(Math.hypot(diagonal.x, diagonal.y)).toBeGreaterThan(16)
+  })
+
+  it('keeps longer names further away sideways', () => {
+    expect(pointLabelOffset({ x: 1, y: 0 }, 'P(2|5)').x).toBeGreaterThan(pointLabelOffset({ x: 1, y: 0 }, 'P').x)
   })
 })

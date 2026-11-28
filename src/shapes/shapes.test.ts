@@ -12,6 +12,7 @@ import {
   shapeViewBox,
   type ShapeLabelLayout,
   type ShapeLayout,
+  vertexLabelDirections,
 } from '.'
 
 function figureOf(task: GeometryTask): TaskFigure {
@@ -222,5 +223,40 @@ describe('frame and helpers', () => {
     expect(describeShape(figureOf(buildPerimeterTask('parallelogram', { a: 6, b: 4 })))).toBe(
       'Parallelogramm ABCD: Seite a = 6 cm, Seite b = 4 cm.',
     )
+  })
+})
+
+describe('vertex label directions', () => {
+  it('points outside along the bisector, like the vertex names of layoutShape', () => {
+    // Trapezoid with a short top side CD: the names of C and D lean away from the side label c above CD.
+    const vertices: Vec[] = [
+      [0, 0],
+      [8, 0],
+      [6, 3],
+      [2, 3],
+    ]
+    const [a, b, c, d] = vertexLabelDirections(vertices)
+    for (const dir of [a, b, c, d]) expect(Math.hypot(dir![0], dir![1])).toBeCloseTo(1)
+    expect(a![0]).toBeLessThan(0)
+    expect(a![1]).toBeLessThan(0)
+    expect(b![0]).toBeGreaterThan(0)
+    expect(c![0]).toBeGreaterThan(0)
+    expect(c![1]).toBeGreaterThan(0)
+    expect(d![0]).toBeLessThan(0)
+    expect(d![1]).toBeGreaterThan(0)
+  })
+
+  it('matches the side of the vertex names in layoutShape', () => {
+    const task = buildAreaTask('trapezoid', { a: 8, c: 4, h: 3 })
+    const layout = layoutShape(figureOf(task))
+    const directions = vertexLabelDirections(layout.vertices)
+    layout.labels
+      .filter((label) => label.kind === 'vertex')
+      .forEach((label, i) => {
+        const v = layout.vertices[i]!
+        const dir = directions[i]!
+        const away = (label.at[0] - v[0]) * dir[0] + (label.at[1] - v[1]) * dir[1]
+        expect(away).toBeGreaterThan(0)
+      })
   })
 })

@@ -16,7 +16,7 @@ import {
   type ShapeVertices,
   type ShearWidget,
 } from '../../cards'
-import { layoutShape, SHAPE_NAMES, VERTEX_NAMES } from '../../shapes'
+import { layoutShape, SHAPE_NAMES, VERTEX_NAMES, vertexLabelDirections } from '../../shapes'
 import CoordinatePlane, { type PlanePointItem, type PlanePolygonItem } from '../plane/CoordinatePlane'
 import ShapeDrawing from '../shapes/ShapeDrawing'
 import Tex from '../Tex'
@@ -37,8 +37,17 @@ export default function ShearView({ widget }: { widget: ShearWidget }) {
   const layout = useMemo(() => layoutShape(state.figure), [state.figure])
   const compare = shearCompare(model, vertices)
 
+  // Vertex names outside along the bisector (as in ShapeFigure), so they do not run into the side labels.
+  const directions = useMemo(() => vertexLabelDirections(layout.vertices), [layout.vertices])
   const points = vertices.map((v, i): PlanePointItem => {
-    const item = { id: vertexId(i), label: VERTEX_NAMES[i] ?? '?', x: v.x, y: v.y }
+    const direction = directions[i]
+    const item = {
+      id: vertexId(i),
+      label: VERTEX_NAMES[i] ?? '?',
+      x: v.x,
+      y: v.y,
+      ...(direction ? { labelDirection: { x: direction[0], y: direction[1] } } : {}),
+    }
     return i === model.top ? { ...item, drag: shearDrag(model, vertices) } : { ...item, tone: 'muted' }
   })
   const polygons: PlanePolygonItem[] = [{ id: 'shape', points: vertices, description: shapePolygonText(model.shape, vertices) }]

@@ -24,6 +24,7 @@ export {
   shapeViewBox,
   svgPoints,
   VERTEX_NAMES,
+  vertexLabelDirections,
   type DiagonalsLayout,
   type HeightLayout,
   type ShapeBounds,

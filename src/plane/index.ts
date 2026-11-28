@@ -37,6 +37,8 @@ export {
   pointValueRange,
   pointValueText,
   sameGridPoint,
+  POINT_LABEL_FONT,
+  pointLabelOffset,
   snapPoint,
   toView,
   UNIT,

@@ -18,6 +18,7 @@ import {
   planeFrame,
   planeKey,
   pointAnnouncement,
+  pointLabelOffset,
   pointLabelText,
   pointValueRange,
   pointValueText,
@@ -60,6 +61,13 @@ export interface PlanePointItem {
   tone?: PlaneTone
   /** Shows "P(2|5)" instead of "P". */
   showCoordinates?: boolean
+  /**
+   * Direction of the name from the point (plane units, y up), e.g. outside
+   * along the bisector for the vertices of a figure, so that the name does
+   * not run into the side labels. Without it the name stands to the upper
+   * right (left or below near the edge).
+   */
+  labelDirection?: PlanePosition
 }
 
 /** A filled polygon, e.g. a figure drawn on the geometry grid. */
@@ -382,11 +390,13 @@ export default function CoordinatePlane({
         {points.map((item) => {
           const at = toView(item)
           const text = item.showCoordinates ? pointLabelText(item.label, item) : item.label
-          // Labels go to the upper right, or to the left/below near the right/top edge.
+          // Labels go to the upper right, or to the left/below near the right/top edge, unless a direction is given.
           const leftSide = item.x >= xMax - 1
           const below = item.y >= yMax - 0.5
-          const labelX = leftSide ? -10 : 10
-          const labelY = below ? 16 : -12
+          const placed = item.labelDirection ? pointLabelOffset(item.labelDirection, text) : null
+          const labelX = placed ? placed.x : leftSide ? -10 : 10
+          const labelY = placed ? placed.y : below ? 16 : -12
+          const anchor = placed ? 'middle' : leftSide ? 'end' : 'start'
           const className = [
             'plane-point',
             `plane-tone-${item.tone ?? 'accent'}`,
@@ -396,7 +406,7 @@ export default function CoordinatePlane({
             .filter(Boolean)
             .join(' ')
           const pointLabel = (
-            <text className="plane-point-label" x={labelX} y={labelY} textAnchor={leftSide ? 'end' : 'start'} dominantBaseline="central">
+            <text className="plane-point-label" x={labelX} y={labelY} textAnchor={anchor} dominantBaseline="central">
               {text}
             </text>
           )
