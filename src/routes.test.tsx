@@ -70,7 +70,7 @@ describe('Routing and layout', () => {
 
   it('names the areas of the catalog in the footer', () => {
     renderAt('/')
-    expect(screen.getByRole('contentinfo')).toHaveTextContent('Lemmio · Algebra · Funktionen · Dein Fortschritt bleibt in deinem Browser.')
+    expect(screen.getByRole('contentinfo')).toHaveTextContent('Lemmio · Algebra · Funktionen · Geometrie · Dein Fortschritt bleibt in deinem Browser.')
   })
 
   it.each([
@@ -79,6 +79,7 @@ describe('Routing and layout', () => {
     '/algebra/terme/ausmultiplizieren',
     '/algebra/lineare-gleichungen/umformen',
     '/funktionen/lineare-funktionen/schnittpunkt',
+    '/geometrie/vierecke-und-flaechen/trapez',
   ])('does not mention "Einheit" on %s', (path) => {
     renderAt(path)
     expect(document.body).not.toHaveTextContent(/einheit/i)

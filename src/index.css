@@ -473,6 +473,11 @@ h1 {
   margin: 0.75rem 0;
 }
 
+/* Worked example about an area or a perimeter: the figure true to scale */
+.example-figure {
+  margin: 0.75rem 0;
+}
+
 /* Practice of linear functions: decision of a Punktprobe below the calculation */
 .function-decision {
   margin: 0.75rem 0;

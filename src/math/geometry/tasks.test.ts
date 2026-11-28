@@ -78,11 +78,11 @@ const KINDS: Readonly<Record<GeometryTopic, readonly GeometryTaskKind[]>> = {
 }
 
 describe('geometry register', () => {
-  it('has the four subtopics, which join ALL_SUBTOPIC_IDS with their contents', () => {
+  it('has the four subtopics, which are part of ALL_SUBTOPIC_IDS', () => {
     expect([...GEOMETRY_SUBTOPIC_IDS].sort()).toEqual([TRIANGLE, PARALLELOGRAM, RHOMBUS, TRAPEZOID].sort())
     for (const id of GEOMETRY_SUBTOPIC_IDS) {
       expect(isGeometrySubtopic(id)).toBe(true)
-      expect((ALL_SUBTOPIC_IDS as readonly string[]).includes(id)).toBe(false)
+      expect((ALL_SUBTOPIC_IDS as readonly string[]).includes(id)).toBe(true)
     }
     expect(isGeometrySubtopic('algebra/terme/ausmultiplizieren')).toBe(false)
   })

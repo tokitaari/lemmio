@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { catalog } from '../catalog'
-import { allEntries, formulaGroupsOf, isEquationTask, isFunctionTask, subtopicContent } from '../content'
-import { ALL_SUBTOPIC_IDS, createRng, EQUATION_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
+import { allEntries, formulaGroupsOf, isEquationTask, isFunctionTask, isGeometryTask, subtopicContent, type ExampleTask } from '../content'
+import { ALL_SUBTOPIC_IDS, createRng, EQUATION_SUBTOPIC_IDS, GEOMETRY_SUBTOPIC_IDS, SUBTOPIC_IDS } from '../math'
 import { TASK_PRACTICE_SUBTOPIC_IDS } from '../practice/functionSession'
 import { generateIntersectionSeries } from '../practice/intersectionSession'
 import { routes } from '../routes'
@@ -18,6 +18,17 @@ function renderAt(path: string) {
 beforeEach(() => {
   localStorage.clear()
 })
+
+/**
+ * Lines of the worked solution beyond `task.steps`. Terms: the prompt.
+ * Equations: the start and the solution set. Functions: none. Geometry: none;
+ * a Rückwärts task shows the equation lines between the substitution and
+ * the result (the last equation line is the result).
+ */
+function extraLines(task: ExampleTask): number {
+  if (isGeometryTask(task)) return task.kind === 'reverse' ? task.equation.steps.length - 1 : 0
+  return isFunctionTask(task) ? 0 : isEquationTask(task) ? 2 : 1
+}
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -36,9 +47,7 @@ describe('topic page', () => {
     content.examples.forEach((example, i) => {
       const card = within(examples.getByRole('article', { name: `Beispiel ${i + 1}: ${example.title}` }))
       const steps = within(card.getByRole('list', { name: 'Lösungsweg' })).getAllByRole('listitem')
-      // Terms: the prompt plus one line per step. Equations: also the solution set. Functions: one line per step.
-      const extra = isFunctionTask(example.task) ? 0 : isEquationTask(example.task) ? 2 : 1
-      expect(steps).toHaveLength(example.task.steps.length + extra)
+      expect(steps).toHaveLength(example.task.steps.length + extraLines(example.task))
       for (const step of example.task.steps) if (step.note) expect(card.getByText(step.note)).toBeInTheDocument()
     })
 
@@ -105,6 +114,22 @@ describe('topic page', () => {
     const lines = within(card.getByRole('list', { name: 'Lösungsweg' })).getAllByRole('listitem')
     expect(lines.at(-1)).toHaveClass('solution-result')
     expect(lines.at(-1)).toHaveTextContent('Der Schnittpunkt der beiden Geraden.')
+  })
+
+  it.each(GEOMETRY_SUBTOPIC_IDS)('%s announces its practice', (topic) => {
+    renderAt(`/${topic}`)
+    const practice = within(screen.getByRole('region', { name: 'Übung' }))
+    expect(practice.getByText('Übungsaufgaben zu diesem Teilthema folgen bald.')).toBeInTheDocument()
+  })
+
+  it('shows the figure of a worked example about areas and solves a Rückwärts task line by line', () => {
+    renderAt('/geometrie/vierecke-und-flaechen/trapez')
+    const first = within(screen.getByRole('article', { name: 'Beispiel 1: Gleichschenkliges Trapez' }))
+    expect(first.getByRole('img', { name: /^Figur zum Beispiel\. Trapez/ })).toBeInTheDocument()
+    const reverse = within(screen.getByRole('article', { name: 'Beispiel 4: Seite c aus dem Flächeninhalt' }))
+    const lines = within(reverse.getByRole('list', { name: 'Lösungsweg' })).getAllByRole('listitem')
+    expect(lines.at(-1)).toHaveClass('solution-result')
+    expect(lines.at(-1)).toHaveTextContent('Die Gleichung nach c auflösen.')
   })
 
   it('shows a worked equation in school notation with the solution set at the end', () => {

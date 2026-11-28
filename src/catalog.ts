@@ -120,6 +120,40 @@ export const catalog: readonly Area[] = [
       },
     ],
   },
+  {
+    slug: 'geometrie',
+    title: 'Geometrie',
+    topics: [
+      {
+        slug: 'vierecke-und-flaechen',
+        title: 'Vierecke und Flächen',
+        summary: 'Flächeninhalt und Umfang von Dreieck, Parallelogramm, Raute und Trapez.',
+        grade: 8,
+        subtopics: [
+          {
+            slug: 'parallelogramm',
+            title: 'Parallelogramm',
+            summary: 'Flächeninhalt und Umfang, Scherung zum Rechteck.',
+          },
+          {
+            slug: 'dreieck',
+            title: 'Dreieck',
+            summary: 'Flächeninhalt als halbes Parallelogramm, auch mit Höhe außerhalb.',
+          },
+          {
+            slug: 'raute',
+            title: 'Raute',
+            summary: 'Flächeninhalt aus den Diagonalen, Umfang.',
+          },
+          {
+            slug: 'trapez',
+            title: 'Trapez',
+            summary: 'Flächeninhalt durch Verdoppeln, Umfang.',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 /** A subtopic together with the area and topic it belongs to. */

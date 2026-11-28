@@ -1,7 +1,9 @@
-import { isEquationTask, isFunctionTask, type WorkedExample } from '../content'
+import { isEquationTask, isFunctionTask, isGeometryTask, type WorkedExample } from '../content'
 import EquationSolutionSteps from './EquationSolutionSteps'
 import FunctionExamplePlane from './FunctionExamplePlane'
 import FunctionSolutionSteps from './FunctionSolutionSteps'
+import GeometrySolutionSteps from './GeometrySolutionSteps'
+import ShapeFigure from './shapes/ShapeFigure'
 import RichText from './RichText'
 import SolutionSteps from './SolutionSteps'
 
@@ -18,7 +20,14 @@ export default function WorkedExampleCard({ example, number }: WorkedExampleCard
         Beispiel {number}: {example.title}
       </h3>
       <p className="example-instruction">{example.task.instruction}</p>
-      {isFunctionTask(example.task) ? (
+      {isGeometryTask(example.task) ? (
+        <>
+          <div className="example-figure">
+            <ShapeFigure figure={example.task.figure} label="Figur zum Beispiel" />
+          </div>
+          <GeometrySolutionSteps task={example.task} />
+        </>
+      ) : isFunctionTask(example.task) ? (
         <>
           <FunctionExamplePlane task={example.task} />
           <FunctionSolutionSteps task={example.task} />

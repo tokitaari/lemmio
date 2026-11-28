@@ -4,6 +4,7 @@ import { allSubtopics } from '../../catalog'
 import { checkAnswer } from '../check'
 import { EQUATION_SUBTOPIC_IDS } from '../equations'
 import { FUNCTION_SUBTOPIC_IDS } from '../functions'
+import { GEOMETRY_SUBTOPIC_IDS } from '../geometry'
 import { polynomialToExpr, toPolynomial } from '../normalize'
 import { parse } from '../parser'
 import { Polynomial } from '../polynomial'
@@ -32,8 +33,8 @@ function sample(topic: (typeof SUBTOPIC_IDS)[number], seed: number, count = SAMP
 }
 
 describe('task generators', () => {
-  it('cover, together with the equation and function generators, exactly the subtopics of the app', () => {
-    expect([...SUBTOPIC_IDS, ...EQUATION_SUBTOPIC_IDS, ...FUNCTION_SUBTOPIC_IDS].sort()).toEqual(
+  it('cover, together with the equation, function and geometry generators, exactly the subtopics of the app', () => {
+    expect([...SUBTOPIC_IDS, ...EQUATION_SUBTOPIC_IDS, ...FUNCTION_SUBTOPIC_IDS, ...GEOMETRY_SUBTOPIC_IDS].sort()).toEqual(
       allSubtopics().map((s) => s.id).sort(),
     )
   })
