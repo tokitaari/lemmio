@@ -601,3 +601,25 @@ export function dragHint(kind: PointDrag['kind']): string {
       return 'Pfeiltasten verschieben den Punkt zum nächsten Gitterpunkt auf der Geraden. Pos1 und Ende: erster und letzter Gitterpunkt.'
   }
 }
+
+/** Font size of point names in SVG units (matches `.plane-point-label` in index.css). */
+export const POINT_LABEL_FONT = 17
+
+/** Distance in SVG units from a point to the box of its name: outside the focus ring (radius 12) with a small gap. */
+const POINT_LABEL_CLEARANCE = 16
+
+/**
+ * Centre of a point name relative to its point, in SVG units (y down), for a
+ * direction in plane units (y up): the estimated text box touches the circle
+ * of POINT_LABEL_CLEARANCE around the point. Used for vertices of a figure,
+ * whose names stand outside along the bisector of the angle.
+ */
+export function pointLabelOffset(direction: PlanePosition, text: string): { x: number; y: number } {
+  const length = Math.hypot(direction.x, direction.y)
+  const dx = length > 0 ? direction.x / length : 1
+  const dy = length > 0 ? direction.y / length : 0
+  const width = text.length * 0.6 * POINT_LABEL_FONT
+  const reach = (Math.abs(dx) * width) / 2 + (Math.abs(dy) * POINT_LABEL_FONT) / 2
+  const distance = POINT_LABEL_CLEARANCE + reach
+  return { x: dx * distance, y: -dy * distance }
+}

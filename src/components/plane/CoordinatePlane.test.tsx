@@ -137,6 +137,27 @@ describe('drawing', () => {
     expect(order).toEqual(['plane-polygon', 'plane-polygon', 'plane-line', 'plane-point'])
   })
 
+  it('places a point name in the given direction, centred on its anchor', () => {
+    const { container } = render(
+      <CoordinatePlane
+        axes={false}
+        window={{ x: [0, 12], y: [0, 10] }}
+        points={[
+          { id: 'd', label: 'D', x: 2, y: 5, drag: { kind: 'free' }, labelDirection: { x: -1, y: 1 } },
+          { id: 'a', label: 'A', x: 1, y: 2 },
+        ]}
+      />,
+    )
+    const [d, a] = [...container.querySelectorAll('.plane-point-label')]
+    expect(d).toHaveTextContent('D')
+    expect(d).toHaveAttribute('text-anchor', 'middle')
+    expect(Number(d!.getAttribute('x'))).toBeLessThan(0)
+    expect(Number(d!.getAttribute('y'))).toBeLessThan(0)
+    // Without a direction: to the upper right as before.
+    expect(a).toHaveAttribute('text-anchor', 'start')
+    expect(a).toHaveAttribute('x', '10')
+  })
+
   it('passes the geometry to an overlay', () => {
     const { container } = render(
       <CoordinatePlane

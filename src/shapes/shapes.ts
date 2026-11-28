@@ -222,6 +222,17 @@ function vertexDirection(vertices: readonly Vec[], i: number, center: Vec): Vec 
   return len(dir) < 0.5 ? unit(sub(v, center)) : dir
 }
 
+/**
+ * Unit directions in which the vertex names stand, one per vertex: outside
+ * along the bisector of the angle, as in `layoutShape`. Used to put the names
+ * of movable vertices on the grid where they do not collide with the side
+ * labels.
+ */
+export function vertexLabelDirections(vertices: readonly Vec[]): Vec[] {
+  const center = centroid(vertices)
+  return vertices.map((_, i) => vertexDirection(vertices, i, center))
+}
+
 // ---------------------------------------------------------------------------
 // Height and diagonals
 
