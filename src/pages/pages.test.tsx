@@ -116,10 +116,14 @@ describe('topic page', () => {
     expect(lines.at(-1)).toHaveTextContent('Der Schnittpunkt der beiden Geraden.')
   })
 
-  it.each(GEOMETRY_SUBTOPIC_IDS)('%s announces its practice', (topic) => {
+  it.each(GEOMETRY_SUBTOPIC_IDS)('%s has the practice of geometry: the first task is an area', (topic) => {
     renderAt(`/${topic}`)
     const practice = within(screen.getByRole('region', { name: 'Übung' }))
-    expect(practice.getByText('Übungsaufgaben zu diesem Teilthema folgen bald.')).toBeInTheDocument()
+    expect(practice.getByText('Aufgabe 1 von 10')).toBeInTheDocument()
+    expect(practice.getByRole('img', { name: /^Figur zur Aufgabe\./ })).toBeInTheDocument()
+    expect(practice.getByLabelText('Deine Rechnung')).toBeInTheDocument()
+    expect(practice.getByRole('radio', { name: 'cm²' })).toBeInTheDocument()
+    expect(practice.queryByText(/folgen bald/)).not.toBeInTheDocument()
   })
 
   it('shows the figure of a worked example about areas and solves a Rückwärts task line by line', () => {

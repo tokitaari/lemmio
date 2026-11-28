@@ -487,6 +487,15 @@ h1 {
   margin-bottom: 0.5rem;
 }
 
+/* Practice of geometry: unit choice cm / cm² below the calculation */
+.geometry-unit {
+  margin: 0.75rem 0;
+}
+
+.geometry-unit legend {
+  margin-bottom: 0.5rem;
+}
+
 /* Worked solution: "= expression" per line, explanation next to it or below on narrow screens */
 
 .solution {

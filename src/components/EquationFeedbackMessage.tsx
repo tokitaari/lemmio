@@ -1,12 +1,19 @@
-import { equationToLatex, operationToLatex } from '../math'
+import { equationToLatex, operationToLatex, type PrintOptions } from '../math'
 import type { EquationFeedback } from '../practice/equationSession'
 import Chip from './Chip'
 import InputEcho from './InputEcho'
 import Tex from './Tex'
 import Unreadable from './Unreadable'
 
+interface EquationFeedbackMessageProps {
+  feedback: EquationFeedback
+  variable: string
+  /** How numbers are printed, e.g. `DECIMAL` for the geometry practice. */
+  options?: PrintOptions
+}
+
 /** The message after a check of the equation practice: right, wrong with chips, unreadable, not allowed, … */
-export default function EquationFeedbackMessage({ feedback, variable }: { feedback: EquationFeedback; variable: string }) {
+export default function EquationFeedbackMessage({ feedback, variable, options }: EquationFeedbackMessageProps) {
   switch (feedback.kind) {
     case 'line-correct':
       return <p className="feedback feedback-correct">✓ Die Zeile stimmt.</p>
@@ -20,10 +27,10 @@ export default function EquationFeedbackMessage({ feedback, variable }: { feedba
             <Chip ok={feedback.right}>{feedback.right ? 'rechte Seite ok' : 'rechte Seite nicht ok'}</Chip>
           </div>
           <p className="feedback-answer">
-            Deine Umformung: <Tex latex={operationToLatex(feedback.operation)} />
+            Deine Umformung: <Tex latex={operationToLatex(feedback.operation, options)} />
           </p>
           <p className="feedback-answer">
-            Deine Zeile: <Tex latex={equationToLatex(feedback.equation)} />
+            Deine Zeile: <Tex latex={equationToLatex(feedback.equation, options)} />
           </p>
           <p>
             {feedback.keepsSolutions

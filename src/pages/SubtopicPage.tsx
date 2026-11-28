@@ -4,6 +4,7 @@ import CardDeck from '../components/cards/CardDeck'
 import EquationPractice from '../components/EquationPractice'
 import FormulaList from '../components/FormulaList'
 import FunctionPractice from '../components/FunctionPractice'
+import GeometryPractice from '../components/GeometryPractice'
 import IntersectionPractice from '../components/IntersectionPractice'
 import Practice from '../components/Practice'
 import WorkedExampleCard from '../components/WorkedExampleCard'
@@ -17,8 +18,8 @@ import NotFound from './NotFound'
  * A subtopic at `/area/topic/subtopic`: explanation as a card deck, worked
  * examples, formulas and the practice area (terms are answered in one field,
  * equations are solved line by line, functions are read, typed and drawn, the
- * intersection of two lines is read and calculated; the practice of
- * geometry follows).
+ * intersection of two lines is read and calculated, areas and perimeters are
+ * calculated as a chain with a unit).
  */
 export default function SubtopicPage() {
   const params = useParams()
@@ -69,12 +70,7 @@ export default function SubtopicPage() {
       {isEquationSubtopic(id) && <EquationPractice key={id} topic={id} />}
       {isTaskPracticeSubtopic(id) && <FunctionPractice key={id} topic={id} />}
       {isIntersectionSubtopic(id) && <IntersectionPractice key={id} topic={id} />}
-      {isGeometrySubtopic(id) && (
-        <section aria-labelledby="uebung" className="panel">
-          <h2 id="uebung">Übung</h2>
-          <p>Übungsaufgaben zu diesem Teilthema folgen bald.</p>
-        </section>
-      )}
+      {isGeometrySubtopic(id) && <GeometryPractice key={id} topic={id} />}
     </>
   )
 }
