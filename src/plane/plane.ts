@@ -51,18 +51,29 @@ export type PlaneLine =
  * - `on-line`: only to grid points on the line; `range` limits them to
  *   x values in [min, max] (y values for a vertical line), e.g. so that a
  *   slope triangle attached to the point stays inside the window
+ *
+ * `bounds` limits `free`, `vertical` and `horizontal` points to a part of
+ * the window (for `vertical` only its y-range counts, for `horizontal` only
+ * its x-range), e.g. so that the top vertex of a figure stays above its base
+ * and a vertex that follows it stays inside the window.
  */
 export type PointDrag =
-  | { kind: 'free' }
-  | { kind: 'vertical' }
-  | { kind: 'horizontal' }
+  | { kind: 'free'; bounds?: PlaneWindow }
+  | { kind: 'vertical'; bounds?: PlaneWindow }
+  | { kind: 'horizontal'; bounds?: PlaneWindow }
   | { kind: 'on-line'; line: PlaneLine; range?: Range }
 
 /** Keys a movable point reacts to (see `planeKey`). */
 export type PlaneKey = 'left' | 'right' | 'up' | 'down' | 'home' | 'end' | 'page-up' | 'page-down'
 
-/** Outcome of a keyboard step: moved, or stopped at the edge or by another point. */
-export type PointMove = { kind: 'moved'; point: GridPoint } | { kind: 'edge' } | { kind: 'occupied'; by: GridPoint }
+/**
+ * Outcome of a keyboard step: moved, or stopped at the edge or by another
+ * point. `bound` marks an edge that is the point's `bounds`, not the window.
+ */
+export type PointMove =
+  | { kind: 'moved'; point: GridPoint }
+  | { kind: 'edge'; bound?: true }
+  | { kind: 'occupied'; by: GridPoint }
 
 // ---------------------------------------------------------------------------
 // Window
@@ -318,16 +329,36 @@ function isOccupied(p: GridPoint, occupied: readonly GridPoint[]): GridPoint | u
  */
 function track(current: GridPoint, drag: PointDrag, window: PlaneWindow, along: 'row' | 'column'): GridPoint[] {
   if (drag.kind === 'on-line') return lineTrack(drag, window)
+  const area = dragWindow(drag, window)
   const direction = drag.kind === 'vertical' ? 'column' : drag.kind === 'horizontal' ? 'row' : along
   return direction === 'row'
-    ? integers(window.x).map((x) => ({ x, y: current.y }))
-    : integers(window.y).map((y) => ({ x: current.x, y }))
+    ? integers(area.x).map((x) => ({ x, y: current.y }))
+    : integers(area.y).map((y) => ({ x: current.x, y }))
+}
+
+/**
+ * The part of the window a point may enter: the window itself, or its
+ * intersection with the point's `bounds`. Points on a line use their range
+ * instead (see `lineTrack`), so for them it is the window.
+ */
+export function dragWindow(drag: PointDrag, window: PlaneWindow): PlaneWindow {
+  if (drag.kind === 'on-line' || !drag.bounds) return window
+  const cut = (outer: Range, inner: Range): Range => [Math.max(outer[0], inner[0]), Math.min(outer[1], inner[1])]
+  return { x: cut(window.x, drag.bounds.x), y: cut(window.y, drag.bounds.y) }
 }
 
 /** German problems of a point's position; empty if it is a grid point of the window that its drag kind allows. */
 export function pointProblems(p: GridPoint, window: PlaneWindow, drag?: PointDrag): string[] {
   if (!Number.isInteger(p.x) || !Number.isInteger(p.y)) return ['Punkt: Koordinaten müssen ganze Zahlen sein.']
   if (!inWindow(window, p)) return ['Punkt: liegt außerhalb des Fensters.']
+  if (drag && drag.kind !== 'on-line') {
+    const area = dragWindow(drag, window)
+    const inX = p.x >= area.x[0] && p.x <= area.x[1]
+    const inY = p.y >= area.y[0] && p.y <= area.y[1]
+    if ((drag.kind !== 'vertical' && !inX) || (drag.kind !== 'horizontal' && !inY)) {
+      return ['Punkt: liegt außerhalb seines Bereichs.']
+    }
+  }
   if (drag?.kind === 'on-line') {
     if (!isOnLine(drag.line, p)) return ['Punkt: liegt nicht auf seiner Geraden.']
     if (!lineTrack(drag, window).some((q) => sameGridPoint(q, p))) return ['Punkt: liegt außerhalb seines Bereichs auf der Geraden.']
@@ -369,8 +400,9 @@ export function snapPoint(
     if (!best) return current
     target = best
   } else {
-    const x = drag.kind === 'vertical' ? current.x : clamp(Math.round(raw.x), window.x)
-    const y = drag.kind === 'horizontal' ? current.y : clamp(Math.round(raw.y), window.y)
+    const area = dragWindow(drag, window)
+    const x = drag.kind === 'vertical' ? current.x : clamp(Math.round(raw.x), area.x)
+    const y = drag.kind === 'horizontal' ? current.y : clamp(Math.round(raw.y), area.y)
     target = { x: x + 0, y: y + 0 }
   }
   return isOccupied(target, occupied) ? current : target
@@ -407,8 +439,10 @@ export function planeKey(key: string): PlaneKey | undefined {
  * - horizontal: →/↑ right, ←/↓ left, Pos1/Ende (and Bild↓/Bild↑) to the left/right edge
  * - on-line: →/↑ to the next grid point on the line, ←/↓ to the previous one, Pos1/Ende (and Bild↓/Bild↑) to the first/last
  *
+ * Points with `bounds` move only inside them, Pos1/Ende etc. go to their edges.
+ *
  * Occupied grid points are skipped. If the point cannot move, the result says
- * why: the edge, or the point that blocks the way.
+ * why: the edge (of the window or of the bounds), or the point that blocks the way.
  */
 export function movePoint(
   current: GridPoint,
@@ -416,6 +450,20 @@ export function movePoint(
   drag: PointDrag,
   window: PlaneWindow,
   occupied: readonly GridPoint[] = [],
+): PointMove {
+  const result = stepPoint(current, key, drag, window, occupied)
+  if (result.kind !== 'edge' || drag.kind === 'on-line' || !drag.bounds) return result
+  // Stopped: by the bounds if the same step would work without them.
+  const unbounded = stepPoint(current, key, { kind: drag.kind }, window, occupied)
+  return unbounded.kind === 'edge' ? result : { kind: 'edge', bound: true }
+}
+
+function stepPoint(
+  current: GridPoint,
+  key: PlaneKey,
+  drag: PointDrag,
+  window: PlaneWindow,
+  occupied: readonly GridPoint[],
 ): PointMove {
   const vertical = key === 'up' || key === 'down' || key === 'page-up' || key === 'page-down'
   const points = track(current, drag, window, vertical && drag.kind === 'free' ? 'column' : 'row')
@@ -427,7 +475,7 @@ export function movePoint(
   const index = points.findIndex((p) => sameGridPoint(p, current))
   if (index < 0) {
     // Not on its track (should not happen): jump to the nearest free grid point of it.
-    const target = snapPoint(current, current, drag.kind === 'on-line' ? drag : { kind: 'free' }, window, occupied)
+    const target = snapPoint(current, current, drag.kind === 'on-line' ? drag : { kind: 'free', bounds: drag.bounds }, window, occupied)
     return sameGridPoint(target, current) ? { kind: 'edge' } : { kind: 'moved', point: target }
   }
 
@@ -456,7 +504,10 @@ export function movePoint(
 
 /** Value range of the coordinate a slider-like point changes: x, or y for vertical points. */
 export function pointValueRange(p: GridPoint, drag: PointDrag, window: PlaneWindow): { now: number; min: number; max: number } {
-  if (drag.kind === 'vertical') return { now: p.y, min: window.y[0], max: window.y[1] }
+  if (drag.kind === 'vertical') {
+    const area = dragWindow(drag, window)
+    return { now: p.y, min: area.y[0], max: area.y[1] }
+  }
   if (drag.kind === 'on-line') {
     const points = lineTrack(drag, window)
     if (drag.line.kind === 'vertical') {
@@ -464,7 +515,8 @@ export function pointValueRange(p: GridPoint, drag: PointDrag, window: PlaneWind
     }
     return { now: p.x, min: points[0]?.x ?? p.x, max: points.at(-1)?.x ?? p.x }
   }
-  return { now: p.x, min: window.x[0], max: window.x[1] }
+  const area = dragWindow(drag, window)
+  return { now: p.x, min: area.x[0], max: area.x[1] }
 }
 
 // ---------------------------------------------------------------------------
@@ -495,8 +547,9 @@ export function pointAnnouncement(label: string, p: GridPoint): string {
   return `${label}: ${pointValueText(p)}`
 }
 
-export function edgeAnnouncement(label: string): string {
-  return `${label}: Rand erreicht`
+/** Stopped at the edge of the window, or with `bound` at the edge of the point's bounds. */
+export function edgeAnnouncement(label: string, bound = false): string {
+  return bound ? `${label}: Grenze erreicht` : `${label}: Rand erreicht`
 }
 
 export function occupiedAnnouncement(other: string): string {

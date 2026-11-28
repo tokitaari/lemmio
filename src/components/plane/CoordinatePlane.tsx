@@ -187,7 +187,7 @@ export default function CoordinatePlane({
       onPointChange?.(item.id, result.point)
       announceMove(item, result.point)
     } else if (result.kind === 'edge') {
-      setAnnouncement(edgeAnnouncement(item.label))
+      setAnnouncement(edgeAnnouncement(item.label, result.bound === true))
     } else {
       const other = points.find((p) => p.id !== item.id && p.drag && sameGridPoint(p, result.by))
       setAnnouncement(occupiedAnnouncement(other?.label ?? 'ein Punkt'))

@@ -7,6 +7,8 @@ import {
   DEFAULT_WINDOW,
   describeWindow,
   dragHint,
+  dragWindow,
+  edgeAnnouncement,
   formatNumber,
   fromView,
   gridLines,
@@ -40,6 +42,8 @@ const vertical: PointDrag = { kind: 'vertical' }
 const horizontal: PointDrag = { kind: 'horizontal' }
 const onF: PointDrag = { kind: 'on-line', line: f }
 const onFLimited: PointDrag = { kind: 'on-line', line: f, range: [0, 3] }
+const box: PlaneWindow = { x: [-2, 3], y: [1, 20] }
+const freeInBox: PointDrag = { kind: 'free', bounds: box }
 
 describe('window', () => {
   it('is −8…8 by default and accepts windows that show both axes', () => {
@@ -194,6 +198,20 @@ describe('snapping', () => {
     expect(pointProblems({ x: 3, y: 3 }, W, onFLimited)).toEqual([])
   })
 
+  it('keeps points with bounds inside the bounds and the window', () => {
+    expect(dragWindow(freeInBox, W)).toEqual({ x: [-2, 3], y: [1, 8] })
+    expect(dragWindow(free, W)).toBe(W)
+    expect(dragWindow(onF, W)).toBe(W)
+    expect(snapPoint({ x: 6.2, y: -4 }, { x: 0, y: 2 }, freeInBox, W)).toEqual({ x: 3, y: 1 })
+    expect(snapPoint({ x: -5, y: 12 }, { x: 0, y: 2 }, freeInBox, W)).toEqual({ x: -2, y: 8 })
+    expect(snapPoint({ x: 6, y: 5 }, { x: 0, y: 2 }, { kind: 'horizontal', bounds: box }, W)).toEqual({ x: 3, y: 2 })
+    expect(snapPoint({ x: 6, y: -5 }, { x: 4, y: 2 }, { kind: 'vertical', bounds: box }, W)).toEqual({ x: 4, y: 1 })
+    expect(pointProblems({ x: 4, y: 2 }, W, freeInBox)).toEqual(['Punkt: liegt außerhalb seines Bereichs.'])
+    expect(pointProblems({ x: 4, y: 2 }, W, { kind: 'vertical', bounds: box })).toEqual([])
+    expect(pointProblems({ x: 0, y: 0 }, W, { kind: 'horizontal', bounds: box })).toEqual([])
+    expect(pointProblems({ x: 0, y: 0 }, W, { kind: 'vertical', bounds: box })).toEqual(['Punkt: liegt außerhalb seines Bereichs.'])
+  })
+
   it('stays where it is while the nearest grid point is taken', () => {
     expect(snapPoint({ x: 2.4, y: -3.6 }, { x: 0, y: 0 }, free, W, [{ x: 2, y: -4 }])).toEqual({ x: 0, y: 0 })
     expect(snapPoint({ x: 3.4, y: -3.6 }, { x: 0, y: 0 }, free, W, [{ x: 2, y: -4 }])).toEqual({ x: 3, y: -4 })
@@ -272,11 +290,32 @@ describe('keyboard', () => {
     expect(movePoint(p, 'home', onFLimited, W)).toEqual({ kind: 'moved', point: { x: 0, y: -3 } })
   })
 
+  it('moves points with bounds inside them and says when the bounds stop them', () => {
+    const p = { x: 2, y: 1 }
+    expect(movePoint(p, 'right', freeInBox, W)).toEqual({ kind: 'moved', point: { x: 3, y: 1 } })
+    expect(movePoint(p, 'end', freeInBox, W)).toEqual({ kind: 'moved', point: { x: 3, y: 1 } })
+    expect(movePoint(p, 'home', freeInBox, W)).toEqual({ kind: 'moved', point: { x: -2, y: 1 } })
+    expect(movePoint(p, 'page-up', freeInBox, W)).toEqual({ kind: 'moved', point: { x: 2, y: 8 } })
+    expect(movePoint(p, 'down', freeInBox, W)).toEqual({ kind: 'edge', bound: true })
+    expect(movePoint({ x: 3, y: 1 }, 'end', freeInBox, W)).toEqual({ kind: 'edge', bound: true })
+    // At the top the window stops the point, not the bounds.
+    expect(movePoint({ x: 2, y: 8 }, 'up', freeInBox, W)).toEqual({ kind: 'edge' })
+    expect(movePoint({ x: 3, y: 0 }, 'right', { kind: 'horizontal', bounds: box }, W)).toEqual({ kind: 'edge', bound: true })
+    expect(movePoint({ x: 0, y: 3 }, 'down', { kind: 'vertical', bounds: { x: [0, 0], y: [3, 5] } }, W)).toEqual({
+      kind: 'edge',
+      bound: true,
+    })
+    expect(edgeAnnouncement('D')).toBe('D: Rand erreicht')
+    expect(edgeAnnouncement('D', true)).toBe('D: Grenze erreicht')
+  })
+
   it('gives the value range of the coordinate a point changes', () => {
     expect(pointValueRange({ x: 3, y: 2 }, free, W)).toEqual({ now: 3, min: -8, max: 8 })
     expect(pointValueRange({ x: 0, y: 2 }, vertical, W)).toEqual({ now: 2, min: -8, max: 8 })
     expect(pointValueRange({ x: 1, y: -1 }, onF, W)).toEqual({ now: 1, min: -2, max: 5 })
     expect(pointValueRange({ x: 1, y: -1 }, onFLimited, W)).toEqual({ now: 1, min: 0, max: 3 })
+    expect(pointValueRange({ x: 1, y: 2 }, freeInBox, W)).toEqual({ now: 1, min: -2, max: 3 })
+    expect(pointValueRange({ x: 1, y: 2 }, { kind: 'vertical', bounds: box }, W)).toEqual({ now: 2, min: 1, max: 8 })
   })
 })
 

@@ -8,6 +8,8 @@ import { buildLinePoints, linePointsLatex, linePointsProblems } from './linePoin
 import { buildLineSliders, lineSlidersLatex, lineSlidersProblems } from './lineSliders'
 import { buildValueTable, valueTableLatex, valueTableProblems } from './valueTable'
 import { buildSlopeTriangle, slopeTriangleLatex, slopeTriangleProblems } from './slopeTriangle'
+import { buildShapePoints, shapePointsLatex, shapePointsProblems } from './shapePoints'
+import { buildShapeSliders, shapeSlidersLatex, shapeSlidersProblems } from './shapeSliders'
 import { CARD_ID, DECK_ID } from './storage'
 import { buildTwoLines, twoLinesLatex, twoLinesProblems } from './twoLines'
 import type { Card, CardQuestion, CardWidget, Deck } from './types'
@@ -73,6 +75,10 @@ function widgetProblems(widget: CardWidget): string[] {
       return valueTableProblems(widget)
     case 'two-lines':
       return twoLinesProblems(widget)
+    case 'shape-sliders':
+      return shapeSlidersProblems(widget)
+    case 'shape-points':
+      return shapePointsProblems(widget)
   }
 }
 
@@ -127,8 +133,8 @@ function cardTerms(card: Card): string[] {
  * LaTeX that a deck shows besides terms and markup, e.g. operations,
  * intermediate lines and solution sets of equation steps, or the start
  * equations of the line widgets, including a term given for g in
- * `two-lines` (their other states are covered by the
- * unit tests of the widgets). Content tests render it with KaTeX in strict
+ * `two-lines`, or the start calculation of the geometry widgets (their
+ * other states are covered by the unit tests of the widgets). Content tests render it with KaTeX in strict
  * mode. Widgets with problems are skipped.
  */
 export function deckLatex(deck: Deck): string[] {
@@ -148,6 +154,10 @@ export function deckLatex(deck: Deck): string[] {
         return valueTableLatex(buildValueTable(widget))
       case 'two-lines':
         return twoLinesLatex(buildTwoLines(widget))
+      case 'shape-sliders':
+        return shapeSlidersLatex(buildShapeSliders(widget))
+      case 'shape-points':
+        return shapePointsLatex(buildShapePoints(widget))
       default:
         return []
     }

@@ -11,6 +11,7 @@ export {
   describeWindow,
   displayText,
   dragHint,
+  dragWindow,
   edgeAnnouncement,
   formatNumber,
   fromView,

@@ -1,5 +1,5 @@
 import type { Markup } from '../content/types'
-import type { Coordinates, FormRequirement } from '../math'
+import type { Coordinates, FormRequirement, Letter, Quantity, ShapeKind } from '../math'
 import type { PlaneWindow, Range } from '../plane'
 
 /**
@@ -37,6 +37,8 @@ export type CardWidget =
   | LinePointsWidget
   | ValueTableWidget
   | TwoLinesWidget
+  | ShapeSlidersWidget
+  | ShapePointsWidget
 
 /**
  * A transformation shown line by line: the start term, then `= term` per step
@@ -299,6 +301,72 @@ export type TwoLinesVary = 'none' | 'm' | 'n' | 'both'
 export interface LineCoefficients {
   m: number
   n: number
+}
+
+/**
+ * A figure true to scale with sliders for its lengths (step 0,5 cm); the
+ * figure and the formula with the numbers inserted follow, e.g.
+ * `A = g·h = 6,5·4 = 26 cm²`. The figure keeps its frame, so nothing jumps
+ * while a slider is dragged. Logic and checks: src/cards/shapeSliders.ts.
+ */
+export interface ShapeSlidersWidget {
+  kind: 'shape-sliders'
+  shape: ShapeKind
+  /** Area (default) or perimeter. */
+  quantity?: Quantity
+  /**
+   * Exactly the letters of the formula: area g, h (parallelogram, triangle),
+   * e, f (rhombus), a, c, h (trapezoid); perimeter a, b (parallelogram),
+   * a, b, c (triangle), a (rhombus), a, b, c, d (trapezoid). A number is a
+   * fixed length, a `ShapeSlider` gets a slider. Lengths in cm, whole or ,5,
+   * within 1…12; every slider position must give a figure.
+   */
+  measures: Readonly<Partial<Record<Letter, ShapeMeasure>>>
+  /**
+   * Area only, not for a rhombus: parallelogram and trapezoid how far the
+   * top side is shifted to the right of A, triangle x of the apex C
+   * (negative or beyond g: obtuse), in cm, a multiple of 0,5 in −6…12.
+   * Default: the shape keeps its proportions (trapezoid isosceles).
+   */
+  offset?: number
+  /** Accessible name in front of the description of the figure. */
+  label?: string
+}
+
+/** A fixed length, or a slider with its start value and range (default 1…10). */
+export type ShapeMeasure = number | ShapeSlider
+
+export interface ShapeSlider {
+  value: number
+  min?: number
+  max?: number
+}
+
+/**
+ * A figure on the geometry grid (0…12 × 0…10, one square = 1 cm) with
+ * movable vertices; the base AB stays horizontal, so g and h are whole
+ * numbers. A stays where it is (for a rhombus the centre M). Movable:
+ * parallelogram B and D (C follows), triangle B and C, rhombus C and D
+ * (A and B follow, mirrored at M), trapezoid B, C and D (C follows D up and
+ * down). Height, lengths and area follow every move. With a `target` area
+ * the status says when it is reached (it does not lock "Weiter"). Logic and
+ * checks: src/cards/shapePoints.ts.
+ */
+export interface ShapePointsWidget {
+  kind: 'shape-points'
+  shape: ShapeKind
+  /**
+   * Start vertices A, B, C(, D) counterclockwise, grid points of the grid.
+   * AB is horizontal with y ≥ 1 (room for its label) and the top above AB;
+   * a parallelogram has C = B + D − A, a trapezoid CD ∥ AB with C right of D.
+   * A rhombus has the horizontal diagonal AC and the vertical diagonal BD
+   * with the same midpoint M (a grid point), so e and f are even.
+   */
+  vertices: readonly Coordinates[]
+  /** Area to reach in cm², a multiple of 0,5 other than the start area. */
+  target?: number
+  /** Accessible name of the grid. */
+  label?: string
 }
 
 export type CardQuestion = ChoiceQuestion | TermQuestion
