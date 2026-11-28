@@ -9,7 +9,7 @@ import Practice from '../components/Practice'
 import WorkedExampleCard from '../components/WorkedExampleCard'
 import { findSubtopic } from '../catalog'
 import { findContent, findFormula } from '../content'
-import { isEquationSubtopic, isTermSubtopic } from '../math'
+import { isEquationSubtopic, isGeometrySubtopic, isTermSubtopic } from '../math'
 import { isIntersectionSubtopic, isTaskPracticeSubtopic } from '../practice/functionSession'
 import NotFound from './NotFound'
 
@@ -17,7 +17,8 @@ import NotFound from './NotFound'
  * A subtopic at `/area/topic/subtopic`: explanation as a card deck, worked
  * examples, formulas and the practice area (terms are answered in one field,
  * equations are solved line by line, functions are read, typed and drawn, the
- * intersection of two lines is read and calculated).
+ * intersection of two lines is read and calculated; the practice of
+ * geometry follows).
  */
 export default function SubtopicPage() {
   const params = useParams()
@@ -68,6 +69,12 @@ export default function SubtopicPage() {
       {isEquationSubtopic(id) && <EquationPractice key={id} topic={id} />}
       {isTaskPracticeSubtopic(id) && <FunctionPractice key={id} topic={id} />}
       {isIntersectionSubtopic(id) && <IntersectionPractice key={id} topic={id} />}
+      {isGeometrySubtopic(id) && (
+        <section aria-labelledby="uebung" className="panel">
+          <h2 id="uebung">Übung</h2>
+          <p>Übungsaufgaben zu diesem Teilthema folgen bald.</p>
+        </section>
+      )}
     </>
   )
 }

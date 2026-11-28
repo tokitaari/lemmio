@@ -1,18 +1,25 @@
 import type { Card } from '../cards/types'
-import type { EquationTask, FunctionTask, Task } from '../math'
+import type { EquationTask, FunctionTask, GeometryTask, Task } from '../math'
 
 /** A paragraph or list item in explanation markup (see markup.ts). */
 export type Markup = string
+
+/** Geometry tasks with a figure: area, perimeter and Rückwärts (drawing tasks are no examples). */
+export type GeometryExampleTask = Extract<GeometryTask, { kind: 'area' | 'perimeter' | 'reverse' }>
+
+/** The task of a worked example. */
+export type ExampleTask = Task | EquationTask | FunctionTask | GeometryExampleTask
 
 /**
  * A fully worked example; the solution steps come from the math core. Term
  * subtopics use a `Task`, equation subtopics an `EquationTask` (see
  * `isEquationTask`), function subtopics a `FunctionTask` (see
- * `isFunctionTask`).
+ * `isFunctionTask`), geometry subtopics a `GeometryExampleTask` (see
+ * `isGeometryTask`).
  */
 export interface WorkedExample {
   title: string
-  task: Task | EquationTask | FunctionTask
+  task: ExampleTask
   /** Optional remark after the solution. */
   comment?: Markup
 }
@@ -83,11 +90,16 @@ export interface SubtopicContent {
 }
 
 /** True if the example is about a linear function (it may carry an equation as well). */
-export function isFunctionTask(task: Task | EquationTask | FunctionTask): task is FunctionTask {
+export function isFunctionTask(task: ExampleTask): task is FunctionTask {
   return 'fn' in task
 }
 
+/** True if the example is about an area or a perimeter (a Rückwärts task carries an equation as well). */
+export function isGeometryTask(task: ExampleTask): task is GeometryExampleTask {
+  return 'shape' in task
+}
+
 /** True if the example is a linear equation solved line by line. */
-export function isEquationTask(task: Task | EquationTask | FunctionTask): task is EquationTask {
-  return 'equation' in task && !isFunctionTask(task)
+export function isEquationTask(task: ExampleTask): task is EquationTask {
+  return 'equation' in task && !isFunctionTask(task) && !isGeometryTask(task)
 }

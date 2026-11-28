@@ -5,15 +5,20 @@ import {
   ALL_SUBTOPIC_IDS,
   areEquivalent,
   checkAnswer,
+  checkCalculation,
   checkDrawnLine,
   checkFunction,
   checkFunctionValue,
   checkIntersection,
   checkSolutionSet,
   checkStep,
+  checkSubstitution,
   checkZero,
+  DECIMAL,
   functionToText,
+  geometryNumberToText,
   isFunctionSubtopic,
+  isGeometrySubtopic,
   equalSolutionSets,
   equationToLatex,
   equationToText,
@@ -33,8 +38,10 @@ import {
   toPolynomial,
   toText,
   valueAt as functionValueAt,
+  withUnit,
   type EquationTask,
   type FunctionTask,
+  type ShapeKind,
 } from '../math'
 import { DEFAULT_WINDOW } from '../plane'
 import { allSubtopics, catalog } from '../catalog'
@@ -56,11 +63,20 @@ import {
   equationPieces,
   equationToLatexMarkup,
   readFunctionSegment,
+  readGeometrySegment,
   splitChain,
   splitMarkup,
   termToLatex,
 } from './markup'
-import { isEquationTask, isFunctionTask, type EquivalenceRule, type SolutionSetRule, type SubtopicContent } from './types'
+import {
+  isEquationTask,
+  isFunctionTask,
+  isGeometryTask,
+  type EquivalenceRule,
+  type GeometryExampleTask,
+  type SolutionSetRule,
+  type SubtopicContent,
+} from './types'
 
 /** The card widgets that show a coordinate plane. */
 const PLANE_WIDGETS: readonly CardWidget['kind'][] = [
@@ -70,6 +86,20 @@ const PLANE_WIDGETS: readonly CardWidget['kind'][] = [
   'value-table',
   'two-lines',
 ]
+
+/** The card widgets about figures (geometry). */
+const GEOMETRY_WIDGETS: readonly CardWidget['kind'][] = ['shape-sliders', 'shape-points', 'shear', 'decompose']
+
+/** The figure of each geometry subtopic, by the last segment of its id. */
+const SHAPE_OF: Readonly<Record<string, ShapeKind>> = {
+  parallelogramm: 'parallelogram',
+  dreieck: 'triangle',
+  raute: 'rhombus',
+  trapez: 'trapezoid',
+}
+
+/** A number with decimals, e.g. `6,5` or `6.5`. */
+const DECIMAL_NUMBER = /\d[,.]\d/
 
 /** Every markup text of a topic: all texts of its cards and the example comments. */
 function markupTexts(content: SubtopicContent): string[] {
@@ -91,15 +121,36 @@ function functionSources(text: string): string[] {
   return splitMarkup(text).flatMap((s) => (s.kind === 'function' ? [s.source] : []))
 }
 
+function geometrySources(text: string): string[] {
+  return splitMarkup(text).flatMap((s) => (s.kind === 'geometry' ? [s.source] : []))
+}
+
+/** The result of a geometry example, given as the learner would, is accepted; Rückwärts tasks are solved line by line. */
+function expectGeometryResultAccepted(task: GeometryExampleTask) {
+  if (task.kind === 'reverse') {
+    expect(checkSubstitution(task, equationToText(task.substitution, DECIMAL)).kind).toBe('correct')
+    expect(task.equation.numbers).toBe('decimal')
+    expectSolvedLineByLine(task.equation)
+    const last = task.equation.steps.at(-1)
+    // The line by line solution ends with the length asked for, e.g. `h = 4`.
+    expect(last && equationToText(last.equation, DECIMAL)).toBe(`${task.unknown} = ${geometryNumberToText(task.result)}`)
+    return
+  }
+  const { calculation } = task
+  expect(checkCalculation(calculation, calculation.answer, calculation.unit).kind).toBe('correct')
+}
+
 /** Checks the worked solution of an equation line by line, including the solution set. */
 function expectSolvedLineByLine(task: EquationTask) {
+  // Geometry prints its equations with a decimal comma, as the learner would type them.
+  const options = task.numbers === 'decimal' ? DECIMAL : undefined
   let previous = task.equation
   for (const step of task.steps) {
-    const text = equationToText(step.equation)
+    const text = equationToText(step.equation, options)
     expect(checkStep(previous, step.operation, text).kind, text).toBe('correct')
     previous = step.equation
   }
-  expect(checkSolutionSet(task, solutionSetToText(task.solutionSet))).toEqual({ kind: 'correct' })
+  expect(checkSolutionSet(task, solutionSetToText(task.solutionSet, options))).toEqual({ kind: 'correct' })
 }
 
 /** The result of a function task, given as the learner would, is accepted. */
@@ -252,6 +303,38 @@ describe('markup', () => {
     expect(() => readFunctionSegment('P(2,5)')).toThrow(/Not a function equation, function value or point/)
   })
 
+  it('splits off geometry segments marked with "geo:"', () => {
+    expect(splitMarkup('Also $geo: A = g · h$.')).toEqual([
+      { kind: 'text', text: 'Also ' },
+      { kind: 'geometry', source: 'A = g · h' },
+      { kind: 'text', text: '.' },
+    ])
+  })
+
+  it('reads calculations with a quantity, decimals and a unit, and equations in a length', () => {
+    expect(readGeometrySegment('A = g · h : 2 = 6,5 · 4 : 2 = 13 cm²')).toEqual({
+      kind: 'calculation',
+      pieces: ['A', '= \\frac{g \\cdot h}{2}', '= \\frac{6{,}5 \\cdot 4}{2}', '= 13\\,\\text{cm}^{2}'],
+      values: [Rational.of(13), Rational.of(13)],
+    })
+    expect(readGeometrySegment('u = 2 · (a + b)').pieces).toEqual(['u', '= 2 \\cdot (a + b)'])
+    expect(readGeometrySegment('h = 4 cm').pieces).toEqual(['h', '= 4\\,\\text{cm}'])
+    expect(readGeometrySegment('A = (6 + 3) · 3 : 2 = 13.5 cm²').values.map((v) => v.toString())).toEqual(['27/2', '27/2'])
+    const equation = readGeometrySegment('18 = 4,5h | : 4,5')
+    expect(equation.kind).toBe('equation')
+    expect(equation.pieces.slice(0, 2)).toEqual(['18', '= 4{,}5h'])
+    expect(equation.pieces[2]).toContain('4{,}5')
+  })
+
+  it('rejects geometry segments with a wrong unit or letter', () => {
+    expect(() => readGeometrySegment('A = 6 · 4 = 24 cm')).toThrow(/unit of A is cm²/)
+    expect(() => readGeometrySegment('u = 16 cm²')).toThrow(/unit of u is cm/)
+    expect(() => readGeometrySegment('A = x · 4')).toThrow(/Letter "x"/)
+    expect(() => readGeometrySegment('h = 2 · A : g')).toThrow(/Letter "A"/)
+    expect(() => readGeometrySegment('A = ')).toThrow(/Empty term/)
+    expect(() => readGeometrySegment('12 = ')).toThrow(/Not a calculation or an equation/)
+  })
+
   it('keeps multiplication dots written in the source', () => {
     expect(chainToLatex('3·(-5) = -15')).toBe('3 \\cdot (-5) = -15')
     expect(chainToLatex('2·x·5 = 10x')).toBe('2 \\cdot x \\cdot 5 = 10x')
@@ -322,6 +405,13 @@ describe('formula sheet', () => {
     expect(entryLatex(findFormula('slope-two-points'))).toBe('m = \\frac{y_2 - y_1}{x_2 - x_1} \\quad (x_1 \\neq x_2)')
   })
 
+  it('has the groups of geometry, typeset like the worked solutions', () => {
+    expect(formulaGroupsOf('geometrie', 'vierecke-und-flaechen').map((g) => g.title)).toEqual(['Flächeninhalt', 'Umfang'])
+    expect(entryLatex(findFormula('area-triangle'))).toBe('A = \\frac{g \\cdot h}{2}')
+    expect(entryLatex(findFormula('area-trapezoid'))).toBe('A = \\frac{(a + c) \\cdot h}{2}')
+    expect(entryLatex(findFormula('perimeter-rhombus'))).toBe('u = 4 \\cdot a')
+  })
+
   it('shows the three binomial formulas in school notation', () => {
     const latex = formulaGroupsOf('algebra', 'terme').find((g) => g.title === 'Binomische Formeln')?.formulas.map(entryLatex)
     expect(latex).toEqual([
@@ -358,7 +448,13 @@ describe('topic content', () => {
       expect(cards.some((c) => c.question?.kind === 'term')).toBe(true)
       if (isTermSubtopic(topic)) expect(kinds.has('area-model')).toBe(true)
       else if (isFunctionSubtopic(topic)) expect(PLANE_WIDGETS.some((kind) => kinds.has(kind))).toBe(true)
-      else expect([kinds.has('balance'), kinds.has('equation-steps')]).toEqual([true, true])
+      else if (isGeometrySubtopic(topic)) {
+        expect(GEOMETRY_WIDGETS.some((kind) => kinds.has(kind))).toBe(true)
+        // The parallelogram is sheared to a rectangle; triangle and trapezoid are doubled, the rhombus lies in the rectangle e × f.
+        const shape = SHAPE_OF[topic.split('/').at(-1)!]
+        if (shape === 'parallelogram') expect(kinds.has('shear')).toBe(true)
+        else expect(cards.some((c) => c.widget?.kind === 'decompose' && c.widget.shape === shape)).toBe(true)
+      } else expect([kinds.has('balance'), kinds.has('equation-steps')]).toEqual([true, true])
     })
 
     it('typesets the operations, intermediate lines and solution sets of its widgets', () => {
@@ -419,6 +515,29 @@ describe('topic content', () => {
       }
     })
 
+    it('reads every geometry segment in the text, its numbers agree, and typesets it with KaTeX', () => {
+      for (const text of markupTexts(content)) {
+        for (const source of geometrySources(text)) {
+          const segment = readGeometrySegment(source)
+          for (const value of segment.values) {
+            expect(value.equals(segment.values[0]!), `${source} (in: ${text})`).toBe(true)
+          }
+          expect(() => renderStrict(segment.pieces.join(' ')), `${source} (in: ${text})`).not.toThrow()
+        }
+      }
+    })
+
+    it.runIf(isGeometrySubtopic(topic))('writes decimals only in geometry segments (elsewhere they would print as fractions)', () => {
+      for (const text of markupTexts(content)) {
+        for (const source of [...mathSources(text), ...equationSources(text)]) {
+          expect(DECIMAL_NUMBER.test(source), `${source} (in: ${text})`).toBe(false)
+        }
+      }
+      for (const card of content.cards) {
+        if (card.question?.kind === 'term') expect(DECIMAL_NUMBER.test(card.question.answer), card.id).toBe(false)
+      }
+    })
+
     describe.each(content.examples.map((e) => [e.title, e] as const))('example "%s"', (_title, example) => {
       const { task } = example
 
@@ -441,6 +560,11 @@ describe('topic content', () => {
       })
 
       it('has a worked solution whose result is accepted as correct', () => {
+        if (isGeometryTask(task)) {
+          expect(task.steps.length).toBeGreaterThan(0)
+          expectGeometryResultAccepted(task)
+          return
+        }
         if (isFunctionTask(task)) {
           expect(task.steps.length).toBeGreaterThan(1)
           expectFunctionResultAccepted(task)
@@ -458,6 +582,16 @@ describe('topic content', () => {
       })
 
       it('typesets prompt and steps with KaTeX', () => {
+        if (isGeometryTask(task)) {
+          const latex = [
+            ...task.steps.map((step) => step.latex),
+            ...(task.kind === 'reverse'
+              ? task.equation.steps.flatMap((s) => [operationToLatex(s.operation, DECIMAL), equationToLatex(s.equation, DECIMAL)])
+              : []),
+          ]
+          for (const l of latex) expect(() => renderStrict(l), l).not.toThrow()
+          return
+        }
         if (isFunctionTask(task)) {
           for (const step of task.steps) expect(() => renderStrict(step.latex), step.latex).not.toThrow()
           return
@@ -483,7 +617,11 @@ describe('topic content', () => {
       ALL_SUBTOPIC_IDS.map((topic) => [
         topic,
         subtopicContent[topic].examples.map(({ task }) =>
-          isFunctionTask(task)
+          isGeometryTask(task)
+            ? task.kind === 'reverse'
+              ? `reverse → ${task.unknown} = ${withUnit(task.result, task.unit)}`
+              : `${task.kind} → ${withUnit(task.calculation.value, task.calculation.unit)}`
+            : isFunctionTask(task)
             ? `${task.kind} → ${task.steps[task.steps.length - 1]!.text}`
             : isEquationTask(task)
               ? `${equationToText(task.equation)} → ${solutionSetToText(task.solutionSet)}`
@@ -528,6 +666,10 @@ describe('topic content', () => {
         'intersection → L = { }',
         'intersection → L = ℚ',
       ],
+      'geometrie/vierecke-und-flaechen/parallelogramm': ['area → 26 cm²', 'area → 15 cm²', 'perimeter → 16 cm', 'reverse → h = 4 cm'],
+      'geometrie/vierecke-und-flaechen/dreieck': ['area → 12 cm²', 'area → 7,5 cm²', 'perimeter → 12 cm', 'reverse → g = 8 cm'],
+      'geometrie/vierecke-und-flaechen/raute': ['area → 12 cm²', 'area → 10,5 cm²', 'perimeter → 18 cm', 'reverse → f = 6 cm'],
+      'geometrie/vierecke-und-flaechen/trapez': ['area → 13,5 cm²', 'area → 18 cm²', 'perimeter → 20 cm', 'reverse → c = 4 cm'],
     })
   })
 })

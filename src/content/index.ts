@@ -9,6 +9,10 @@ import { funktionenGleichungAufstellen } from './funktionen-gleichung-aufstellen
 import { funktionenPunktprobeNullstelle } from './funktionen-punktprobe-nullstelle'
 import { funktionenSchnittpunkt } from './funktionen-schnittpunkt'
 import { funktionenSteigungUndGraph } from './funktionen-steigung-und-graph'
+import { geometrieDreieck } from './geometrie-dreieck'
+import { geometrieParallelogramm } from './geometrie-parallelogramm'
+import { geometrieRaute } from './geometrie-raute'
+import { geometrieTrapez } from './geometrie-trapez'
 import type { SubtopicContent } from './types'
 
 export {
@@ -30,20 +34,26 @@ export {
   equationPieces,
   equationToLatexMarkup,
   FUNCTION_PREFIX,
+  GEOMETRY_PREFIX,
   readFunctionSegment,
+  readGeometrySegment,
   segmentPieces,
   splitChain,
   splitMarkup,
   termToLatex,
   type FunctionSegment,
+  type GeometrySegment,
   type Segment,
 } from './markup'
 export {
   isEquationTask,
   isFunctionTask,
+  isGeometryTask,
   type EquivalenceRule,
+  type ExampleTask,
   type Formula,
   type FormulaGroup,
+  type GeometryExampleTask,
   type Markup,
   type SheetEntry,
   type SolutionSetRule,
@@ -64,6 +74,10 @@ export const subtopicContent = {
   'funktionen/lineare-funktionen/gleichung-aufstellen': funktionenGleichungAufstellen,
   'funktionen/lineare-funktionen/punktprobe-nullstelle': funktionenPunktprobeNullstelle,
   'funktionen/lineare-funktionen/schnittpunkt': funktionenSchnittpunkt,
+  'geometrie/vierecke-und-flaechen/parallelogramm': geometrieParallelogramm,
+  'geometrie/vierecke-und-flaechen/dreieck': geometrieDreieck,
+  'geometrie/vierecke-und-flaechen/raute': geometrieRaute,
+  'geometrie/vierecke-und-flaechen/trapez': geometrieTrapez,
 } as const satisfies Record<SubtopicId, SubtopicContent>
 
 export function findContent(id: string): SubtopicContent | undefined {

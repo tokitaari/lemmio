@@ -1,4 +1,5 @@
 import {
+  DECIMAL,
   operationToLatex,
   parse,
   pointToLatex,
@@ -11,8 +12,11 @@ import {
   readTerm,
   solutionSetToLatex,
   toLatex,
+  toPolynomial,
+  unitToLatex,
   type Expr,
   type Rational,
+  type Unit,
 } from '../math'
 
 /**
@@ -33,18 +37,29 @@ import {
  * `$fn: f(2) = 2·2 - 1 = 3$`, a point `$fn: P(2|3)$` or a value of m or n
  * `$fn: m = (9 - 3)/(4 - 1) = 2$`. The content tests check that these can be
  * read and that the numbers of a chain agree.
+ *
+ * Geometry uses the prefix `geo:` (see `readGeometrySegment`): a calculation
+ * `$geo: A = g · h : 2 = 6 · 4 : 2 = 12 cm²$` with a quantity on the left
+ * (A, u or a length a–h) and an optional unit at the end, or an equation in
+ * a length, e.g. `$geo: 18 = 4,5h | : 4,5$`. Numbers are typeset with a
+ * decimal comma. The content tests check that the numbers of a chain agree
+ * and that the unit fits the quantity.
  */
 export type Segment =
   | { kind: 'text'; text: string }
   | { kind: 'math'; source: string }
   | { kind: 'equation'; source: string }
   | { kind: 'function'; source: string }
+  | { kind: 'geometry'; source: string }
 
 /** Marks an equation segment, e.g. `$eq: 2x = 6$`. */
 export const EQUATION_PREFIX = 'eq:'
 
 /** Marks a segment about linear functions, e.g. `$fn: f(x) = 2x - 3$`. */
 export const FUNCTION_PREFIX = 'fn:'
+
+/** Marks a segment about areas and perimeters, e.g. `$geo: A = g · h = 6 · 4 = 24 cm²$`. */
+export const GEOMETRY_PREFIX = 'geo:'
 
 export function splitMarkup(text: string): Segment[] {
   const parts = text.split('$')
@@ -58,6 +73,9 @@ export function splitMarkup(text: string): Segment[] {
       }
       if (trimmed.startsWith(FUNCTION_PREFIX)) {
         return { kind: 'function', source: trimmed.slice(FUNCTION_PREFIX.length).trim() }
+      }
+      if (trimmed.startsWith(GEOMETRY_PREFIX)) {
+        return { kind: 'geometry', source: trimmed.slice(GEOMETRY_PREFIX.length).trim() }
       }
       return { kind: 'math', source: part }
     })
@@ -73,6 +91,8 @@ export function segmentPieces(segment: Exclude<Segment, { kind: 'text' }>): stri
       return equationPieces(segment.source)
     case 'function':
       return readFunctionSegment(segment.source).pieces
+    case 'geometry':
+      return readGeometrySegment(segment.source).pieces
   }
 }
 
@@ -178,6 +198,98 @@ export function readFunctionSegment(source: string): FunctionSegment {
     throw new Error(`Not a function equation, function value or point: "${source}" (${point.error.message})`)
   }
   return { kind: 'point', pieces: [pointToLatex(point.point, point.label ?? '')] }
+}
+
+/**
+ * A segment about areas and perimeters, read with the math core: its LaTeX
+ * pieces and, for a calculation, the values of the terms that consist of
+ * numbers only (they must all be equal; checked by the content tests).
+ */
+export interface GeometrySegment {
+  kind: 'calculation' | 'equation'
+  pieces: string[]
+  values: Rational[]
+}
+
+/** A quantity on the left of a calculation: area A, perimeter u or a length a–h. */
+const GEOMETRY_QUANTITY = /^\s*([Aua-h])\s*$/
+const GEOMETRY_UNIT = /\s*(cm²|cm)\s*$/
+const LETTER = /[A-Za-zÄÖÜäöüß]/g
+const LENGTH_LETTER = /^[a-h]$/
+
+/** Lengths a–h only: other letters (also A, which the parser would read as a) are not allowed in a term. */
+function checkGeometryLetters(term: string, source: string): void {
+  for (const letter of term.match(LETTER) ?? []) {
+    if (!LENGTH_LETTER.test(letter)) throw new Error(`Letter "${letter}" is not a length a–h in "${source}"`)
+  }
+}
+
+/** LaTeX for a term of a geometry segment: dots as written, numbers with a decimal comma. */
+function geometryTermToLatex(term: string, source: string): string {
+  checkGeometryLetters(term, source)
+  return toLatex(keepDots(parse(term), term), DECIMAL)
+}
+
+/**
+ * Reads a segment with the prefix `geo:` (without the prefix):
+ * - a calculation `A = g · h : 2 = 6 · 4 : 2 = 12 cm²` with the quantity on
+ *   the left (A, u or a length a–h), terms with the lengths a–h and numbers
+ *   (whole or with a decimal comma), and an optional unit at the end that
+ *   must fit the quantity (A: cm², u and lengths: cm)
+ * - an equation in lengths, optionally with an operation, e.g.
+ *   `24 = 6 · h : 2` or `18 = 4,5h | : 4,5`
+ * `:` and `/` are typeset as a fraction bar, as in the formula sheet.
+ *
+ * @throws Error if the source is neither or uses another letter.
+ */
+export function readGeometrySegment(source: string): GeometrySegment {
+  const text = source.trim()
+  const parts = text.split('=')
+  const quantity = parts.length > 1 && !text.includes('|') ? GEOMETRY_QUANTITY.exec(parts[0]!) : null
+  if (!quantity) return readGeometryEquation(text, source)
+
+  const name = quantity[1]!
+  const terms = parts.slice(1)
+  const last = terms.length - 1
+  const unitMatch = GEOMETRY_UNIT.exec(terms[last]!)
+  let unit: Unit | undefined
+  if (unitMatch) {
+    unit = unitMatch[1] as Unit
+    terms[last] = terms[last]!.slice(0, unitMatch.index)
+    const expected: Unit = name === 'A' ? 'cm²' : 'cm'
+    if (unit !== expected) throw new Error(`The unit of ${name} is ${expected}, not ${unit}, in "${source}"`)
+  }
+  const values: Rational[] = []
+  const pieces = [name]
+  for (const term of terms) {
+    if (term.trim() === '') throw new Error(`Empty term in "${source}"`)
+    const latex = geometryTermToLatex(term.trim(), source)
+    const value = toPolynomial(parse(term)).constantValue()
+    if (value !== undefined && !/[a-h]/.test(term)) values.push(value)
+    pieces.push(`= ${latex}`)
+  }
+  if (unit) pieces[pieces.length - 1] += `\\,${unitToLatex(unit)}`
+  return { kind: 'calculation', pieces, values }
+}
+
+function readGeometryEquation(text: string, source: string): GeometrySegment {
+  const bar = text.indexOf('|')
+  const equation = (bar < 0 ? text : text.slice(0, bar)).trim()
+  const operation = bar < 0 ? '' : text.slice(bar)
+  const read = readEquation(equation)
+  if (!read.ok) throw new Error(`Not a calculation or an equation: "${source}" (${read.error.message})`)
+  const equals = equation.indexOf('=')
+  const pieces = [
+    geometryTermToLatex(equation.slice(0, equals).trim(), source),
+    `= ${geometryTermToLatex(equation.slice(equals + 1).trim(), source)}`,
+  ]
+  if (operation !== '') {
+    checkGeometryLetters(operation.slice(1), source)
+    const op = readOperation(operation)
+    if (!op.ok) throw new Error(`Not an allowed operation: "${source}" (${op.error.message})`)
+    pieces.push(operationToLatex(op.operation, DECIMAL))
+  }
+  return { kind: 'equation', pieces, values: [] }
 }
 
 /**

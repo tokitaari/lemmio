@@ -1,3 +1,4 @@
+import { calculationToLatex, formulaFor, type Quantity, type ShapeKind } from '../math'
 import { chainToLatex, termToLatex } from './markup'
 import type { Formula, FormulaGroup, SheetEntry } from './types'
 
@@ -191,6 +192,41 @@ export const formulaSheets: Readonly<Record<string, readonly FormulaGroup[]>> = 
       ],
     },
   ],
+  'geometrie/vierecke-und-flaechen': [
+    {
+      title: 'Flächeninhalt',
+      formulas: [
+        geometryStatement('area-parallelogram', 'Parallelogramm: Grundseite mal Höhe', 'parallelogram', 'area'),
+        geometryStatement('area-triangle', 'Dreieck: die Hälfte von Grundseite mal Höhe', 'triangle', 'area'),
+        geometryStatement('area-rhombus', 'Raute: die Hälfte von Diagonale mal Diagonale', 'rhombus', 'area'),
+        {
+          kind: 'statement',
+          id: 'area-rhombus-side',
+          name: 'Raute als Parallelogramm: Seite mal Höhe',
+          latex: String.raw`A = a \cdot h`,
+        },
+        geometryStatement('area-trapezoid', 'Trapez: Summe der parallelen Seiten mal Höhe, halbiert', 'trapezoid', 'area'),
+      ],
+    },
+    {
+      title: 'Umfang',
+      formulas: [
+        geometryStatement('perimeter-parallelogram', 'Parallelogramm', 'parallelogram', 'perimeter'),
+        geometryStatement('perimeter-triangle', 'Dreieck', 'triangle', 'perimeter'),
+        geometryStatement('perimeter-rhombus', 'Raute: vier gleich lange Seiten', 'rhombus', 'perimeter'),
+        geometryStatement('perimeter-trapezoid', 'Trapez', 'trapezoid', 'perimeter'),
+      ],
+    },
+  ],
+}
+
+/**
+ * A formula of the geometry topic, typeset from the math core so that the
+ * formula sheet shows the same formula as the worked solutions, e.g.
+ * `A = \frac{g \cdot h}{2}`.
+ */
+function geometryStatement(id: string, name: string, shape: ShapeKind, quantity: Quantity): SheetEntry {
+  return { kind: 'statement', id, name, latex: calculationToLatex(quantity, [formulaFor(shape, quantity)]) }
 }
 
 /** Every entry of the formula sheet, in sheet order. */
