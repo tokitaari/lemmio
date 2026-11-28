@@ -9,8 +9,7 @@ type CalculationTask = Extract<GeometryTask, { kind: 'area' | 'perimeter' | 'rev
  * task the substituted formula is solved line by line in school notation
  * (the operation next to the line it applies to, numbers with a decimal
  * comma), ending with the length and its unit instead of a solution set. Used
- * for the worked examples and later for the model solution in the practice
- * area.
+ * for the worked examples and for the model solution in the practice area.
  */
 export default function GeometrySolutionSteps({ task }: { task: CalculationTask }) {
   if (task.kind !== 'reverse') {

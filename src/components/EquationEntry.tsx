@@ -21,6 +21,8 @@ interface Key {
   wide?: boolean
 }
 
+const COMMA_KEY: Key = { text: ',', label: 'Komma' }
+
 function operationKeys(variable: string): readonly Key[] {
   return [
     { text: '|', label: 'Strich' },
@@ -74,6 +76,8 @@ interface EquationEntryProps {
   operationRef: RefObject<HTMLInputElement | null>
   equationRef: RefObject<HTMLInputElement | null>
   setRef?: RefObject<HTMLInputElement | null>
+  /** Adds a comma key to the fields "Umformung" and "Neue Zeile", for decimal numbers. */
+  decimalKey?: boolean
 }
 
 /**
@@ -92,6 +96,7 @@ export default function EquationEntry({
   operationRef,
   equationRef,
   setRef,
+  decimalKey = false,
 }: EquationEntryProps) {
   const [active, setActive] = useState<EquationField>('operation')
   // Caret position to restore after React has written the new value.
@@ -146,7 +151,8 @@ export default function EquationEntry({
     write(value.slice(0, from) + value.slice(end), from)
   }
 
-  const keys = active === 'operation' ? operationKeys(variable) : active === 'equation' ? equationKeys(variable) : SET_KEYS
+  const base = active === 'operation' ? operationKeys(variable) : active === 'equation' ? equationKeys(variable) : SET_KEYS
+  const keys = decimalKey && active !== 'set' ? [...base, COMMA_KEY] : base
 
   return (
     <div className="equation-entry">

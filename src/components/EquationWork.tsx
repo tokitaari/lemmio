@@ -1,4 +1,4 @@
-import { equationToLatex, operationToLatex, solutionSetToLatex, type EquationTask } from '../math'
+import { DECIMAL, equationToLatex, operationToLatex, solutionSetToLatex, type EquationTask } from '../math'
 import type { EquationFeedback, EquationLine } from '../practice/equationSession'
 import Chip from './Chip'
 import Tex from './Tex'
@@ -13,9 +13,11 @@ interface EquationWorkProps {
 /**
  * The learner's own solution in school notation: the given equation, then one
  * line per accepted step with the operation written next to the line it
- * applies to. Each accepted line carries its check as chips.
+ * applies to. Each accepted line carries its check as chips. Tasks marked
+ * with `numbers: 'decimal'` are printed with a decimal comma.
  */
 export default function EquationWork({ task, lines, end = null }: EquationWorkProps) {
+  const options = task.numbers === 'decimal' ? DECIMAL : undefined
   const equations = [task.equation, ...lines.map((line) => line.equation)]
   return (
     <ol className="solution equation-work" aria-label="Deine Rechnung">
@@ -25,11 +27,11 @@ export default function EquationWork({ task, lines, end = null }: EquationWorkPr
           <li key={i} className="solution-step">
             <span className="solution-rel" aria-hidden="true" />
             <span className="solution-expr">
-              <Tex latex={equationToLatex(equation)} />
+              <Tex latex={equationToLatex(equation, options)} />
             </span>
             {next && (
               <span className="solution-note equation-op">
-                <Tex latex={operationToLatex(next.operation)} />
+                <Tex latex={operationToLatex(next.operation, options)} />
               </span>
             )}
             {i > 0 && (
@@ -45,7 +47,7 @@ export default function EquationWork({ task, lines, end = null }: EquationWorkPr
         <li className="solution-step solution-result">
           <span className="solution-rel" aria-hidden="true" />
           <span className="solution-expr">
-            <Tex latex={solutionSetToLatex(task.solutionSet)} />
+            <Tex latex={solutionSetToLatex(task.solutionSet, options)} />
           </span>
           <div className="chips solution-chips">
             <Chip ok>Lösungsmenge ok</Chip>
@@ -56,7 +58,7 @@ export default function EquationWork({ task, lines, end = null }: EquationWorkPr
         <li className="solution-step solution-result">
           <span className="solution-rel" aria-hidden="true" />
           <span className="solution-expr">
-            <Tex latex={solutionSetToLatex(end.given)} />
+            <Tex latex={solutionSetToLatex(end.given, options)} />
           </span>
           <div className="chips solution-chips">
             <Chip ok={false}>Lösungsmenge nicht ok</Chip>
