@@ -1,11 +1,13 @@
 import type { CardWidget } from '../../cards'
 import AreaModelView from './AreaModelView'
 import BalanceView from './BalanceView'
+import DecomposeView from './DecomposeView'
 import EquationStepsView from './EquationStepsView'
 import LinePointsView from './LinePointsView'
 import LineSlidersView from './LineSlidersView'
 import ShapePointsView from './ShapePointsView'
 import ShapeSlidersView from './ShapeSlidersView'
+import ShearView from './ShearView'
 import SlopeTriangleView from './SlopeTriangleView'
 import TermStepsView from './TermStepsView'
 import TwoLinesView from './TwoLinesView'
@@ -42,5 +44,9 @@ export default function CardWidgetView({ widget }: { widget: CardWidget }) {
       return <ShapeSlidersView widget={widget} />
     case 'shape-points':
       return <ShapePointsView widget={widget} />
+    case 'shear':
+      return <ShearView widget={widget} />
+    case 'decompose':
+      return <DecomposeView widget={widget} />
   }
 }

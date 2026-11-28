@@ -381,5 +381,73 @@ export const demoDeck: Deck = {
         ],
       },
     },
+    {
+      id: 'scheren-parallelogramm',
+      title: 'Parallelogramm scheren',
+      body: ['Ziehe D nach links, bis über A. Aus dem Parallelogramm wird ein Rechteck, die Fläche bleibt gleich.'],
+      widget: {
+        kind: 'shear',
+        shape: 'parallelogram',
+        vertices: [
+          [2, 2],
+          [8, 2],
+          [10, 6],
+          [4, 6],
+        ],
+      },
+    },
+    {
+      id: 'scheren-hoehe-aussen',
+      title: 'Stark geneigt',
+      body: ['Hier liegt die Höhe außerhalb. Schiebe D zurück, bis die Höhe wieder in der Figur liegt.'],
+      widget: {
+        kind: 'shear',
+        shape: 'parallelogram',
+        vertices: [
+          [1, 2],
+          [5, 2],
+          [11, 5],
+          [7, 5],
+        ],
+      },
+    },
+    {
+      id: 'scheren-dreieck',
+      title: 'Dreieck scheren',
+      body: ['Ziehe C entlang der Parallelen zu AB. Grundseite und Höhe bleiben, also bleibt auch die Fläche.'],
+      widget: {
+        kind: 'shear',
+        shape: 'triangle',
+        vertices: [
+          [2, 2],
+          [8, 2],
+          [5, 7],
+        ],
+      },
+    },
+    {
+      id: 'zerlegen-parallelogramm',
+      title: 'Parallelogramm zerlegen',
+      body: ['Schneide ein Dreieck ab und lege es an die andere Seite. Gehe Schritt für Schritt vor.'],
+      widget: { kind: 'decompose', shape: 'parallelogram', measures: { g: 6.5, h: 4 }, offset: 2 },
+    },
+    {
+      id: 'verdoppeln-dreieck',
+      title: 'Dreieck verdoppeln',
+      body: ['Zwei gleiche Dreiecke ergeben ein Parallelogramm. Das gilt auch, wenn die Höhe außerhalb liegt.'],
+      widget: { kind: 'decompose', shape: 'triangle', measures: { g: 5, h: 4 }, offset: 7 },
+    },
+    {
+      id: 'verdoppeln-trapez',
+      title: 'Trapez verdoppeln',
+      body: ['Zwei gleiche Trapeze ergeben ein Parallelogramm mit der Grundseite a + c.'],
+      widget: { kind: 'decompose', shape: 'trapezoid', measures: { a: 6, c: 3, h: 3 } },
+    },
+    {
+      id: 'raute-rechteck',
+      title: 'Raute im Rechteck',
+      body: ['Um die Raute passt ein Rechteck aus den Diagonalen e und f. Die Raute füllt genau die Hälfte.'],
+      widget: { kind: 'decompose', shape: 'rhombus', measures: { e: 6, f: 4 } },
+    },
   ],
 }

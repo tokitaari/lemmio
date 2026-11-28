@@ -15,8 +15,12 @@
 
 export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
-/** Durations in milliseconds; short enough to never hold the learner up. */
-export const DURATION = { short: 150, medium: 250, long: 400 } as const
+/**
+ * Durations in milliseconds; short enough to never hold the learner up.
+ * `move` is for pieces that travel across a figure (e.g. a triangle moved
+ * or turned by 180°), which look hasty at `long`.
+ */
+export const DURATION = { short: 150, medium: 250, long: 400, move: 700 } as const
 
 export const EASING = { out: 'cubic-bezier(0.2, 0.8, 0.2, 1)', inOut: 'ease-in-out' } as const
 

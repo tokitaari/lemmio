@@ -282,6 +282,47 @@ describe('geometry widgets', () => {
       'A = \\frac{(a + c) \\cdot h}{2} = \\frac{(8 + 4) \\cdot 4}{2} = \\frac{12 \\cdot 4}{2} = 24\\,\\text{cm}^{2}',
     ])
   })
+
+  it('reports the problems of shear and decompose with the card', () => {
+    const shear = card({
+      widget: {
+        kind: 'shear',
+        shape: 'triangle',
+        vertices: [
+          [2, 2],
+          [8, 3],
+          [4, 6],
+        ],
+      },
+    })
+    expect(validateDeck(deckOf(shear))).toEqual(['card "karte": shear: AB must be horizontal with A left of B'])
+    const decompose = card({ widget: { kind: 'decompose', shape: 'trapezoid', measures: { a: 4, c: 5, h: 3 } } })
+    expect(validateDeck(deckOf(decompose))).toEqual(['card "karte": decompose: c must be shorter than a'])
+  })
+
+  it('typesets the calculation of shear and every line of decompose', () => {
+    const deck = deckOf(
+      card({
+        id: 'scheren',
+        widget: {
+          kind: 'shear',
+          shape: 'parallelogram',
+          vertices: [
+            [2, 2],
+            [8, 2],
+            [10, 6],
+            [4, 6],
+          ],
+        },
+      }),
+      card({ id: 'raute', widget: { kind: 'decompose', shape: 'rhombus', measures: { e: 6, f: 4 } } }),
+    )
+    expect(deckLatex(deck)).toEqual([
+      'A = g \\cdot h = 6 \\cdot 4 = 24\\,\\text{cm}^{2}',
+      '\\text{Rechteck: } e \\cdot f = 6 \\cdot 4 = 24\\,\\text{cm}^{2}',
+      'A = \\frac{e \\cdot f}{2} = \\frac{6 \\cdot 4}{2} = 12\\,\\text{cm}^{2}',
+    ])
+  })
 })
 
 describe('demo deck', () => {

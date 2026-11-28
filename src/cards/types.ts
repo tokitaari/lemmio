@@ -39,6 +39,8 @@ export type CardWidget =
   | TwoLinesWidget
   | ShapeSlidersWidget
   | ShapePointsWidget
+  | ShearWidget
+  | DecomposeWidget
 
 /**
  * A transformation shown line by line: the start term, then `= term` per step
@@ -366,6 +368,49 @@ export interface ShapePointsWidget {
   /** Area to reach in cm², a multiple of 0,5 other than the start area. */
   target?: number
   /** Accessible name of the grid. */
+  label?: string
+}
+
+/**
+ * Shear on the geometry grid: the top vertex of a parallelogram (D, C
+ * follows) or a triangle (C) slides along the parallel to AB. Base and
+ * height stay, so the area stays; a parallelogram becomes a rectangle when D
+ * lies above A, and a dashed rectangle with the same base and height is
+ * shown for comparison. Logic and checks: src/cards/shear.ts.
+ */
+export interface ShearWidget {
+  kind: 'shear'
+  shape: 'parallelogram' | 'triangle'
+  /** Start vertices A, B, C(, D), with the same rules as `shape-points`. */
+  vertices: readonly Coordinates[]
+  /** Accessible name of the grid. */
+  label?: string
+}
+
+/**
+ * A figure taken apart or doubled in steps, with animation: a parallelogram
+ * is cut along its height and the triangle moved to the other side (a
+ * rectangle g × h); a triangle or trapezoid gets a copy turned by 180° about
+ * the midpoint of a side (a parallelogram, twice the figure); a rhombus gets
+ * the rectangle e × f around it, whose corners are copies of the four
+ * triangles of the rhombus. Logic and checks: src/cards/decompose.ts.
+ */
+export interface DecomposeWidget {
+  kind: 'decompose'
+  shape: ShapeKind
+  /**
+   * Exactly the letters of the area formula: g, h (parallelogram, triangle),
+   * e, f (rhombus), a, c, h (trapezoid, c < a). Lengths in cm, whole or ,5,
+   * within 1…12; the figure may grow to at most 16 cm in width.
+   */
+  measures: Readonly<Partial<Record<Letter, number>>>
+  /**
+   * As for `shape-sliders`, in cm, a multiple of 0,5 in −6…12; not for a
+   * rhombus. A parallelogram needs 0 < offset ≤ g (the height inside, so a
+   * triangle can be cut off). Default: the proportions of the math core.
+   */
+  offset?: number
+  /** Accessible name in front of the description of the figure. Default: "Zerlegen". */
   label?: string
 }
 

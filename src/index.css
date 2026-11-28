@@ -1624,6 +1624,67 @@ p .tex {
   text-align: center;
 }
 
+/* Decompose: pieces of the figure and copies, help rectangle, outline of the new figure, cut, centre M */
+.decompose-piece polygon {
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.decompose-piece.is-figure polygon {
+  fill: var(--accent-soft);
+  stroke: var(--text);
+}
+
+.decompose-piece.is-copy polygon {
+  fill: var(--pink-soft);
+  stroke: var(--pink);
+}
+
+.decompose-piece.is-faded polygon {
+  fill: none;
+  stroke-dasharray: 6 4;
+}
+
+.decompose-outline {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.decompose-outline.is-guide {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.decompose-outline.is-result {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+}
+
+.decompose-cut {
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+.decompose-center circle {
+  fill: var(--text);
+}
+
+.decompose-caption {
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
+.decompose-lines {
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
 /* Line widgets (line-sliders, slope-triangle, line-points): equation, sliders, slope triangle, table of values */
 .line-equation,
 .slope-calc {

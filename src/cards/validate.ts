@@ -3,6 +3,7 @@ import { areEquivalent, checkAnswer, parse, type Expr } from '../math'
 import { areaModelProblems, areaModelTerms, buildAreaModel } from './areaModel'
 import { balanceProblems, balanceTerms, buildBalance } from './balance'
 import { termQuestionKey } from './deck'
+import { buildDecompose, decomposeLatex, decomposeProblems } from './decompose'
 import { buildEquationSteps, equationStepsLatex, equationStepsProblems, equationStepsTerms } from './equationSteps'
 import { buildLinePoints, linePointsLatex, linePointsProblems } from './linePoints'
 import { buildLineSliders, lineSlidersLatex, lineSlidersProblems } from './lineSliders'
@@ -10,6 +11,7 @@ import { buildValueTable, valueTableLatex, valueTableProblems } from './valueTab
 import { buildSlopeTriangle, slopeTriangleLatex, slopeTriangleProblems } from './slopeTriangle'
 import { buildShapePoints, shapePointsLatex, shapePointsProblems } from './shapePoints'
 import { buildShapeSliders, shapeSlidersLatex, shapeSlidersProblems } from './shapeSliders'
+import { buildShear, shearLatex, shearProblems } from './shear'
 import { CARD_ID, DECK_ID } from './storage'
 import { buildTwoLines, twoLinesLatex, twoLinesProblems } from './twoLines'
 import type { Card, CardQuestion, CardWidget, Deck } from './types'
@@ -79,6 +81,10 @@ function widgetProblems(widget: CardWidget): string[] {
       return shapeSlidersProblems(widget)
     case 'shape-points':
       return shapePointsProblems(widget)
+    case 'shear':
+      return shearProblems(widget)
+    case 'decompose':
+      return decomposeProblems(widget)
   }
 }
 
@@ -134,7 +140,8 @@ function cardTerms(card: Card): string[] {
  * intermediate lines and solution sets of equation steps, or the start
  * equations of the line widgets, including a term given for g in
  * `two-lines`, or the start calculation of the geometry widgets (their
- * other states are covered by the unit tests of the widgets). Content tests render it with KaTeX in strict
+ * other states are covered by the unit tests of the widgets; `decompose`
+ * gives all its calculation lines). Content tests render it with KaTeX in strict
  * mode. Widgets with problems are skipped.
  */
 export function deckLatex(deck: Deck): string[] {
@@ -158,6 +165,10 @@ export function deckLatex(deck: Deck): string[] {
         return shapeSlidersLatex(buildShapeSliders(widget))
       case 'shape-points':
         return shapePointsLatex(buildShapePoints(widget))
+      case 'shear':
+        return shearLatex(buildShear(widget))
+      case 'decompose':
+        return decomposeLatex(buildDecompose(widget))
       default:
         return []
     }
